@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
+import com.exe.whateat.entity.account.Account;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -35,15 +36,18 @@ public class WhatEatJwtHelper {
     @Value("${whateat.jwt.refreshtoken.lifetime}")
     private long refreshTokenLifetime;
 
-    public final String generateToken() {
+    public final String generateToken(Account account) {
+        if (account == null) {
+            throw new IllegalArgumentException("Account is null");
+        }
         final Algorithm algorithm = Algorithm.HMAC256(secretForToken);
         final Instant currentTime = Instant.now();
         return JWT.create()
                 .withIssuer(issuer)
-                .withSubject("dummySubject")
+                .withSubject(account.getId().asTsid().asString())
                 .withIssuedAt(currentTime)
                 .withExpiresAt(currentTime.plusSeconds(tokenLifetime))
-                .withClaim(EMAIL, "dummyEmail")
+                .withClaim(EMAIL, account.getEmail())
                 .sign(algorithm);
     }
 
@@ -52,15 +56,15 @@ public class WhatEatJwtHelper {
      *
      * @return The refresh token.
      */
-    public final String generateRefreshToken() {
+    public final String generateRefreshToken(Account account) {
         final Algorithm algorithm = Algorithm.HMAC256(secretForRefreshToken);
         final Instant currentTime = Instant.now();
         return JWT.create()
                 .withIssuer(issuer)
-                .withSubject("dummySubject")
+                .withSubject(account.getId().asTsid().asString())
                 .withIssuedAt(currentTime)
                 .withExpiresAt(currentTime.plusSeconds(refreshTokenLifetime))
-                .withClaim(EMAIL, "dummyEmail")
+                .withClaim(EMAIL, account.getEmail())
                 .withClaim("makeLove", "notWar")
                 .sign(algorithm);
     }
