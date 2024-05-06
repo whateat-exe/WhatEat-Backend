@@ -1,5 +1,6 @@
-package com.exe.whateat.application.response;
+package com.exe.whateat.infrastructure.exception;
 
+import com.exe.whateat.application.exception.WhatEatErrorCode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
@@ -7,18 +8,17 @@ import org.apache.commons.lang3.StringUtils;
 import java.time.Instant;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
 
 @Getter
 @AllArgsConstructor
 @SuppressWarnings("unused")
 public final class WhatEatErrorResponse {
 
-    public record Error(String target, String message) {
+    public record Error(String title, String message) {
 
         public Error {
-            if (StringUtils.isBlank(target) || StringUtils.isBlank(message)) {
-                throw new IllegalArgumentException("Invalid target or error message");
+            if (StringUtils.isBlank(title) || StringUtils.isBlank(message)) {
+                throw new IllegalArgumentException("Invalid title or error message");
             }
         }
     }
@@ -28,17 +28,17 @@ public final class WhatEatErrorResponse {
     private final List<Error> reasons;
     private final Instant createdAt;
 
-    public WhatEatErrorResponse(String code, String title, List<Error> reasons) {
-        this.code = code;
-        this.title = title;
-        this.reasons = reasons;
+    private WhatEatErrorResponse(Builder builder) {
+        this.code = builder.code.toString();
+        this.title = builder.code.getTitle();
+        this.reasons = builder.reasons;
         this.createdAt = Instant.now();
     }
 
     public static final class Builder {
 
         private WhatEatErrorCode code;
-        private List<Error> reasons;
+        private final List<Error> reasons;
 
         private Builder() {
             this.reasons = new LinkedList<>();
@@ -50,8 +50,8 @@ public final class WhatEatErrorResponse {
         }
 
         public Builder reason(Error reason) {
-            if (this.reasons == null) {
-                throw new NullPointerException("Reasons cannot be null");
+            if (reason == null) {
+                throw new NullPointerException("Reason cannot be null");
             }
             this.reasons.add(reason);
             return this;
@@ -64,12 +64,15 @@ public final class WhatEatErrorResponse {
         }
 
         public Builder reasons(List<Error> reasons) {
-            this.reasons = Objects.requireNonNullElseGet(reasons, LinkedList::new);
+            if (reasons == null) {
+                throw new NullPointerException("Reasons cannot be null");
+            }
+            this.reasons.addAll(reasons);
             return this;
         }
 
         public WhatEatErrorResponse build() {
-            return new WhatEatErrorResponse(code.toString(), code.getTitle(), reasons);
+            return new WhatEatErrorResponse(this);
         }
     }
 

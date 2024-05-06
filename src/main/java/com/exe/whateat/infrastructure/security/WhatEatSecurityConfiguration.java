@@ -45,7 +45,8 @@ public class WhatEatSecurityConfiguration {
                 .sessionManagement(c -> c.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET).permitAll())
-                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath("/docs/**")).permitAll());
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath("/docs/**")).permitAll())
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.POST, resolvePath("/auth/**")).permitAll());
         if (environment.acceptsProfiles(Profiles.of("dev"))) {
             httpSecurity.authorizeHttpRequests(c -> c.requestMatchers(resolvePath("/test/**")).permitAll());
         }
