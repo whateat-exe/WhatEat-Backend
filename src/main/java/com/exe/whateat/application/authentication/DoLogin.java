@@ -1,14 +1,14 @@
 package com.exe.whateat.application.authentication;
 
 import com.exe.whateat.application.common.AbstractController;
-import com.exe.whateat.application.exception.WhatEatAuthenticationException;
-import com.exe.whateat.application.exception.WhatEatValidationException;
+import com.exe.whateat.application.exception.WhatEatErrorCode;
+import com.exe.whateat.application.exception.WhatEatException;
 import com.exe.whateat.entity.account.Account;
 import com.exe.whateat.infrastructure.security.jwt.WhatEatJwtHelper;
-import jakarta.persistence.EntityManager;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.http.ResponseEntity;
@@ -30,20 +30,33 @@ public final class DoLogin {
 
     public record LoginRequest(String email, String password) {
 
+        @SneakyThrows
         public LoginRequest(String email, String password) {
             final String trimmedEmail = StringUtils.trim(email);
             if (StringUtils.isBlank(trimmedEmail)) {
-                throw new WhatEatValidationException("Email is required");
+                throw WhatEatException.builder()
+                        .code(WhatEatErrorCode.WEV_0001)
+                        .reason("email", "Email is required")
+                        .build();
             }
             if (!EmailValidator.getInstance().isValid(trimmedEmail)) {
-                throw new WhatEatValidationException("Email is invalid");
+                throw WhatEatException.builder()
+                        .code(WhatEatErrorCode.WEV_0001)
+                        .reason("email", "Email has invalid format")
+                        .build();
             }
             final String trimmedPassword = StringUtils.trim(password);
             if (StringUtils.isBlank(trimmedPassword)) {
-                throw new WhatEatValidationException("Password is required");
+                throw WhatEatException.builder()
+                        .code(WhatEatErrorCode.WEV_0002)
+                        .reason("password", "Password is required")
+                        .build();
             }
             if (trimmedPassword.length() < PASSWORD_MIN_LENGTH || trimmedPassword.length() > PASSWORD_MAX_LENGTH) {
-                throw new WhatEatValidationException(INVALID_PASSWORD_LENGTH);
+                throw WhatEatException.builder()
+                        .code(WhatEatErrorCode.WEV_0002)
+                        .reason("password", INVALID_PASSWORD_LENGTH)
+                        .build();
             }
             this.email = trimmedEmail;
             this.password = trimmedPassword;
@@ -71,10 +84,8 @@ public final class DoLogin {
     @AllArgsConstructor
     public static final class DoLoginService {
 
-
         private final WhatEatJwtHelper jwtHelper;
         private final AuthenticationManager authenticationManager;
-        private final EntityManager em;
 
         public LoginResponse validateAndReturnTokens(LoginRequest request) {
             final UsernamePasswordAuthenticationToken authenticationToken =
@@ -82,7 +93,10 @@ public final class DoLogin {
             final Authentication authentication = authenticationManager.authenticate(authenticationToken);
             final Object principal = authentication.getPrincipal();
             if (!(principal instanceof Account account)) {
-                throw new WhatEatAuthenticationException("Unknown account being authenticated.");
+                throw WhatEatException.builder()
+                        .code(WhatEatErrorCode.WES_0002)
+                        .reason("account", "Unknown account being authenticated")
+                        .build();
             }
             final String token = jwtHelper.generateToken(account);
             final String refreshToken = jwtHelper.generateRefreshToken(account);
