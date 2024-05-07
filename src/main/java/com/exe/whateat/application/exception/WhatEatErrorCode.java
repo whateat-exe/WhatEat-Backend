@@ -22,6 +22,7 @@ public enum WhatEatErrorCode {
     WEV_0000("Dummy validation error code"),
     WEV_0001("Invalid email address"),
     WEV_0002("Invalid password"),
+    WEV_0003("Invalid amount"),
     WES_0000("Dummy server error"),
     WES_0001("Unknown error"),
     WES_0002("Unknown user account"),
@@ -30,7 +31,8 @@ public enum WhatEatErrorCode {
     WEA_0002("Forbidden"),
     WEA_0003("Invalid authentication token"),
     WEA_0004("Inactive account"),
-    WEA_0005("Invalid login credentials");
+    WEA_0005("Invalid login credentials"),
+    WEA_0006("Invalid refresh token");
 
     private static final String BUSINESS_CODE = "WEB";
     private static final String VALIDATION_CODE = "WEV";
