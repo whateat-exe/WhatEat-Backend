@@ -1,6 +1,5 @@
 package com.exe.whateat.infrastructure.exception;
 
-import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.exe.whateat.application.exception.WhatEatErrorCode;
 import com.exe.whateat.application.exception.WhatEatException;
 import org.springframework.http.ResponseEntity;
@@ -9,20 +8,16 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.util.List;
+
 @ControllerAdvice
 public class WhatEatExceptionHandler {
-
-    @ExceptionHandler({JWTVerificationException.class})
-    public ResponseEntity<WhatEatErrorResponse> handleJwtVerificationException() {
-        final WhatEatException whatEatException = WhatEatException.builder()
-                .code(WhatEatErrorCode.WEA_0003)
-                .reason("auth_token", "Invalid authentication token.")
-                .build();
-        return createResponse(whatEatException);
-    }
 
     @ExceptionHandler({AuthenticationException.class, UsernameNotFoundException.class})
     public ResponseEntity<WhatEatErrorResponse> handleAuthenticationException(Exception ex) {
@@ -43,6 +38,27 @@ public class WhatEatExceptionHandler {
         // Unknown exception. Resort to server error.
         return createResponse(ex);
     }
+
+    // Jakarta Validation handling mechanism
+
+    @ExceptionHandler
+    public ResponseEntity<WhatEatErrorResponse> handleValidationException(MethodArgumentNotValidException ex) {
+        final List<ObjectError> errors = ex.getAllErrors();
+        final List<WhatEatErrorResponse.Error> mappedErrors = errors.stream()
+                .map(e -> {
+                    if (e instanceof FieldError fieldError) {
+                        return new WhatEatErrorResponse.Error(fieldError.getField(), fieldError.getDefaultMessage());
+                    }
+                    return new WhatEatErrorResponse.Error(e.getObjectName(), e.getDefaultMessage());
+                })
+                .toList();
+        return ResponseEntity.badRequest().body(WhatEatErrorResponse.builder()
+                .code(WhatEatErrorCode.WEV_0000)
+                .reasons(mappedErrors)
+                .build());
+    }
+
+    // WhatEatException handling mechanism
 
     @ExceptionHandler
     public ResponseEntity<WhatEatErrorResponse> handleWhatEatException(WhatEatException ex) {

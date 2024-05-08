@@ -8,8 +8,14 @@ import com.exe.whateat.infrastructure.security.WhatEatSecurityHelper;
 import io.github.x4ala1c.tsid.Tsid;
 import io.github.x4ala1c.tsid.TsidGenerator;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +42,18 @@ public final class GeneralTestForDev {
 
     public record TsidRequest(Tsid id) {
 
+    }
+
+    @Data
+    @Builder
+    public static final class JakartaValidationRequest {
+
+        @NotBlank(message = "Must not be blank.")
+        private String notNull;
+
+        @NotNull(message = "Number required.")
+        @Min(value = 0, message = "Must be non-negative.")
+        private Integer notNegative;
     }
 
     @Profile("dev")
@@ -87,6 +105,13 @@ public final class GeneralTestForDev {
             return account.isPresent()
                     ? ResponseEntity.ok("Account exists.")
                     : ResponseEntity.notFound().build();
+        }
+
+        @Operation(hidden = true)
+        @PostMapping("/test/validation")
+        @SuppressWarnings("unused")
+        public ResponseEntity<JakartaValidationRequest> testJakartaValidation(@Valid @RequestBody JakartaValidationRequest request) {
+            return ResponseEntity.ok(request);
         }
     }
 }

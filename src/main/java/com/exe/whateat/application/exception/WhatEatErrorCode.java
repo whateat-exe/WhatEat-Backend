@@ -19,7 +19,7 @@ import org.springframework.http.HttpStatus;
 public enum WhatEatErrorCode {
 
     WEB_0000("Dummy business error code"),
-    WEV_0000("Dummy validation error code"),
+    WEV_0000("Invalid request"),
     WEV_0001("Invalid email address"),
     WEV_0002("Invalid password"),
     WEV_0003("Invalid amount"),
