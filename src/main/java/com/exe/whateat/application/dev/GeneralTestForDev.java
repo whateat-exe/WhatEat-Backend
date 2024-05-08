@@ -3,10 +3,13 @@ package com.exe.whateat.application.dev;
 import com.exe.whateat.application.common.AbstractController;
 import com.exe.whateat.application.exception.WhatEatErrorCode;
 import com.exe.whateat.application.exception.WhatEatException;
+import com.exe.whateat.entity.account.Account;
+import com.exe.whateat.infrastructure.security.WhatEatSecurityHelper;
 import io.github.x4ala1c.tsid.Tsid;
 import io.github.x4ala1c.tsid.TsidGenerator;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class GeneralTestForDev {
@@ -36,7 +40,10 @@ public final class GeneralTestForDev {
 
     @Profile("dev")
     @RestController
+    @AllArgsConstructor
     public static final class Controller extends AbstractController {
+
+        private final WhatEatSecurityHelper securityHelper;
 
         @Operation(hidden = true)
         @PostMapping("/test/untrimmed-string-body")
@@ -71,6 +78,15 @@ public final class GeneralTestForDev {
         @SuppressWarnings("unused")
         public ResponseEntity<String> receiveTsidAsString(@RequestBody TsidRequest request) {
             return ResponseEntity.ok("Successful TSID deserialization.");
+        }
+
+        @Operation(hidden = true)
+        @GetMapping("/test/account/current")
+        public ResponseEntity<String> getCurrentAccount() {
+            final Optional<Account> account = securityHelper.getCurrentLoggedInAccount();
+            return account.isPresent()
+                    ? ResponseEntity.ok("Account exists.")
+                    : ResponseEntity.notFound().build();
         }
     }
 }
