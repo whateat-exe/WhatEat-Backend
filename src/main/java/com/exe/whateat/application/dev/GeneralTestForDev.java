@@ -30,6 +30,10 @@ public final class GeneralTestForDev {
 
     }
 
+    public record TsidRequest(Tsid id) {
+
+    }
+
     @Profile("dev")
     @RestController
     public static final class Controller extends AbstractController {
@@ -41,7 +45,7 @@ public final class GeneralTestForDev {
         }
 
         @Operation(hidden = true)
-        @GetMapping("/test/tsid-generate")
+        @GetMapping("/test/tsid/generate")
         public ResponseEntity<List<TsidResponse>> generateTsid(@RequestParam(defaultValue = "10") Integer amount) {
             if (amount <= 0) {
                 throw WhatEatException.builder()
@@ -54,6 +58,19 @@ public final class GeneralTestForDev {
                 tsids.add(TsidGenerator.globalGenerate());
             }
             return ResponseEntity.ok(tsids.stream().map(id -> new TsidResponse(id.asString(), id.asLong())).toList());
+        }
+
+        @Operation(hidden = true)
+        @GetMapping("/test/tsid")
+        public ResponseEntity<Tsid> tsidAsString() {
+            return ResponseEntity.ok(TsidGenerator.globalGenerate());
+        }
+
+        @Operation(hidden = true)
+        @PostMapping("/test/tsid")
+        @SuppressWarnings("unused")
+        public ResponseEntity<String> receiveTsidAsString(@RequestBody TsidRequest request) {
+            return ResponseEntity.ok("Successful TSID deserialization.");
         }
     }
 }

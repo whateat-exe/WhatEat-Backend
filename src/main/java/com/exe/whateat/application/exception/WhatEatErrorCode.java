@@ -24,6 +24,7 @@ public enum WhatEatErrorCode {
     WEV_0002("Invalid password"),
     WEV_0003("Invalid amount"),
     WEV_0004("Invalid timestamp format"),
+    WEV_0005("Invalid ID format"),
     WES_0000("Dummy server error"),
     WES_0001("Unknown error"),
     WES_0002("Unknown user account"),
