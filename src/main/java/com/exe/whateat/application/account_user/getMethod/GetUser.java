@@ -1,11 +1,12 @@
 package com.exe.whateat.application.account_user.getMethod;
 
-import com.exe.whateat.application.account_user.getMethod.dto.UserDTO;
-import com.exe.whateat.application.account_user.getMethod.mapper.AccountDTOMapper;
+import com.exe.whateat.application.account_user.dto.UserDTO;
+import com.exe.whateat.application.account_user.mapper.AccountDTOMapper;
 import com.exe.whateat.application.account_user.getMethod.response.UserResponse;
 import com.exe.whateat.application.common.AbstractController;
 import com.exe.whateat.entity.account.Account;
 import com.exe.whateat.infrastructure.repository.AccountRepository;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,6 +24,10 @@ public final class GetUser {
 
     @RestController
     @AllArgsConstructor
+    @Tag(
+            name = "get_user",
+            description = "APIs for get users"
+    )
     public static class GetUserContronller extends AbstractController {
 
         private final GetUserService getUserService;

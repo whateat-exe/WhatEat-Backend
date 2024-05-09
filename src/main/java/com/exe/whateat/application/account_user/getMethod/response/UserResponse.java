@@ -1,6 +1,6 @@
 package com.exe.whateat.application.account_user.getMethod.response;
 
-import com.exe.whateat.application.account_user.getMethod.dto.UserDTO;
+import com.exe.whateat.application.account_user.dto.UserDTO;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;

@@ -1,5 +1,4 @@
-package com.exe.whateat.application.account_user.getMethod.dto;
-import com.exe.whateat.entity.common.WhatEatId;
+package com.exe.whateat.application.account_user.dto;
 import io.github.x4ala1c.tsid.Tsid;
 import lombok.Builder;
 import lombok.Getter;

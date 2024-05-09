@@ -1,6 +1,6 @@
-package com.exe.whateat.application.account_user.getMethod.mapper;
+package com.exe.whateat.application.account_user.mapper;
 
-import com.exe.whateat.application.account_user.getMethod.dto.UserDTO;
+import com.exe.whateat.application.account_user.dto.UserDTO;
 import com.exe.whateat.entity.account.Account;
 import org.springframework.stereotype.Component;
 
