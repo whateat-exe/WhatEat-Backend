@@ -2,6 +2,7 @@ package com.exe.whateat.infrastructure.exception;
 
 import com.exe.whateat.application.exception.WhatEatErrorCode;
 import com.exe.whateat.application.exception.WhatEatException;
+import com.google.cloud.storage.StorageException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
@@ -37,6 +38,15 @@ public class WhatEatExceptionHandler {
         }
         // Unknown exception. Resort to server error.
         return createResponse(ex);
+    }
+
+    @ExceptionHandler({StorageException.class})
+    public ResponseEntity<WhatEatErrorResponse> handleFirebaseException() {
+        final WhatEatException whatEatException = WhatEatException.builder()
+                .code(WhatEatErrorCode.WES_0003)
+                .reason("firebase", "Unable to communicate with Firebase.")
+                .build();
+        return createResponse(whatEatException);
     }
 
     // Jakarta Validation handling mechanism
@@ -79,7 +89,7 @@ public class WhatEatExceptionHandler {
         // Unknown exception. Return as Internal Server Error.
         final WhatEatErrorResponse response = WhatEatErrorResponse.builder()
                 .code(WhatEatErrorCode.WES_0001)
-                .reason("Unknown", "Oopsie! Something's wrong with our server. Do try again!")
+                .reason("Unknown", "Oopsie! Something's wrong with our server. Try again!")
                 .build();
         return ResponseEntity.internalServerError().body(response);
     }
