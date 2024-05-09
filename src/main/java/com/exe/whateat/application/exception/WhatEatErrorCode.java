@@ -26,6 +26,8 @@ public enum WhatEatErrorCode {
     WEV_0004("Invalid timestamp format"),
     WEV_0005("Invalid ID format"),
     WEV_0006("Invalid image format"),
+    WEV_0007("Invalid full name"),
+    WEV_0008("Invalid phone number"),
     WES_0000("Dummy server error"),
     WES_0001("Unknown error"),
     WES_0002("Unknown user account"),
