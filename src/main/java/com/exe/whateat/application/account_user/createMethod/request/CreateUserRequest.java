@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,15 +19,18 @@ public class CreateUserRequest {
     private String email;
 
     @NotNull
-    @Min(value = 8, message = "The length of password has to be larger 8")
-    @Max(value = 32, message = "The length of password has to be larger 32")
+//    @Min(value = 8, message = "The length of password has to be larger than 8")
+//    @Max(value = 32, message = "The length of password has to be less than 32")
+    @Size(min = 8, max = 32, message = "The length of password has to be larger than 8 and less than 32 ")
     private String password;
 
     @NotBlank
-    @Max(value = 100, message = "The length of full name has to be less than 100")
+//    @Max(value = 100, message = "The length of full name has to be less than 100")
+    @Size(max = 100, message = "The length of full name has to be less than 100")
     private String fullName;
 
     @NotBlank
-    @Max(value = 20, message = "The length of phone number has to be less than 20")
+//    @Max(value = 20, message = "The length of phone number has to be less than 20")
+    @Size(max = 20, message = "The length of phone number has to be less than 20")
     private String phoneNumber;
 }

@@ -25,7 +25,7 @@ public final class GetUser {
     @RestController
     @AllArgsConstructor
     @Tag(
-            name = "get_user",
+            name = "user",
             description = "APIs for get users"
     )
     public static class GetUserContronller extends AbstractController {
