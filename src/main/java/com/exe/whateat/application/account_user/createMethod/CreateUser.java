@@ -11,6 +11,7 @@ import com.exe.whateat.application.exception.WhatEatException;
 import com.exe.whateat.entity.account.Account;
 import com.exe.whateat.entity.account.AccountRole;
 import com.exe.whateat.entity.common.ActiveStatus;
+import com.exe.whateat.entity.common.WhatEatId;
 import com.exe.whateat.infrastructure.repository.AccountRepository;
 import com.exe.whateat.infrastructure.security.WhatEatSecurityHelper;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -83,12 +84,12 @@ public final class CreateUser {
             if (!phoneNumberCheck)
                 throw WhatEatException
                         .builder()
-                        .code(WhatEatErrorCode.WEV_0001)
+                        .code(WhatEatErrorCode.WEV_0008)
                         .reason("phone number", "Wrong phone number pattern")
                         .build();
 
             Optional<Account> account = accountRepository.findByEmail(email);
-            if (account != null || !account.isEmpty()) {
+            if (!account.isEmpty()) {
                 throw WhatEatException
                         .builder()
                         .code(WhatEatErrorCode.WEV_0001)
@@ -97,8 +98,10 @@ public final class CreateUser {
             }
             else {
                 String passwordEncode = passwordEncoder.encode(createUserRequest.getPassword());
+                WhatEatId whatEatId = WhatEatId.generate();
                 Account accountCreate =
                         Account.builder()
+                                .id(whatEatId)
                                 .email(createUserRequest.getEmail())
                                 .status(ActiveStatus.INACTIVE)
                                 .fullName(createUserRequest.getFullName())
