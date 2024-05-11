@@ -19,6 +19,9 @@ import org.springframework.http.HttpStatus;
 public enum WhatEatErrorCode {
 
     WEB_0000("Dummy business error code"),
+    WEB_0001("Restaurant name or email already exists"),
+    WEB_0002("Restaurant not found"),
+    WEB_0003("Invalid restaurant status"),
     WEV_0000("Invalid request"),
     WEV_0001("Invalid email address"),
     WEV_0002("Invalid password"),
@@ -26,10 +29,12 @@ public enum WhatEatErrorCode {
     WEV_0004("Invalid timestamp format"),
     WEV_0005("Invalid ID format"),
     WEV_0006("Invalid image format"),
+    WEV_0007("Invalid phone number"),
     WES_0000("Dummy server error"),
     WES_0001("Unknown error"),
     WES_0002("Unknown user account"),
     WES_0003("3rd party service error"),
+    WES_0004("Unknown image URL"),
     WEA_0000("Dummy authorization/authentication error code"),
     WEA_0001("Not authorized"),
     WEA_0002("Forbidden"),

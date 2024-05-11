@@ -2,10 +2,10 @@ package com.exe.whateat.entity.restaurant;
 
 import com.exe.whateat.entity.account.Account;
 import com.exe.whateat.entity.common.AbstractEntity;
-import com.exe.whateat.entity.common.ActiveStatus;
 import com.exe.whateat.entity.food.Dish;
 import com.exe.whateat.entity.request.RestaurantRequest;
 import com.exe.whateat.entity.subscription.RestaurantSubscription;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -41,18 +41,18 @@ public class Restaurant extends AbstractEntity {
     private String image;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    private ActiveStatus status;
+    @Column(name = "status", nullable = false, length = 10)
+    private RestaurantStatus status;
 
-    @OneToOne(optional = false)
+    @OneToOne(optional = false, cascade = {CascadeType.PERSIST})
     @JoinColumn(name = "account_id", columnDefinition = AbstractEntity.ID_COLUMN)
     private Account account;
 
     @OneToMany(mappedBy = "restaurant")
     private List<Dish> dishes;
 
-    @OneToOne(mappedBy = "restaurant")
-    private RestaurantAddress restaurantAddress;
+    @Column(name = "address", nullable = false)
+    private String address;
 
     @OneToMany(mappedBy = "restaurant")
     private List<RestaurantRequest> restaurantRequests;

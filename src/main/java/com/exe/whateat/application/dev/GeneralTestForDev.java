@@ -3,6 +3,7 @@ package com.exe.whateat.application.dev;
 import com.exe.whateat.application.common.AbstractController;
 import com.exe.whateat.application.exception.WhatEatErrorCode;
 import com.exe.whateat.application.exception.WhatEatException;
+import com.exe.whateat.application.image.FirebaseImageResponse;
 import com.exe.whateat.application.image.FirebaseImageService;
 import com.exe.whateat.entity.account.Account;
 import com.exe.whateat.infrastructure.security.WhatEatSecurityHelper;
@@ -123,7 +124,7 @@ public final class GeneralTestForDev {
 
         @Operation(hidden = true)
         @PostMapping("/test/image")
-        public ResponseEntity<String> testUploadImage(@RequestBody ImageRequest request) {
+        public ResponseEntity<FirebaseImageResponse> testUploadImage(@RequestBody ImageRequest request) {
             return ResponseEntity.ok(firebaseImageService.uploadBase64Image(request.image()));
         }
     }
