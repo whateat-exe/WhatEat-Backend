@@ -38,7 +38,8 @@ public enum WhatEatErrorCode {
     WEA_0003("Invalid authentication token"),
     WEA_0004("Inactive account"),
     WEA_0005("Invalid login credentials"),
-    WEA_0006("Invalid refresh token");
+    WEA_0006("Invalid refresh token"),
+    WEA_0007("Internal Server");
 
     private static final String BUSINESS_CODE = "WEB";
     private static final String VALIDATION_CODE = "WEV";

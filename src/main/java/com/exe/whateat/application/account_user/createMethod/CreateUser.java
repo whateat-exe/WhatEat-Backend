@@ -36,7 +36,7 @@ public final class CreateUser {
     @AllArgsConstructor
     @Tag(
             name = "user",
-            description = "APIs for create users"
+            description = "APIs for create a user"
     )
     public static final class CreateUserController extends AbstractController {
 

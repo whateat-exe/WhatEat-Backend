@@ -1,4 +1,106 @@
 package com.exe.whateat.application.account_user.updateMethod;
 
+import com.exe.whateat.application.account_user.mapper.AccountDTOMapper;
+import com.exe.whateat.application.account_user.updateMethod.response.UpdateUserResponse;
+import com.exe.whateat.application.common.AbstractController;
+import com.exe.whateat.application.exception.WhatEatErrorCode;
+import com.exe.whateat.application.exception.WhatEatException;
+import com.exe.whateat.entity.account.Account;
+import com.exe.whateat.entity.account.AccountRole;
+import com.exe.whateat.entity.common.WhatEatId;
+import com.exe.whateat.infrastructure.repository.AccountRepository;
+import com.exe.whateat.infrastructure.security.WhatEatSecurityHelper;
+import com.google.firebase.database.core.Repo;
+import com.google.storage.v2.UpdateBucketRequest;
+import io.github.x4ala1c.tsid.Tsid;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.stereotype.Service;
+import org.springframework.util.ReflectionUtils;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.lang.reflect.Field;
+import java.util.Map;
+import java.util.Optional;
+
 public class UpdateUser {
+
+    @RestController
+    @AllArgsConstructor
+    @Tag(
+            name = "user",
+            description = "APIs for update a user with Id"
+    )
+    public static final class UpdateUserController extends AbstractController {
+
+        private final UpdateUserService updateUserService;
+        private final WhatEatSecurityHelper whatEatSecurityHelper;
+
+        @PatchMapping("users/{id}")
+        public ResponseEntity<UpdateUserResponse> updateUser (
+                @RequestBody Map<String, Object> fields, @PathVariable Tsid id
+                ) {
+
+            if (fields == null) {
+                return ResponseEntity.ok(null);
+            }
+            Optional<Account> account = whatEatSecurityHelper.getCurrentLoggedInAccount();
+            if (!account.isPresent()) {
+                throw WhatEatException
+                        .builder()
+                        .code(WhatEatErrorCode.WEA_0003)
+                        .reason("Unauthenticated", "You have not logged in")
+                        .build();
+            }
+            if (account.get().getRole() != AccountRole.USER) {
+                throw WhatEatException
+                        .builder()
+                        .code(WhatEatErrorCode.WEA_0002)
+                        .reason("Forbidden", "You are not privileged to do this function")
+                        .build();
+            }
+            UpdateUserResponse userResponse = updateUserService.updateUser(fields, id);
+            return ResponseEntity.ok(userResponse);
+        }
+    }
+    @Service
+    @AllArgsConstructor
+    public static final class UpdateUserService {
+
+        private final AccountRepository accountRepository;
+        private final AccountDTOMapper accountDTOMapper;
+
+        public UpdateUserResponse updateUser(Map<String, Object> fields, Tsid id) {
+
+            WhatEatId whatEatId = WhatEatId.builder().id(id).build();
+            Optional<Account> accountExisting = accountRepository.findById(whatEatId);
+            if (accountExisting.isPresent()) {
+                fields.forEach((key, value) -> {
+                    Field field = ReflectionUtils.findField(Account.class, key);
+                    field.setAccessible(true);
+                    ReflectionUtils.setField(field, accountExisting.get(), value);
+                });
+                Account accountUpdated = accountRepository.save(accountExisting.get());
+                UpdateUserResponse userResponse =
+                        UpdateUserResponse
+                                .builder()
+                                .userDTO(accountDTOMapper.apply(accountUpdated))
+                                .build();
+                return userResponse;
+            }
+            throw WhatEatException
+                    .builder()
+                    .code(WhatEatErrorCode.WEA_0007)
+                    .reason("server", "Fault in internal server")
+                    .build();
+        }
+    }
+
 }
