@@ -10,15 +10,10 @@ import com.exe.whateat.entity.account.AccountRole;
 import com.exe.whateat.entity.common.WhatEatId;
 import com.exe.whateat.infrastructure.repository.AccountRepository;
 import com.exe.whateat.infrastructure.security.WhatEatSecurityHelper;
-import com.google.firebase.database.core.Repo;
-import com.google.storage.v2.UpdateBucketRequest;
 import io.github.x4ala1c.tsid.Tsid;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -45,7 +40,7 @@ public class UpdateUser {
 
         @PatchMapping("users/{id}")
         public ResponseEntity<UpdateUserResponse> updateUser (
-                @RequestBody Map<String, Object> fields, @PathVariable Tsid id
+                @RequestBody Map<String, Object> fields, @PathVariable String id
                 ) {
 
             if (fields == null) {
@@ -77,9 +72,9 @@ public class UpdateUser {
         private final AccountRepository accountRepository;
         private final AccountDTOMapper accountDTOMapper;
 
-        public UpdateUserResponse updateUser(Map<String, Object> fields, Tsid id) {
+        public UpdateUserResponse updateUser(Map<String, Object> fields, String id) {
 
-            WhatEatId whatEatId = WhatEatId.builder().id(id).build();
+            WhatEatId whatEatId = WhatEatId.builder().id(Tsid.fromString(id)).build();
             Optional<Account> accountExisting = accountRepository.findById(whatEatId);
             if (accountExisting.isPresent()) {
                 fields.forEach((key, value) -> {
