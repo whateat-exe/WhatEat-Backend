@@ -7,12 +7,14 @@ import com.exe.whateat.entity.post.PostComment;
 import com.exe.whateat.entity.post.PostVoting;
 import com.exe.whateat.entity.profile.PersonalProfile;
 import com.exe.whateat.entity.random.RandomHistory;
+import com.exe.whateat.entity.restaurant.Restaurant;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -57,6 +59,9 @@ public class Account extends AbstractEntity implements UserDetails {
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private AccountRole role;
+
+    @OneToOne(mappedBy = "account")
+    private Restaurant restaurant;
 
     @OneToMany(mappedBy = "account", fetch = FetchType.LAZY)
     private List<PersonalProfile> personalProfiles;

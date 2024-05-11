@@ -1,5 +1,6 @@
 package com.exe.whateat.infrastructure.security;
 
+import com.exe.whateat.entity.account.AccountRole;
 import com.exe.whateat.infrastructure.security.jwt.WhatEatJwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,20 +40,33 @@ public class WhatEatSecurityConfiguration {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        HttpSecurity httpSecurity = http
-                .csrf(AbstractHttpConfigurer::disable)
+        http.csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .sessionManagement(c -> c.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET).permitAll())
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.POST, resolvePath("/users")).permitAll())
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath("/docs/**")).permitAll())
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.POST, resolvePath("/auth/**")).permitAll());
+        handleRestaurantApi(http);
         if (environment.acceptsProfiles(Profiles.of("dev"))) {
-            httpSecurity.authorizeHttpRequests(c -> c.requestMatchers(resolvePath("/test/**")).permitAll());
+            http.authorizeHttpRequests(c -> c.requestMatchers(resolvePath("/test/**")).permitAll());
         }
-        httpSecurity.authorizeHttpRequests(c -> c.anyRequest().authenticated());
-        return httpSecurity.build();
+        http.authorizeHttpRequests(c -> c.anyRequest().authenticated());
+        return http.build();
+    }
+
+    private void handleRestaurantApi(HttpSecurity http) throws Exception {
+        final String restaurantPath = "/restaurants/**";
+        http.authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.POST, resolvePath("/restaurants"))
+                        .permitAll())
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.PATCH, resolvePath(restaurantPath))
+                        .hasAnyAuthority(AccountRole.RESTAURANT.name(), AccountRole.ADMIN.name()))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.DELETE, resolvePath(restaurantPath))
+                        .hasAnyAuthority(AccountRole.RESTAURANT.name(), AccountRole.ADMIN.name()))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath("/restaurants/current"))
+                        .hasAnyAuthority(AccountRole.RESTAURANT.name(), AccountRole.ADMIN.name()))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath(restaurantPath))
+                        .hasAnyAuthority(AccountRole.RESTAURANT.name(), AccountRole.ADMIN.name()));
     }
 
     private String resolvePath(String path) {

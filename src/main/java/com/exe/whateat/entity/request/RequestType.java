@@ -2,5 +2,6 @@ package com.exe.whateat.entity.request;
 
 public enum RequestType {
 
-    CREATE_NEW_FOOD
+    NEW_FOOD,
+    NEW_RESTAURANT
 }

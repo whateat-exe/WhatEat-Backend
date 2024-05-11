@@ -2,30 +2,46 @@ package com.exe.whateat.infrastructure.firebase;
 
 import com.exe.whateat.application.exception.WhatEatErrorCode;
 import com.exe.whateat.application.exception.WhatEatException;
+import com.exe.whateat.application.image.FirebaseImageResponse;
 import com.exe.whateat.application.image.FirebaseImageService;
 import com.google.cloud.storage.Acl;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.Bucket;
 import com.google.firebase.cloud.StorageClient;
 import jakarta.transaction.Transactional;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Base64;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @Transactional(rollbackOn = Exception.class)
 public class FirebaseImageServiceImpl implements FirebaseImageService {
 
-    private static final Map<String, String> mimes;
+    private static final Map<String, String> MIMES;
+    private static final String IMAGE_URL_FORMAT = "https://storage.googleapis.com/storage/v1/b/%s/o/%s?alt=media";
+    private static final String IMAGE_URL_REGEX;
 
     static {
-        mimes = Map.of("data:image/jpeg;base64", ".jpeg",
+        String imageUrlRegex = IMAGE_URL_FORMAT.replace("/", "\\/");
+        imageUrlRegex = imageUrlRegex.replace(".", "\\.");
+        imageUrlRegex = imageUrlRegex.replace("?", "\\?");
+        IMAGE_URL_REGEX = imageUrlRegex.replace("%s", "([\\S]+)");
+
+        // Set up MIMES
+        MIMES = Map.of("data:image/jpeg;base64", ".jpeg",
                 "data:image/jpg;base64", ".jpg",
                 "data:image/png;base64", ".png");
     }
+
+    @Value("${whateat.firebase.storage}")
+    private String firebaseStorageUrl;
 
     private final StorageClient storageClient;
 
@@ -35,9 +51,9 @@ public class FirebaseImageServiceImpl implements FirebaseImageService {
     }
 
     @Override
-    public String uploadBase64Image(String base64Image) {
+    public FirebaseImageResponse uploadBase64Image(String base64Image) {
         final String[] base64ImageParts = base64Image.split(",");
-        if (base64ImageParts.length != 2 || !mimes.containsKey(base64ImageParts[0])) {
+        if (base64ImageParts.length != 2 || !MIMES.containsKey(base64ImageParts[0])) {
             throw WhatEatException.builder()
                     .code(WhatEatErrorCode.WEV_0006)
                     .reason("image", "Image must be a valid Base64 representation.")
@@ -45,10 +61,39 @@ public class FirebaseImageServiceImpl implements FirebaseImageService {
         }
         final String contentType = base64ImageParts[0].substring(5, base64ImageParts[0].indexOf(";"));
         final byte[] imageBytes = Base64.getDecoder().decode(base64ImageParts[1]);
-        final String imageId = UUID.randomUUID().toString();
-        Blob blob = storageClient.bucket().create(imageId, imageBytes, contentType,
+        final UUID imageId = UUID.randomUUID();
+        Blob blob = storageClient.bucket().create(imageId.toString(), imageBytes, contentType,
                 Bucket.BlobTargetOption.doesNotExist());
+        // Set ALL users to be able to access the link!
         blob.createAcl(Acl.of(Acl.User.ofAllUsers(), Acl.Role.READER));
-        return blob.getMediaLink();
+        return new FirebaseImageResponse(imageId.toString(),
+                String.format(IMAGE_URL_FORMAT, firebaseStorageUrl, imageId));
+    }
+
+    @Override
+    public void deleteImage(String imageArg, DeleteType deleteType) {
+        if (deleteType == DeleteType.ID) {
+            final Blob blob = storageClient.bucket().get(imageArg);
+            if (blob != null) {
+                blob.delete();
+            }
+            return;
+        }
+        final Pattern pattern = Pattern.compile(IMAGE_URL_REGEX);
+        final Matcher matcher = pattern.matcher(imageArg);
+        if (matcher.matches()) {
+            final String imageId = matcher.group(2);
+            if (StringUtils.isBlank(imageId)) {
+                // Unknown image ID
+                throw WhatEatException.builder()
+                        .code(WhatEatErrorCode.WES_0004)
+                        .reason("image_url", "Unknown image URL format.")
+                        .build();
+            }
+            final Blob blob = storageClient.bucket().get(imageId);
+            if (blob != null) {
+                blob.delete();
+            }
+        }
     }
 }
