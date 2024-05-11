@@ -135,27 +135,15 @@ CREATE TABLE rating
 
 CREATE TABLE restaurant
 (
-    version               INTEGER,
-    name                  VARCHAR(255)  NOT NULL,
-    description           VARCHAR(5000) NOT NULL,
-    image                 VARCHAR(255)  NOT NULL,
-    status                VARCHAR(255)  NOT NULL,
-    account_id            BIGINT        NOT NULL,
-    id                    BIGINT        NOT NULL,
-    restaurant_address_id BIGINT,
+    version     INTEGER,
+    name        VARCHAR(255)  NOT NULL,
+    description VARCHAR(5000) NOT NULL,
+    image       VARCHAR(255)  NOT NULL,
+    status      VARCHAR(10)   NOT NULL,
+    account_id  BIGINT        NOT NULL,
+    address     VARCHAR(255)  NOT NULL,
+    id          BIGINT        NOT NULL,
     CONSTRAINT pk_restaurant PRIMARY KEY (id)
-);
-
-CREATE TABLE restaurant_address
-(
-    version       INTEGER,
-    description   VARCHAR(1000),
-    province_id   INTEGER NOT NULL,
-    district_id   INTEGER NOT NULL,
-    ward_id       INTEGER NOT NULL,
-    restaurant_id BIGINT  NOT NULL,
-    id            BIGINT  NOT NULL,
-    CONSTRAINT pk_restaurant_address PRIMARY KEY (id)
 );
 
 CREATE TABLE restaurant_request
@@ -256,9 +244,6 @@ ALTER TABLE rating
 ALTER TABLE restaurant
     ADD CONSTRAINT uc_restaurant_account UNIQUE (account_id);
 
-ALTER TABLE restaurant_address
-    ADD CONSTRAINT uc_restaurant_address_restaurant UNIQUE (restaurant_id);
-
 ALTER TABLE restaurant_response
     ADD CONSTRAINT uc_restaurant_response_restaurant_request UNIQUE (restaurant_request_id);
 
@@ -322,14 +307,8 @@ ALTER TABLE rating
 ALTER TABLE rating
     ADD CONSTRAINT FK_RATING_ON_DISH FOREIGN KEY (dish_id) REFERENCES dish (id);
 
-ALTER TABLE restaurant_address
-    ADD CONSTRAINT FK_RESTAURANT_ADDRESS_ON_RESTAURANT FOREIGN KEY (restaurant_id) REFERENCES restaurant (id);
-
 ALTER TABLE restaurant
     ADD CONSTRAINT FK_RESTAURANT_ON_ACCOUNT FOREIGN KEY (account_id) REFERENCES account (id);
-
-ALTER TABLE restaurant
-    ADD CONSTRAINT FK_RESTAURANT_ON_RESTAURANTADDRESS FOREIGN KEY (restaurant_address_id) REFERENCES restaurant_address (id);
 
 ALTER TABLE restaurant_request
     ADD CONSTRAINT FK_RESTAURANT_REQUEST_ON_RESTAURANT FOREIGN KEY (restaurant_id) REFERENCES restaurant (id);

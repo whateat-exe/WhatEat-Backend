@@ -1,13 +1,15 @@
 package com.exe.whateat.application.account_user.getMethod;
 
 import com.exe.whateat.application.account_user.dto.UserDTO;
-import com.exe.whateat.application.account_user.mapper.AccountDTOMapper;
 import com.exe.whateat.application.account_user.getMethod.response.UserResponse;
+import com.exe.whateat.application.account_user.mapper.AccountDTOMapper;
 import com.exe.whateat.application.common.AbstractController;
 import com.exe.whateat.entity.account.Account;
 import com.exe.whateat.infrastructure.repository.AccountRepository;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,8 +20,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class GetUser {
 
     @RestController
@@ -28,7 +30,7 @@ public final class GetUser {
             name = "user",
             description = "APIs for get users"
     )
-    public static class GetUserContronller extends AbstractController {
+    public static class GetUserController extends AbstractController {
 
         private final GetUserService getUserService;
 
@@ -55,15 +57,13 @@ public final class GetUser {
             List<Account> accounts = accountPage.getContent();
             List<UserDTO> userDTOS = accounts
                     .stream()
-                    .map(u -> accountDTOMapper.apply(u)).collect(Collectors.toList());
-            UserResponse userResponse =
-                    UserResponse.builder()
-                            .userDTOS(userDTOS)
-                            .pageNumber(pageNumber)
-                            .pageSize(pageSize)
-                            .totalElemnts(userDTOS.size())
-                            .build();
-            return userResponse;
+                    .map(accountDTOMapper).toList();
+            return UserResponse.builder()
+                    .userDTOS(userDTOS)
+                    .pageNumber(pageNumber)
+                    .pageSize(pageSize)
+                    .totalElemnts(userDTOS.size())
+                    .build();
         }
     }
 }

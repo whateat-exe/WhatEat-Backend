@@ -13,16 +13,16 @@ import com.exe.whateat.entity.account.AccountRole;
 import com.exe.whateat.entity.common.ActiveStatus;
 import com.exe.whateat.entity.common.WhatEatId;
 import com.exe.whateat.infrastructure.repository.AccountRepository;
-import com.exe.whateat.infrastructure.security.WhatEatSecurityHelper;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Optional;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class CreateUser {
 
     @RestController
@@ -42,7 +43,6 @@ public final class CreateUser {
     public static final class CreateUserController extends AbstractController {
 
         private final CreateUserService createUserService;
-        private final WhatEatSecurityHelper whatEatSecurityHelper;
 
         @PostMapping("/users")
         @ApiResponse(
@@ -56,7 +56,6 @@ public final class CreateUser {
                 content = @Content(schema = @Schema(implementation = CreateUserResponse.class))
         )
         public ResponseEntity<CreateUserResponse> createUser(@RequestBody @Valid CreateUserRequest createUserRequest) {
-            Optional<Account> account = whatEatSecurityHelper.getCurrentLoggedInAccount();
             final CreateUserResponse userResponse = createUserService.createUserService(createUserRequest);
             return ResponseEntity.status(HttpStatus.CREATED).body(userResponse);
         }
@@ -89,14 +88,13 @@ public final class CreateUser {
                         .build();
 
             Optional<Account> account = accountRepository.findByEmail(email);
-            if (!account.isEmpty()) {
+            if (account.isPresent()) {
                 throw WhatEatException
                         .builder()
                         .code(WhatEatErrorCode.WEV_0001)
                         .reason("email", "Email has been registered")
                         .build();
-            }
-            else {
+            } else {
                 String passwordEncode = passwordEncoder.encode(createUserRequest.getPassword());
                 WhatEatId whatEatId = WhatEatId.generate();
                 Account accountCreate =
@@ -111,11 +109,10 @@ public final class CreateUser {
                                 .build();
                 Account accountCreated = accountRepository.save(accountCreate);
                 UserDTO userDTO = accountDTOMapper.apply(accountCreated);
-                CreateUserResponse userResponse =
-                        CreateUserResponse.builder()
-                                .userDTO(userDTO)
-                                .build();
-                return userResponse;
+                return CreateUserResponse.builder()
+                        .userDTO(userDTO)
+                        .build();
             }
         }
-    }}
+    }
+}

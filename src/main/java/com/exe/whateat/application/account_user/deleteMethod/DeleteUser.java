@@ -11,7 +11,9 @@ import com.exe.whateat.infrastructure.repository.AccountRepository;
 import com.exe.whateat.infrastructure.security.WhatEatSecurityHelper;
 import io.github.x4ala1c.tsid.Tsid;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Optional;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class DeleteUser {
 
     @RestController
@@ -34,10 +37,10 @@ public final class DeleteUser {
         private final WhatEatSecurityHelper whatEatSecurityHelper;
 
         @PutMapping("/users/{id}")
-        public ResponseEntity DeleteUser(@PathVariable String id) {
+        public ResponseEntity<Object> DeleteUser(@PathVariable String id) {
 
             Optional<Account> account = whatEatSecurityHelper.getCurrentLoggedInAccount();
-            if (!account.isPresent()) {
+            if (account.isEmpty()) {
                 throw WhatEatException
                         .builder()
                         .code(WhatEatErrorCode.WEA_0003)
@@ -62,13 +65,14 @@ public final class DeleteUser {
     public static final class DeleteUserService {
 
         private final AccountRepository accountRepository;
-        public void deleteUser (String id) {
+
+        public void deleteUser(String id) {
 
             Tsid tsid = Tsid.fromString(id);
             WhatEatId whatEatId = WhatEatId.builder().id(tsid).build();
             Optional<Account> account = accountRepository.findById(whatEatId);
 
-            if(account.isPresent()) {
+            if (account.isPresent()) {
                 if (account.get().getStatus().equals(ActiveStatus.ACTIVE)) {
 
                     account.get().setStatus(ActiveStatus.INACTIVE);
@@ -77,7 +81,7 @@ public final class DeleteUser {
                 }
                 throw WhatEatException
                         .builder()
-                        .code(WhatEatErrorCode.WEV_0007)
+                        .code(WhatEatErrorCode.WEA_0007)
                         .reason("server", "Can not disable an inactive account")
                         .build();
             }

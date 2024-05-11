@@ -12,7 +12,9 @@ import com.exe.whateat.infrastructure.repository.AccountRepository;
 import com.exe.whateat.infrastructure.security.WhatEatSecurityHelper;
 import io.github.x4ala1c.tsid.Tsid;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
@@ -25,6 +27,7 @@ import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.Optional;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class UpdateUser {
 
     @RestController
@@ -39,15 +42,15 @@ public class UpdateUser {
         private final WhatEatSecurityHelper whatEatSecurityHelper;
 
         @PatchMapping("users/{id}")
-        public ResponseEntity<UpdateUserResponse> updateUser (
+        public ResponseEntity<UpdateUserResponse> updateUser(
                 @RequestBody Map<String, Object> fields, @PathVariable String id
-                ) {
+        ) {
 
             if (fields == null) {
                 return ResponseEntity.ok(null);
             }
             Optional<Account> account = whatEatSecurityHelper.getCurrentLoggedInAccount();
-            if (!account.isPresent()) {
+            if (account.isEmpty()) {
                 throw WhatEatException
                         .builder()
                         .code(WhatEatErrorCode.WEA_0003)
@@ -65,6 +68,7 @@ public class UpdateUser {
             return ResponseEntity.ok(userResponse);
         }
     }
+
     @Service
     @AllArgsConstructor
     public static final class UpdateUserService {
@@ -79,16 +83,15 @@ public class UpdateUser {
             if (accountExisting.isPresent()) {
                 fields.forEach((key, value) -> {
                     Field field = ReflectionUtils.findField(Account.class, key);
+                    // Are you sure about using reflection?
                     field.setAccessible(true);
                     ReflectionUtils.setField(field, accountExisting.get(), value);
                 });
                 Account accountUpdated = accountRepository.save(accountExisting.get());
-                UpdateUserResponse userResponse =
-                        UpdateUserResponse
-                                .builder()
-                                .userDTO(accountDTOMapper.apply(accountUpdated))
-                                .build();
-                return userResponse;
+                return UpdateUserResponse
+                        .builder()
+                        .userDTO(accountDTOMapper.apply(accountUpdated))
+                        .build();
             }
             throw WhatEatException
                     .builder()

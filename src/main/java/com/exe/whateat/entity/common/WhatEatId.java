@@ -18,7 +18,10 @@ public final class WhatEatId {
 
     private Tsid id;
 
-    private WhatEatId(Tsid id) {
+    public WhatEatId(Tsid id) {
+        if (id == null) {
+            throw new NullPointerException("ID is null");
+        }
         this.id = id;
     }
 
