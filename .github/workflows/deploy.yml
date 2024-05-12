@@ -1,0 +1,46 @@
+name: Deploy to Docker Hub
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Extract Version & Profile
+        id: version
+        run: |
+          echo "VERSION=$(grep 'whateat.version=' src/main/resources/application.properties | cut -d'=' -f2)" >> $GITHUB_ENV
+          echo "PROFILE=$(grep 'spring.profiles.active=' src/main/resources/application.properties | cut -d'=' -f2)" >> $GITHUB_ENV
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Docker image and push
+        run: docker buildx build --platform linux/amd64 -t whateatexe/whateat-${{ env.PROFILE }}:${{ env.VERSION }} . --push
+
+      - name: Setup SSH Keys
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Deploy to EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_IP }} << EOF
+            sudo docker pull whateatexe/whateat-${{ env.PROFILE }}:${{ env.VERSION }}
+            sudo docker stop whateat-${{ env.PROFILE }} || true
+            sudo docker rm whateat-${{ env.PROFILE }} || true
+            sudo docker run -d --name whateat-${{ env.PROFILE }} -p 8080:8080 whateatexe/whateat-${{ env.PROFILE }}:${{ env.VERSION }}
+          EOF
