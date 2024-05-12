@@ -42,5 +42,5 @@ jobs:
             sudo docker pull whateatexe/whateat-${{ env.PROFILE }}:${{ env.VERSION }}
             sudo docker stop whateat-${{ env.PROFILE }} || true
             sudo docker rm whateat-${{ env.PROFILE }} || true
-            sudo docker run -d --name whateat-${{ env.PROFILE }} -p 8080:8080 whateatexe/whateat-${{ env.PROFILE }}:${{ env.VERSION }}
+            sudo docker run -d --name whateat-${{ env.PROFILE }} -p 80:8080 whateatexe/whateat-${{ env.PROFILE }}:${{ env.VERSION }}
           EOF
