@@ -41,7 +41,7 @@ public class UpdateUser {
         private final UpdateUserService updateUserService;
         private final WhatEatSecurityHelper whatEatSecurityHelper;
 
-        @PatchMapping("users/{id}")
+        @PatchMapping("/users/{id}")
         public ResponseEntity<UpdateUserResponse> updateUser(
                 @RequestBody Map<String, Object> fields, @PathVariable String id
         ) {
@@ -57,6 +57,7 @@ public class UpdateUser {
                         .reason("Unauthenticated", "You have not logged in")
                         .build();
             }
+            // Everyone should be able to update their Account ?
             if (account.get().getRole() != AccountRole.USER) {
                 throw WhatEatException
                         .builder()

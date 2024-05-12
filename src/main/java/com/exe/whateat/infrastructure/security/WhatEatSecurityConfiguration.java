@@ -44,15 +44,26 @@ public class WhatEatSecurityConfiguration {
                 .cors(Customizer.withDefaults())
                 .sessionManagement(c -> c.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.POST, resolvePath("/users")).permitAll())
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath("/docs/**")).permitAll())
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.POST, resolvePath("/auth/**")).permitAll());
+        handleAccountApi(http);
         handleRestaurantApi(http);
         if (environment.acceptsProfiles(Profiles.of("dev"))) {
             http.authorizeHttpRequests(c -> c.requestMatchers(resolvePath("/test/**")).permitAll());
         }
         http.authorizeHttpRequests(c -> c.anyRequest().authenticated());
         return http.build();
+    }
+
+    private void handleAccountApi(HttpSecurity http) throws Exception {
+        http.authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath("/users"))
+                        .hasAnyAuthority(AccountRole.ADMIN.name(), AccountRole.MANAGER.name()))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.POST, resolvePath("/users"))
+                        .permitAll())
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.DELETE, resolvePath("/users/**"))
+                        .hasAuthority(AccountRole.ADMIN.name()))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.PATCH, resolvePath("/users/**"))
+                        .authenticated());
     }
 
     private void handleRestaurantApi(HttpSecurity http) throws Exception {
