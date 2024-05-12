@@ -71,6 +71,7 @@ public final class CreateUser {
 
         public CreateUserResponse createUserService(CreateUserRequest createUserRequest) {
             var email = createUserRequest.getEmail();
+            // We have library for checking email, like EmailValidator. Use Jakarta @Email instead.
             boolean checkEmail = WhatEatRegex.checkPattern(WhatEatRegex.emailPattern, createUserRequest.getEmail());
             if (!checkEmail)
                 throw WhatEatException
