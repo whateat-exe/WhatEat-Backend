@@ -28,6 +28,16 @@ public class FirebaseImageServiceImpl implements FirebaseImageService {
     private static final String IMAGE_URL_FORMAT = "https://storage.googleapis.com/storage/v1/b/%s/o/%s?alt=media";
     private static final String IMAGE_URL_REGEX;
 
+    private static final int MAX_IMAGE_SIZE = 3145728;      // 3MB
+    private static final String JPEG_MAGIC_BYTES_1 = "/9j/";
+    private static final String JPEG_MAGIC_BYTES_2 = "/9k/";
+    private static final String PNG_MAGIC_BYTES = "iVBORw0KGgoAAAANSUhEUgAA";
+
+    private static final WhatEatException INVALID_FORMAT_EXCEPTION = WhatEatException.builder()
+            .code(WhatEatErrorCode.WEV_0006)
+            .reason("image", "Image does not seem to be in correct Base64 format.")
+            .build();
+
     static {
         String imageUrlRegex = IMAGE_URL_FORMAT.replace("/", "\\/");
         imageUrlRegex = imageUrlRegex.replace(".", "\\.");
@@ -43,6 +53,9 @@ public class FirebaseImageServiceImpl implements FirebaseImageService {
     @Value("${whateat.firebase.storage}")
     private String firebaseStorageUrl;
 
+    @Value("${spring.profiles.active}")
+    private String profile;
+
     private final StorageClient storageClient;
 
     @Autowired
@@ -54,20 +67,42 @@ public class FirebaseImageServiceImpl implements FirebaseImageService {
     public FirebaseImageResponse uploadBase64Image(String base64Image) {
         final String[] base64ImageParts = base64Image.split(",");
         if (base64ImageParts.length != 2 || !MIMES.containsKey(base64ImageParts[0])) {
+            throw INVALID_FORMAT_EXCEPTION;
+        }
+        if (base64ImageParts[1].length() > MAX_IMAGE_SIZE) {
             throw WhatEatException.builder()
-                    .code(WhatEatErrorCode.WEV_0006)
-                    .reason("image", "Image must be a valid Base64 representation.")
+                    .code(WhatEatErrorCode.WEV_0009)
+                    .reason("image", "Image is too big. Must be <= 3MB.")
                     .build();
         }
         final String contentType = base64ImageParts[0].substring(5, base64ImageParts[0].indexOf(";"));
+        final String imageExtension = MIMES.get(base64ImageParts[0]);
+        checkIfImageHasCorrectMagicBytes(base64ImageParts[1], imageExtension);
         final byte[] imageBytes = Base64.getDecoder().decode(base64ImageParts[1]);
         final UUID imageId = UUID.randomUUID();
-        Blob blob = storageClient.bucket().create(imageId.toString(), imageBytes, contentType,
+        final String imagePath = String.format("%s/%s", profile, imageId);
+        Blob blob = storageClient.bucket().create(imagePath, imageBytes, contentType,
                 Bucket.BlobTargetOption.doesNotExist());
         // Set ALL users to be able to access the link!
         blob.createAcl(Acl.of(Acl.User.ofAllUsers(), Acl.Role.READER));
         return new FirebaseImageResponse(imageId.toString(),
-                String.format(IMAGE_URL_FORMAT, firebaseStorageUrl, imageId));
+                String.format(IMAGE_URL_FORMAT, firebaseStorageUrl, imagePath.replace("/", "%2F")));
+    }
+
+    private void checkIfImageHasCorrectMagicBytes(String base64Image, String imageExtension) {
+        if (StringUtils.equals(".jpg", imageExtension) || StringUtils.equals(".jpeg", imageExtension)) {
+            if (base64Image.startsWith(JPEG_MAGIC_BYTES_1) || base64Image.startsWith(JPEG_MAGIC_BYTES_2)) {
+                return;
+            }
+            throw INVALID_FORMAT_EXCEPTION;
+        }
+        if (StringUtils.equals(".png", imageExtension)) {
+            if (base64Image.startsWith(PNG_MAGIC_BYTES)) {
+                return;
+            }
+            throw INVALID_FORMAT_EXCEPTION;
+        }
+        throw INVALID_FORMAT_EXCEPTION;
     }
 
     @Override

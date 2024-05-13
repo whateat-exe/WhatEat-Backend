@@ -31,6 +31,7 @@ public enum WhatEatErrorCode {
     WEV_0006("Invalid image format"),
     WEV_0007("Invalid phone number"),
     WEV_0008("Invalid full name"),
+    WEV_0009("Oversize image"),
     WES_0000("Dummy server error"),
     WES_0001("Unknown error"),
     WES_0002("Unknown user account"),
