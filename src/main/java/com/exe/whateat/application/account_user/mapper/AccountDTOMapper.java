@@ -4,7 +4,6 @@ import com.exe.whateat.application.account_user.dto.UserDTO;
 import com.exe.whateat.entity.account.Account;
 import org.springframework.stereotype.Component;
 
-
 import java.util.function.Function;
 
 @Component
