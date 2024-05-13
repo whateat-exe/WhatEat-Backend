@@ -52,6 +52,9 @@ public class Account extends AbstractEntity implements UserDetails {
     @Column(name = "full_name", nullable = false, length = 100)
     private String fullName;
 
+    @Column(name = "image")
+    private String image;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private ActiveStatus status;
