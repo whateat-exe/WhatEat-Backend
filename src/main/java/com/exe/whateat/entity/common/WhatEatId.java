@@ -45,4 +45,9 @@ public final class WhatEatId {
     public int hashCode() {
         return Objects.hashCode(id);
     }
+
+    @Override
+    public String toString() {
+        return id.asString();
+    }
 }
