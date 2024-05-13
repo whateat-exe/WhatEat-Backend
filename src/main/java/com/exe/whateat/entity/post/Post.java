@@ -26,9 +26,6 @@ import java.util.List;
 @Table(name = "post")
 public class Post extends AbstractAuditableEntity {
 
-    @Column(name = "title", nullable = false)
-    private String title;
-
     @Column(name = "content", nullable = false, length = 5000)
     private String content;
 

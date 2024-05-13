@@ -63,7 +63,6 @@ CREATE TABLE post
     created_at    TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     last_modified TIMESTAMP WITHOUT TIME ZONE,
     version       INTEGER,
-    title         VARCHAR(255)                NOT NULL,
     content       VARCHAR(5000)               NOT NULL,
     account_id    BIGINT                      NOT NULL,
     id            BIGINT                      NOT NULL,
