@@ -14,6 +14,7 @@ import java.time.Instant;
 public class WhatEatJwtHelper {
 
     private static final String EMAIL = "email";
+    private static final String ROLE = "role";
 
     @Value("${whateat.jwt.token.secret}")
     private String secretForToken;
@@ -48,6 +49,7 @@ public class WhatEatJwtHelper {
                 .withIssuedAt(currentTime)
                 .withExpiresAt(currentTime.plusSeconds(tokenLifetime))
                 .withClaim(EMAIL, account.getEmail())
+                .withClaim(ROLE, account.getRole().name())
                 .sign(algorithm);
     }
 
@@ -65,6 +67,7 @@ public class WhatEatJwtHelper {
                 .withIssuedAt(currentTime)
                 .withExpiresAt(currentTime.plusSeconds(refreshTokenLifetime))
                 .withClaim(EMAIL, account.getEmail())
+                .withClaim(ROLE, account.getRole().name())
                 .withClaim("makeLove", "notWar")
                 .sign(algorithm);
     }
@@ -74,6 +77,7 @@ public class WhatEatJwtHelper {
         final JWTVerifier verifier = JWT.require(algorithm)
                 .withIssuer(issuer)
                 .withClaimPresence(EMAIL)
+                .withClaimPresence(ROLE)
                 .build();
         return verifier.verify(token);
     }
@@ -83,6 +87,7 @@ public class WhatEatJwtHelper {
         final JWTVerifier verifier = JWT.require(algorithm)
                 .withIssuer(issuer)
                 .withClaimPresence(EMAIL)
+                .withClaimPresence(ROLE)
                 .withClaim("makeLove", "notWar")
                 .build();
         return verifier.verify(token);

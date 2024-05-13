@@ -1,13 +1,15 @@
 CREATE TABLE account
 (
-    version      INTEGER,
-    email        VARCHAR(255),
-    password     VARCHAR(255) NOT NULL,
-    phone_number VARCHAR(20)  NOT NULL,
-    full_name    VARCHAR(100) NOT NULL,
-    status       VARCHAR(255) NOT NULL,
-    role         VARCHAR(255) NOT NULL,
-    id           BIGINT       NOT NULL,
+    version       INTEGER,
+    email         VARCHAR(255),
+    password      VARCHAR(255) NOT NULL,
+    phone_number  VARCHAR(20)  NOT NULL,
+    full_name     VARCHAR(100) NOT NULL,
+    image         VARCHAR(255),
+    status        VARCHAR(255) NOT NULL,
+    role          VARCHAR(255) NOT NULL,
+    id            BIGINT       NOT NULL,
+    restaurant_id BIGINT,
     CONSTRAINT pk_account PRIMARY KEY (id)
 );
 
@@ -61,7 +63,6 @@ CREATE TABLE post
     created_at    TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     last_modified TIMESTAMP WITHOUT TIME ZONE,
     version       INTEGER,
-    title         VARCHAR(255)                NOT NULL,
     content       VARCHAR(5000)               NOT NULL,
     account_id    BIGINT                      NOT NULL,
     id            BIGINT                      NOT NULL,
@@ -249,6 +250,9 @@ ALTER TABLE restaurant_response
 
 ALTER TABLE restaurant_subscription_payment
     ADD CONSTRAINT uc_restaurant_subscription_payment_transaction_history UNIQUE (transaction_history_id);
+
+ALTER TABLE account
+    ADD CONSTRAINT FK_ACCOUNT_ON_RESTAURANT FOREIGN KEY (restaurant_id) REFERENCES restaurant (id);
 
 ALTER TABLE dish
     ADD CONSTRAINT FK_DISH_ON_FOOD FOREIGN KEY (food_id) REFERENCES food (id);

@@ -1,9 +1,5 @@
 package com.exe.whateat.application.account_user.createMethod.request;
 
-import com.exe.whateat.application.common.WhatEatRegex;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
