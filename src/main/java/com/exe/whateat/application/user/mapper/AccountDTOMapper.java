@@ -1,17 +1,16 @@
-package com.exe.whateat.application.account_user.mapper;
+package com.exe.whateat.application.user.mapper;
 
-import com.exe.whateat.application.account_user.dto.UserDTO;
+import com.exe.whateat.application.user.response.UserResponse;
+import com.exe.whateat.application.common.WhatEatMapper;
 import com.exe.whateat.entity.account.Account;
 import org.springframework.stereotype.Component;
 
-import java.util.function.Function;
-
 @Component
-public class AccountDTOMapper implements Function<Account, UserDTO> {
+public class AccountDTOMapper implements WhatEatMapper<Account, UserResponse> {
 
     @Override
-    public UserDTO apply(Account account) {
-        return UserDTO.builder()
+    public UserResponse convertToDto(Account account) {
+        return UserResponse.builder()
                 .id(account.getId().asTsid())
                 .email(account.getEmail())
                 .fullName(account.getFullName())

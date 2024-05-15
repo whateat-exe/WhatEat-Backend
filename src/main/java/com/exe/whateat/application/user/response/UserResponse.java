@@ -1,4 +1,5 @@
-package com.exe.whateat.application.account_user.dto;
+package com.exe.whateat.application.user.response;
+
 import io.github.x4ala1c.tsid.Tsid;
 import lombok.Builder;
 import lombok.Getter;
@@ -9,7 +10,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @Builder
-public class UserDTO {
+public class UserResponse {
 
     private Tsid id;
     private String email;
