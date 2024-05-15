@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -42,6 +43,7 @@ public final class CreateUser {
     public static class CreateUserRequest {
 
         @NotBlank(message = "Email is required")
+        @Email
         private String email;
 
         @NotNull
@@ -95,13 +97,13 @@ public final class CreateUser {
         public UserResponse createUserService(CreateUserRequest createUserRequest) {
             var email = createUserRequest.getEmail();
             // We have library for checking email, like EmailValidator. Use Jakarta @Email instead.
-            boolean checkEmail = WhatEatRegex.checkPattern(WhatEatRegex.emailPattern, createUserRequest.getEmail());
-            if (!checkEmail)
-                throw WhatEatException
-                        .builder()
-                        .code(WhatEatErrorCode.WEV_0001)
-                        .reason("email", "Wrong email pattern")
-                        .build();
+//            boolean checkEmail = WhatEatRegex.checkPattern(WhatEatRegex.emailPattern, createUserRequest.getEmail());
+//            if (!checkEmail)
+//                throw WhatEatException
+//                        .builder()
+//                        .code(WhatEatErrorCode.WEV_0001)
+//                        .reason("email", "Wrong email pattern")
+//                        .build();
 
             var phoneNumberCheck = WhatEatRegex.checkPattern(WhatEatRegex.phonePattern, createUserRequest.getPhoneNumber());
             if (!phoneNumberCheck)
