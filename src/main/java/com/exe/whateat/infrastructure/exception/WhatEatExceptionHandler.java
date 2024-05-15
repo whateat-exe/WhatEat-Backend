@@ -1,5 +1,6 @@
 package com.exe.whateat.infrastructure.exception;
 
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.exe.whateat.application.exception.WhatEatErrorCode;
 import com.exe.whateat.application.exception.WhatEatException;
 import com.google.cloud.storage.StorageException;
@@ -68,10 +69,21 @@ public class WhatEatExceptionHandler {
                 .build());
     }
 
+    // JWT Verification handling mechanism
+
+    @ExceptionHandler({JWTVerificationException.class})
+    public ResponseEntity<WhatEatErrorResponse> handleJwtException() {
+        final WhatEatException whatEatException = WhatEatException.builder()
+                .code(WhatEatErrorCode.WEA_0003)
+                .reason("token", "Token xác thực không hợp lệ.")
+                .build();
+        return createResponse(whatEatException);
+    }
+
     // WhatEatException handling mechanism
 
     @ExceptionHandler
-    public ResponseEntity<WhatEatErrorResponse> handleWhatEatException(WhatEatException ex) {
+    public ResponseEntity<WhatEatErrorResponse> handleWhatEatException(Exception ex) {
         return createResponse(ex);
     }
 
@@ -83,7 +95,7 @@ public class WhatEatExceptionHandler {
                             .map(r -> new WhatEatErrorResponse.Error(r.title(), r.reason()))
                             .toList())
                     .build();
-            return ResponseEntity.status(whateatException.getCode().asHttpStatus())
+            return ResponseEntity.status(whateatException.getCode().getStatus())
                     .body(response);
         }
         // Unknown exception. Return as Internal Server Error.
