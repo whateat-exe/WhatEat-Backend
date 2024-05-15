@@ -13,30 +13,33 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class RefreshToken {
 
-    public record RefreshTokenRequest(String refreshToken) {
+    /**
+     * Somehow having only one property would make deserialization throws error, so we need to use @NoArgsConstructor.
+     * Maybe in the future, all request class must have @NoArgsConstructor instead of @Builder?
+     */
+    @Data
+    @NoArgsConstructor
+    public static final class RefreshTokenRequest {
 
-        public RefreshTokenRequest {
-            if (StringUtils.isBlank(refreshToken)) {
-                throw WhatEatException.builder()
-                        .code(WhatEatErrorCode.WEA_0006)
-                        .reason("refreshToken", "Refresh token is required")
-                        .build();
-            }
-        }
+        @NotBlank(message = "Refresh token là bắt buộc.")
+        private String refreshToken;
     }
 
     @RestController
@@ -67,7 +70,7 @@ public final class RefreshToken {
                 responseCode = "400s/500s",
                 content = @Content(schema = @Schema(implementation = WhatEatErrorResponse.class))
         )
-        public ResponseEntity<Object> refreshToken(RefreshTokenRequest request) {
+        public ResponseEntity<Object> refreshToken(@RequestBody @Valid RefreshTokenRequest request) {
             final TokenResponse response = service.refreshToken(request);
             return ResponseEntity.ok(response);
         }
@@ -81,7 +84,7 @@ public final class RefreshToken {
         private final UserDetailsService userDetailsService;
 
         public TokenResponse refreshToken(RefreshTokenRequest request) {
-            final DecodedJWT jwt = jwtHelper.verifyRefreshToken(request.refreshToken());
+            final DecodedJWT jwt = jwtHelper.verifyRefreshToken(request.getRefreshToken());
             final String email = jwtHelper.extractEmail(jwt);
             final UserDetails userDetails = userDetailsService.loadUserByUsername(email);
             if (!userDetails.isEnabled()) {
