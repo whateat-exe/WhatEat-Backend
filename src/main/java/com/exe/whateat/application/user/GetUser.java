@@ -1,8 +1,7 @@
-package com.exe.whateat.application.account_user.getMethod;
+package com.exe.whateat.application.user;
 
-import com.exe.whateat.application.account_user.dto.UserDTO;
-import com.exe.whateat.application.account_user.getMethod.response.UserResponse;
-import com.exe.whateat.application.account_user.mapper.AccountDTOMapper;
+import com.exe.whateat.application.user.mapper.AccountDTOMapper;
+import com.exe.whateat.application.user.response.UserResponse;
 import com.exe.whateat.application.common.AbstractController;
 import com.exe.whateat.entity.account.Account;
 import com.exe.whateat.infrastructure.repository.AccountRepository;
@@ -35,11 +34,11 @@ public final class GetUser {
         private final GetUserService getUserService;
 
         @GetMapping("/users")
-        public ResponseEntity<UserResponse> getAllAccount(
+        public ResponseEntity<List<UserResponse>> getAllAccount(
                 @RequestParam(value = "pageNumber", defaultValue = "0", required = false) int pageNumber,
                 @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize
         ) {
-            final UserResponse response = getUserService.getAllUser(pageNumber, pageSize);
+            final List<UserResponse> response = getUserService.getAllUser(pageNumber, pageSize);
             return ResponseEntity.ok(response);
         }
     }
@@ -51,19 +50,13 @@ public final class GetUser {
         private final AccountRepository accountRepository;
         private final AccountDTOMapper accountDTOMapper;
 
-        public UserResponse getAllUser(int pageNumber, int pageSize) {
+        public List<UserResponse> getAllUser(int pageNumber, int pageSize) {
             Pageable pageable = PageRequest.of(pageNumber, pageSize);
             Page<Account> accountPage = accountRepository.findAll(pageable);
             List<Account> accounts = accountPage.getContent();
-            List<UserDTO> userDTOS = accounts
+            return  accounts
                     .stream()
-                    .map(accountDTOMapper).toList();
-            return UserResponse.builder()
-                    .userDTOS(userDTOS)
-                    .pageNumber(pageNumber)
-                    .pageSize(pageSize)
-                    .totalElemnts(userDTOS.size())
-                    .build();
+                    .map(accountDTOMapper::convertToDto).toList();
         }
     }
 }
