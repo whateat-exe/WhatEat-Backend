@@ -85,7 +85,7 @@ public class FirebaseImageServiceImpl implements FirebaseImageService {
                 Bucket.BlobTargetOption.doesNotExist());
         // Set ALL users to be able to access the link!
         blob.createAcl(Acl.of(Acl.User.ofAllUsers(), Acl.Role.READER));
-        return new FirebaseImageResponse(imageId.toString(),
+        return new FirebaseImageResponse(imagePath,
                 String.format(IMAGE_URL_FORMAT, firebaseStorageUrl, imagePath.replace("/", "%2F")));
     }
 

@@ -17,7 +17,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-import org.hibernate.annotations.NaturalId;
 
 import java.util.List;
 
@@ -30,8 +29,7 @@ import java.util.List;
 @Table(name = "food")
 public class Food extends AbstractEntity {
 
-    @NaturalId
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false, unique = true)
     private String name;
 
     @Column(name = "image", nullable = false)

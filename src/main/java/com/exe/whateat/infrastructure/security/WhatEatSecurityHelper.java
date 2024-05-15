@@ -1,6 +1,7 @@
 package com.exe.whateat.infrastructure.security;
 
 import com.exe.whateat.entity.account.Account;
+import com.exe.whateat.entity.account.AccountRole;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -19,5 +20,18 @@ public final class WhatEatSecurityHelper {
             return Optional.empty();
         }
         return Optional.of(account);
+    }
+
+    public boolean currentAccountIsAdminOrManager() {
+        final Optional<Account> account = getCurrentLoggedInAccount();
+        if (account.isEmpty()) {
+            return false;
+        }
+        final AccountRole role = account.get().getRole();
+        return ((role == AccountRole.ADMIN) || (role == AccountRole.MANAGER));
+    }
+
+    public boolean currentAccountIsNotAdminOrManager() {
+        return !currentAccountIsAdminOrManager();
     }
 }

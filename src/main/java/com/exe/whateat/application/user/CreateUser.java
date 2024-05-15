@@ -1,11 +1,11 @@
 package com.exe.whateat.application.user;
 
-import com.exe.whateat.application.user.mapper.AccountDTOMapper;
-import com.exe.whateat.application.user.response.UserResponse;
 import com.exe.whateat.application.common.AbstractController;
 import com.exe.whateat.application.common.WhatEatRegex;
 import com.exe.whateat.application.exception.WhatEatErrorCode;
 import com.exe.whateat.application.exception.WhatEatException;
+import com.exe.whateat.application.user.mapper.AccountDTOMapper;
+import com.exe.whateat.application.user.response.UserResponse;
 import com.exe.whateat.entity.account.Account;
 import com.exe.whateat.entity.account.AccountRole;
 import com.exe.whateat.entity.common.ActiveStatus;
@@ -96,15 +96,6 @@ public final class CreateUser {
 
         public UserResponse createUserService(CreateUserRequest createUserRequest) {
             var email = createUserRequest.getEmail();
-            // We have library for checking email, like EmailValidator. Use Jakarta @Email instead.
-//            boolean checkEmail = WhatEatRegex.checkPattern(WhatEatRegex.emailPattern, createUserRequest.getEmail());
-//            if (!checkEmail)
-//                throw WhatEatException
-//                        .builder()
-//                        .code(WhatEatErrorCode.WEV_0001)
-//                        .reason("email", "Wrong email pattern")
-//                        .build();
-
             var phoneNumberCheck = WhatEatRegex.checkPattern(WhatEatRegex.phonePattern, createUserRequest.getPhoneNumber());
             if (!phoneNumberCheck)
                 throw WhatEatException
