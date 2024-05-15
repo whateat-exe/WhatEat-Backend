@@ -48,6 +48,7 @@ public class WhatEatSecurityConfiguration {
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.POST, resolvePath("/auth/**")).permitAll());
         handleAccountApi(http);
         handleRestaurantApi(http);
+        handleFoodApi(http);
         if (environment.acceptsProfiles(Profiles.of("dev"))) {
             http.authorizeHttpRequests(c -> c.requestMatchers(resolvePath("/test/**")).permitAll());
         }
@@ -78,6 +79,18 @@ public class WhatEatSecurityConfiguration {
                         .hasAnyAuthority(AccountRole.RESTAURANT.name(), AccountRole.ADMIN.name()))
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath(restaurantPath))
                         .hasAnyAuthority(AccountRole.RESTAURANT.name(), AccountRole.ADMIN.name()));
+    }
+
+    private void handleFoodApi(HttpSecurity http) throws Exception {
+        final String foodPath = resolvePath("/foods/**");
+        http.authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.POST, resolvePath("/foods"))
+                        .hasAnyAuthority(AccountRole.ADMIN.name(), AccountRole.MANAGER.name()))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.PATCH, foodPath)
+                        .hasAnyAuthority(AccountRole.ADMIN.name(), AccountRole.MANAGER.name()))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.DELETE, foodPath)
+                        .hasAnyAuthority(AccountRole.ADMIN.name(), AccountRole.MANAGER.name()))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, foodPath)
+                        .authenticated());
     }
 
     private String resolvePath(String path) {

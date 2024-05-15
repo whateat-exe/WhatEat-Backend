@@ -1,7 +1,7 @@
 package com.exe.whateat.application.user.mapper;
 
-import com.exe.whateat.application.user.response.UserResponse;
 import com.exe.whateat.application.common.WhatEatMapper;
+import com.exe.whateat.application.user.response.UserResponse;
 import com.exe.whateat.entity.account.Account;
 import org.springframework.stereotype.Component;
 

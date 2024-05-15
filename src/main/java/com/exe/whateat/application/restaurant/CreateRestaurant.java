@@ -151,10 +151,21 @@ public final class CreateRestaurant {
                     .build();
             FirebaseImageResponse firebaseImageResponse = null;
             try {
-                restaurantRepository.save(restaurant);
                 firebaseImageResponse = firebaseImageService.uploadBase64Image(request.getImage());
                 restaurant.setImage(firebaseImageResponse.url());
-                restaurant = restaurantRepository.save(restaurant);
+                restaurant = restaurantRepository.saveAndFlush(restaurant);
+                // Create request to validate the restaurant.
+                final RestaurantRequest restaurantRequest = RestaurantRequest.builder()
+                        .id(WhatEatId.generate())
+                        .restaurant(restaurant)
+                        .title("Request for creation of Restaurant \"%s\"")
+                        .content(String.format(REQUEST_CONTENT, restaurant.getId().asTsid().toString(),
+                                restaurant.getName(), restaurant.getAddress()))
+                        .type(RequestType.NEW_RESTAURANT)
+                        .createdAt(Instant.now())
+                        .build();
+                restaurantRequestRepository.saveAndFlush(restaurantRequest);
+                return mapper.convertToDto(restaurant);
             } catch (Exception e) {
                 // Image is created. Time to delete!
                 if (firebaseImageResponse != null) {
@@ -168,18 +179,6 @@ public final class CreateRestaurant {
                         .reason("restaurant", "Error while creating restaurant. Please contact admin.")
                         .build();
             }
-            // Create request to validate the restaurant.
-            final RestaurantRequest restaurantRequest = RestaurantRequest.builder()
-                    .id(WhatEatId.generate())
-                    .restaurant(restaurant)
-                    .title("Request for creation of Restaurant \"%s\"")
-                    .content(String.format(REQUEST_CONTENT, restaurant.getId().asTsid().toString(),
-                            restaurant.getName(), restaurant.getAddress()))
-                    .type(RequestType.NEW_RESTAURANT)
-                    .createdAt(Instant.now())
-                    .build();
-            restaurantRequestRepository.save(restaurantRequest);
-            return mapper.convertToDto(restaurant);
         }
     }
 }
