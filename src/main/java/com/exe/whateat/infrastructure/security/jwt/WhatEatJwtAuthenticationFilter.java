@@ -49,7 +49,7 @@ public class WhatEatJwtAuthenticationFilter extends OncePerRequestFilter {
             }
             filterChain.doFilter(request, response);
         } catch (JWTVerificationException e) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
             PrintWriter writer = response.getWriter();
             writer.write(objectMapper.writeValueAsString(WhatEatErrorResponse.builder()
@@ -58,7 +58,7 @@ public class WhatEatJwtAuthenticationFilter extends OncePerRequestFilter {
                     .build()));
             writer.flush();
         } catch (UsernameNotFoundException e) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
             PrintWriter writer = response.getWriter();
             writer.write(objectMapper.writeValueAsString(WhatEatErrorResponse.builder()

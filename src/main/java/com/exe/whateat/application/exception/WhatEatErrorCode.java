@@ -18,60 +18,43 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public enum WhatEatErrorCode {
 
-    WEB_0000("Dummy business error code"),
-    WEB_0001("Restaurant name or email already exists"),
-    WEB_0002("Restaurant not found"),
-    WEB_0003("Invalid restaurant status"),
-    WEB_0004("Tên của món ăn đã bị trùng"),
-    WEB_0005("Món ăn không tìm thấy"),
-    WEB_0006("Món ăn được chỉ tới không hợp lệ"),
-    WEB_0007("Trạng thái món ăn không hợp lệ"),
-    WEV_0000("Invalid request"),
-    WEV_0001("Invalid email address"),
-    WEV_0002("Invalid password"),
-    WEV_0003("Invalid amount"),
-    WEV_0004("Invalid timestamp format"),
-    WEV_0005("Invalid ID format"),
-    WEV_0006("Invalid image format"),
-    WEV_0007("Invalid phone number"),
-    WEV_0008("Invalid full name"),
-    WEV_0009("Oversize image"),
-    WES_0000("Dummy server error"),
-    WES_0001("Lỗi server"),
-    WES_0002("Unknown user account"),
-    WES_0003("3rd party service error"),
-    WES_0004("Unknown image URL"),
-    WEA_0000("Dummy authorization/authentication error code"),
-    WEA_0001("Not authorized"),
-    WEA_0002("Forbidden"),
-    WEA_0003("Invalid authentication token"),
-    WEA_0004("Inactive account"),
-    WEA_0005("Invalid login credentials"),
-    WEA_0006("Invalid refresh token"),
-    WEA_0007("Internal Server");
-
-    private static final String BUSINESS_CODE = "WEB";
-    private static final String VALIDATION_CODE = "WEV";
-    private static final String SERVER_ERROR_CODE = "WES";
-    private static final String AUTH_CODE = "WEA";
+    WEB_0000("Dummy business error code", HttpStatus.BAD_REQUEST),
+    WEB_0001("Restaurant name or email already exists", HttpStatus.BAD_REQUEST),
+    WEB_0002("Restaurant not found", HttpStatus.BAD_REQUEST),
+    WEB_0003("Invalid restaurant status", HttpStatus.BAD_REQUEST),
+    WEB_0004("Tên của món ăn đã bị trùng", HttpStatus.BAD_REQUEST),
+    WEB_0005("Món ăn không tìm thấy", HttpStatus.BAD_REQUEST),
+    WEB_0006("Món ăn được chỉ tới không hợp lệ", HttpStatus.BAD_REQUEST),
+    WEB_0007("Trạng thái món ăn không hợp lệ", HttpStatus.BAD_REQUEST),
+    WEV_0000("Invalid request", HttpStatus.BAD_REQUEST),
+    WEV_0001("Invalid email address", HttpStatus.BAD_REQUEST),
+    WEV_0002("Invalid password", HttpStatus.BAD_REQUEST),
+    WEV_0003("Invalid amount", HttpStatus.BAD_REQUEST),
+    WEV_0004("Invalid timestamp format", HttpStatus.BAD_REQUEST),
+    WEV_0005("Invalid ID format", HttpStatus.BAD_REQUEST),
+    WEV_0006("Invalid image format", HttpStatus.BAD_REQUEST),
+    WEV_0007("Invalid phone number", HttpStatus.BAD_REQUEST),
+    WEV_0008("Invalid full name", HttpStatus.BAD_REQUEST),
+    WEV_0009("Oversize image", HttpStatus.BAD_REQUEST),
+    WES_0000("Dummy server error", HttpStatus.INTERNAL_SERVER_ERROR),
+    WES_0001("Lỗi server", HttpStatus.INTERNAL_SERVER_ERROR),
+    WES_0002("Unknown user account", HttpStatus.INTERNAL_SERVER_ERROR),
+    WES_0003("3rd party service error", HttpStatus.INTERNAL_SERVER_ERROR),
+    WES_0004("Unknown image URL", HttpStatus.INTERNAL_SERVER_ERROR),
+    WEA_0000("Dummy authorization/authentication error code", HttpStatus.FORBIDDEN),
+    WEA_0001("Not authorized", HttpStatus.UNAUTHORIZED),
+    WEA_0002("Forbidden", HttpStatus.FORBIDDEN),
+    WEA_0003("Invalid authentication token", HttpStatus.UNAUTHORIZED),
+    WEA_0004("Inactive account", HttpStatus.FORBIDDEN),
+    WEA_0005("Invalid login credentials", HttpStatus.UNAUTHORIZED),
+    WEA_0006("Invalid refresh token", HttpStatus.BAD_REQUEST),
+    WEA_0007("Internal Server", HttpStatus.INTERNAL_SERVER_ERROR);
 
     private final String title;
+    private final HttpStatus status;
 
     @Override
     public String toString() {
         return name().replace("_", "-");
-    }
-
-    public HttpStatus asHttpStatus() {
-        if (this == WEA_0001) {
-            return HttpStatus.UNAUTHORIZED;
-        }
-        if (this.name().startsWith(BUSINESS_CODE) || this.name().startsWith(VALIDATION_CODE)) {
-            return HttpStatus.BAD_REQUEST;
-        }
-        if (this.name().startsWith(AUTH_CODE)) {
-            return HttpStatus.FORBIDDEN;
-        }
-        return HttpStatus.INTERNAL_SERVER_ERROR;
     }
 }
