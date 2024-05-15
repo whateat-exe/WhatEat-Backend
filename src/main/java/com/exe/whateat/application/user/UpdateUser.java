@@ -1,12 +1,12 @@
-package com.exe.whateat.application.account_user.updateMethod;
+package com.exe.whateat.application.user;
 
-import com.exe.whateat.application.account_user.mapper.AccountDTOMapper;
-import com.exe.whateat.application.account_user.updateMethod.response.UpdateUserResponse;
+import com.exe.whateat.application.user.mapper.AccountDTOMapper;
+import com.exe.whateat.application.user.response.UserResponse;
 import com.exe.whateat.application.common.AbstractController;
+import com.exe.whateat.application.common.WhatEatRegex;
 import com.exe.whateat.application.exception.WhatEatErrorCode;
 import com.exe.whateat.application.exception.WhatEatException;
 import com.exe.whateat.entity.account.Account;
-import com.exe.whateat.entity.account.AccountRole;
 import com.exe.whateat.entity.common.WhatEatId;
 import com.exe.whateat.infrastructure.repository.AccountRepository;
 import com.exe.whateat.infrastructure.security.WhatEatSecurityHelper;
@@ -14,21 +14,26 @@ import io.github.x4ala1c.tsid.Tsid;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.lang.reflect.Field;
-import java.util.Map;
 import java.util.Optional;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class UpdateUser {
+
+    @Data
+    public static class UpdateUserRequest {
+        private String email;
+        private String fullName;
+        private String phoneNumber;
+    }
 
     @RestController
     @AllArgsConstructor
@@ -42,13 +47,9 @@ public class UpdateUser {
         private final WhatEatSecurityHelper whatEatSecurityHelper;
 
         @PatchMapping("/users/{id}")
-        public ResponseEntity<UpdateUserResponse> updateUser(
-                @RequestBody Map<String, Object> fields, @PathVariable String id
+        public ResponseEntity<UserResponse> updateUser(
+                @RequestBody UpdateUserRequest updateUserRequest, @PathVariable String id
         ) {
-
-            if (fields == null) {
-                return ResponseEntity.ok(null);
-            }
             Optional<Account> account = whatEatSecurityHelper.getCurrentLoggedInAccount();
             if (account.isEmpty()) {
                 throw WhatEatException
@@ -57,15 +58,7 @@ public class UpdateUser {
                         .reason("Unauthenticated", "You have not logged in")
                         .build();
             }
-            // Everyone should be able to update their Account ?
-            if (account.get().getRole() != AccountRole.USER) {
-                throw WhatEatException
-                        .builder()
-                        .code(WhatEatErrorCode.WEA_0002)
-                        .reason("Forbidden", "You are not privileged to do this function")
-                        .build();
-            }
-            UpdateUserResponse userResponse = updateUserService.updateUser(fields, id);
+            UserResponse userResponse = updateUserService.updateUser(updateUserRequest, id);
             return ResponseEntity.ok(userResponse);
         }
     }
@@ -77,22 +70,39 @@ public class UpdateUser {
         private final AccountRepository accountRepository;
         private final AccountDTOMapper accountDTOMapper;
 
-        public UpdateUserResponse updateUser(Map<String, Object> fields, String id) {
+        public UserResponse updateUser(UpdateUserRequest updateUserRequest, String id) {
 
             WhatEatId whatEatId = WhatEatId.builder().id(Tsid.fromString(id)).build();
             Optional<Account> accountExisting = accountRepository.findById(whatEatId);
             if (accountExisting.isPresent()) {
-                fields.forEach((key, value) -> {
-                    Field field = ReflectionUtils.findField(Account.class, key);
-                    // Are you sure about using reflection?
-                    field.setAccessible(true);
-                    ReflectionUtils.setField(field, accountExisting.get(), value);
-                });
+                if (!updateUserRequest.email.isBlank()) {
+                    if (WhatEatRegex.checkPattern(WhatEatRegex.emailPattern, updateUserRequest.email))
+                        accountExisting.get().setEmail(updateUserRequest.email);
+                    else
+                        throw WhatEatException
+                                .builder()
+                                .code(WhatEatErrorCode.WEV_0001)
+                                .reason("email", "Invalid email address")
+                                .build();
+                }
+
+                if (!updateUserRequest.phoneNumber.isBlank()) {
+                    if (WhatEatRegex.checkPattern(WhatEatRegex.phonePattern, updateUserRequest.phoneNumber))
+                        accountExisting.get().setPhoneNumber(updateUserRequest.getPhoneNumber());
+                    else
+                        throw WhatEatException
+                                .builder()
+                                .code(WhatEatErrorCode.WEV_0001)
+                                .reason("email", "Invalid email address")
+                                .build();
+                }
+
+                if (!updateUserRequest.fullName.isBlank()) {
+                    accountExisting.get().setFullName(updateUserRequest.getFullName());
+                }
+
                 Account accountUpdated = accountRepository.save(accountExisting.get());
-                return UpdateUserResponse
-                        .builder()
-                        .userDTO(accountDTOMapper.apply(accountUpdated))
-                        .build();
+                return accountDTOMapper.convertToDto(accountUpdated);
             }
             throw WhatEatException
                     .builder()

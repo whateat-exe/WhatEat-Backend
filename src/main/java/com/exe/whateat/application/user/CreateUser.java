@@ -1,9 +1,7 @@
-package com.exe.whateat.application.account_user.createMethod;
+package com.exe.whateat.application.user;
 
-import com.exe.whateat.application.account_user.createMethod.request.CreateUserRequest;
-import com.exe.whateat.application.account_user.createMethod.response.CreateUserResponse;
-import com.exe.whateat.application.account_user.dto.UserDTO;
-import com.exe.whateat.application.account_user.mapper.AccountDTOMapper;
+import com.exe.whateat.application.user.mapper.AccountDTOMapper;
+import com.exe.whateat.application.user.response.UserResponse;
 import com.exe.whateat.application.common.AbstractController;
 import com.exe.whateat.application.common.WhatEatRegex;
 import com.exe.whateat.application.exception.WhatEatErrorCode;
@@ -18,9 +16,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,6 +36,26 @@ import java.util.Optional;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class CreateUser {
+
+    @Getter
+    @Setter
+    public static class CreateUserRequest {
+
+        @NotBlank(message = "Email is required")
+        private String email;
+
+        @NotNull
+        @Size(min = 8, max = 32, message = "The length of password has to be larger than 8 and less than 32 ")
+        private String password;
+
+        @NotBlank
+        @Size(max = 100, message = "The length of full name has to be less than 100")
+        private String fullName;
+
+        @NotBlank
+        @Size(max = 20, message = "The length of phone number has to be less than 20")
+        private String phoneNumber;
+    }
 
     @RestController
     @AllArgsConstructor
@@ -48,15 +71,15 @@ public final class CreateUser {
         @ApiResponse(
                 responseCode = "201",
                 description = "Create a new user successfully",
-                content = @Content(schema = @Schema(implementation = CreateUserResponse.class))
+                content = @Content(schema = @Schema(implementation = UserResponse.class))
         )
         @ApiResponse(
                 responseCode = "400s",
                 description = "Can not create a new user",
-                content = @Content(schema = @Schema(implementation = CreateUserResponse.class))
+                content = @Content(schema = @Schema(implementation = UserResponse.class))
         )
-        public ResponseEntity<CreateUserResponse> createUser(@RequestBody @Valid CreateUserRequest createUserRequest) {
-            final CreateUserResponse userResponse = createUserService.createUserService(createUserRequest);
+        public ResponseEntity<UserResponse> createUser(@RequestBody @Valid CreateUserRequest createUserRequest) {
+            final UserResponse userResponse = createUserService.createUserService(createUserRequest);
             return ResponseEntity.status(HttpStatus.CREATED).body(userResponse);
         }
     }
@@ -69,7 +92,7 @@ public final class CreateUser {
         private final PasswordEncoder passwordEncoder;
         private final AccountDTOMapper accountDTOMapper;
 
-        public CreateUserResponse createUserService(CreateUserRequest createUserRequest) {
+        public UserResponse createUserService(CreateUserRequest createUserRequest) {
             var email = createUserRequest.getEmail();
             // We have library for checking email, like EmailValidator. Use Jakarta @Email instead.
             boolean checkEmail = WhatEatRegex.checkPattern(WhatEatRegex.emailPattern, createUserRequest.getEmail());
@@ -102,17 +125,14 @@ public final class CreateUser {
                         Account.builder()
                                 .id(whatEatId)
                                 .email(createUserRequest.getEmail())
-                                .status(ActiveStatus.INACTIVE)
+                                .status(ActiveStatus.ACTIVE)
                                 .fullName(createUserRequest.getFullName())
                                 .password(passwordEncode)
                                 .role(AccountRole.USER)
                                 .phoneNumber(createUserRequest.getPhoneNumber())
                                 .build();
                 Account accountCreated = accountRepository.save(accountCreate);
-                UserDTO userDTO = accountDTOMapper.apply(accountCreated);
-                return CreateUserResponse.builder()
-                        .userDTO(userDTO)
-                        .build();
+                return accountDTOMapper.convertToDto(accountCreated);
             }
         }
     }

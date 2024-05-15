@@ -1,4 +1,4 @@
-package com.exe.whateat.application.account_user.deleteMethod;
+package com.exe.whateat.application.user;
 
 import com.exe.whateat.application.common.AbstractController;
 import com.exe.whateat.application.exception.WhatEatErrorCode;
@@ -36,8 +36,9 @@ public final class DeleteUser {
         private final DeleteUserService deleteUserService;
         private final WhatEatSecurityHelper whatEatSecurityHelper;
 
+
         @PutMapping("/users/{id}")
-        public ResponseEntity<Object> DeleteUser(@PathVariable String id) {
+        public ResponseEntity<Object> deleteUser(@PathVariable String id) {
 
             Optional<Account> account = whatEatSecurityHelper.getCurrentLoggedInAccount();
             if (account.isEmpty()) {
