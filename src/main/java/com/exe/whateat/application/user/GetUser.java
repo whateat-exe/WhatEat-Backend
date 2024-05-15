@@ -1,8 +1,8 @@
 package com.exe.whateat.application.user;
 
+import com.exe.whateat.application.common.AbstractController;
 import com.exe.whateat.application.user.mapper.AccountDTOMapper;
 import com.exe.whateat.application.user.response.UserResponse;
-import com.exe.whateat.application.common.AbstractController;
 import com.exe.whateat.entity.account.Account;
 import com.exe.whateat.infrastructure.repository.AccountRepository;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -54,7 +54,7 @@ public final class GetUser {
             Pageable pageable = PageRequest.of(pageNumber, pageSize);
             Page<Account> accountPage = accountRepository.findAll(pageable);
             List<Account> accounts = accountPage.getContent();
-            return  accounts
+            return accounts
                     .stream()
                     .map(accountDTOMapper::convertToDto).toList();
         }
