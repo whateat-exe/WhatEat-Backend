@@ -12,11 +12,15 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -31,41 +35,18 @@ public final class DoLogin {
 
     private static final int PASSWORD_MIN_LENGTH = 8;
     private static final int PASSWORD_MAX_LENGTH = 32;
-    private static final String INVALID_PASSWORD_LENGTH = String
-            .format("Password must be between %d and %d", PASSWORD_MIN_LENGTH, PASSWORD_MAX_LENGTH);
 
-    public record LoginRequest(String email, String password) {
+    @Data
+    @Builder
+    public static final class LoginRequest {
 
-        public LoginRequest(String email, String password) {
-            final String trimmedEmail = StringUtils.trim(email);
-            if (StringUtils.isBlank(trimmedEmail)) {
-                throw WhatEatException.builder()
-                        .code(WhatEatErrorCode.WEV_0001)
-                        .reason("email", "Email is required")
-                        .build();
-            }
-            if (!EmailValidator.getInstance().isValid(trimmedEmail)) {
-                throw WhatEatException.builder()
-                        .code(WhatEatErrorCode.WEV_0001)
-                        .reason("email", "Email has invalid format")
-                        .build();
-            }
-            final String trimmedPassword = StringUtils.trim(password);
-            if (StringUtils.isBlank(trimmedPassword)) {
-                throw WhatEatException.builder()
-                        .code(WhatEatErrorCode.WEV_0002)
-                        .reason("password", "Password is required")
-                        .build();
-            }
-            if (trimmedPassword.length() < PASSWORD_MIN_LENGTH || trimmedPassword.length() > PASSWORD_MAX_LENGTH) {
-                throw WhatEatException.builder()
-                        .code(WhatEatErrorCode.WEV_0002)
-                        .reason("password", INVALID_PASSWORD_LENGTH)
-                        .build();
-            }
-            this.email = trimmedEmail;
-            this.password = trimmedPassword;
-        }
+        @NotBlank(message = "Email là bắt buộc.")
+        @Email(message = "Email phải đúng format của một email.")
+        private String email;
+
+        @NotBlank(message = "Mật khẩu là bắt buộc.")
+        @Size(min = PASSWORD_MIN_LENGTH, max = PASSWORD_MAX_LENGTH, message = "Mật khẩu phải trong khoảng từ 8 tới 32 kí tự.")
+        private String password;
     }
 
     @RestController
@@ -96,7 +77,7 @@ public final class DoLogin {
                 responseCode = "400s/500s",
                 content = @Content(schema = @Schema(implementation = WhatEatErrorResponse.class))
         )
-        public ResponseEntity<Object> login(@RequestBody LoginRequest request) {
+        public ResponseEntity<Object> login(@RequestBody @Valid LoginRequest request) {
             final TokenResponse response = service.validateAndReturnTokens(request);
             return ResponseEntity.ok(response);
         }
@@ -111,7 +92,7 @@ public final class DoLogin {
 
         public TokenResponse validateAndReturnTokens(LoginRequest request) {
             final UsernamePasswordAuthenticationToken authenticationToken =
-                    new UsernamePasswordAuthenticationToken(request.email(), request.password());
+                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword());
             final Authentication authentication = authenticationManager.authenticate(authenticationToken);
             final Object principal = authentication.getPrincipal();
             if (!(principal instanceof Account account)) {
