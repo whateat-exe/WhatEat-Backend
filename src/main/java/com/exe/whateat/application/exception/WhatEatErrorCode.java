@@ -50,6 +50,7 @@ public enum WhatEatErrorCode {
     WEA_0005("Invalid login credentials", HttpStatus.UNAUTHORIZED),
     WEA_0006("Invalid refresh token", HttpStatus.BAD_REQUEST),
     WEA_0007("Internal Server", HttpStatus.INTERNAL_SERVER_ERROR);
+
     private final String title;
     private final HttpStatus status;
 

@@ -3,13 +3,20 @@ package com.exe.whateat.application.tag;
 import com.exe.whateat.application.common.AbstractController;
 import com.exe.whateat.application.exception.WhatEatErrorCode;
 import com.exe.whateat.application.exception.WhatEatException;
+import com.exe.whateat.application.restaurant.CreateRestaurant;
+import com.exe.whateat.application.restaurant.response.RestaurantResponse;
 import com.exe.whateat.application.tag.mapper.TagMapper;
 import com.exe.whateat.application.tag.response.TagResponse;
 import com.exe.whateat.entity.common.WhatEatId;
 import com.exe.whateat.entity.food.Tag;
 import com.exe.whateat.entity.food.TagType;
+import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
 import com.exe.whateat.infrastructure.repository.TagRepository;
 import com.exe.whateat.infrastructure.security.WhatEatSecurityHelper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -34,10 +41,10 @@ public final class CreateTag {
     @Setter
     public static final class CreateTagRequest {
 
-        @NotNull
+        @NotNull(message = "tag name is required")
         private String tagName;
 
-        @NotNull
+        @NotNull(message = "tag type is required")
         private String tagType;
     }
 
@@ -52,6 +59,23 @@ public final class CreateTag {
         private CreateTagService createTagService;
 
         @PostMapping("tags")
+        @Operation(
+                summary = "Create tag API. Returns the new information of tag.",
+                requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                        description = "Information of the tag.",
+                        content = @Content(schema = @Schema(implementation = CreateTag.CreateTagRequest.class))
+                )
+        )
+        @ApiResponse(
+                description = "Successful creation. Returns new information of the tag.",
+                responseCode = "200",
+                content = @Content(schema = @Schema(implementation = TagResponse.class))
+        )
+        @ApiResponse(
+                description = "Failed creation of the tag.",
+                responseCode = "400s/500s",
+                content = @Content(schema = @Schema(implementation = WhatEatErrorResponse.class))
+        )
         public ResponseEntity<Object> createTag(@RequestBody @Valid CreateTagRequest createTagRequest) {
             var response = createTagService.createTag(createTagRequest);
             return ResponseEntity.ok(response);

@@ -4,9 +4,14 @@ import com.exe.whateat.application.common.AbstractController;
 import com.exe.whateat.application.exception.WhatEatErrorCode;
 import com.exe.whateat.application.exception.WhatEatException;
 import com.exe.whateat.entity.common.WhatEatId;
+import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
 import com.exe.whateat.infrastructure.repository.TagRepository;
 import com.exe.whateat.infrastructure.security.WhatEatSecurityHelper;
 import io.github.x4ala1c.tsid.Tsid;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
@@ -31,7 +36,20 @@ public class DeleteTag {
 
         private WhatEatSecurityHelper whatEatSecurityHelper;
         private DeleteTagService deleteTagService;
+
         @DeleteMapping("tags/{id}")
+        @Operation(
+                summary = "Delete tag API"
+        )
+        @ApiResponse(
+                description = "Successful deactivation.",
+                responseCode = "200"
+        )
+        @ApiResponse(
+                description = "Failed deleting",
+                responseCode = "400s/500s",
+                content = @Content(schema = @Schema(implementation = WhatEatErrorResponse.class))
+        )
         public ResponseEntity<Object> deleteTag(@PathVariable Tsid id) {
 
             deleteTagService.deleteTag(id);
@@ -47,7 +65,6 @@ public class DeleteTag {
         private TagRepository tagRepository;
 
         public void deleteTag(Tsid tsid) {
-
             var tag = tagRepository.findById(WhatEatId.builder().id(tsid).build());
             if (!tag.isPresent()) {
                 throw WhatEatException

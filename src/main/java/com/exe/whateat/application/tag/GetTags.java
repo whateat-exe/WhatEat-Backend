@@ -39,9 +39,7 @@ public final class GetTags {
         private final GetTagService getTagService;
 
         @GetMapping("tags")
-        public ResponseEntity<Object> getTagController(
-                @Valid GetTagsRequest getTagsRequest
-        ) {
+        public ResponseEntity<Object> getTagController(@Valid GetTagsRequest getTagsRequest) {
             var response = getTagService.getTagService(getTagsRequest);
             return ResponseEntity.ok(response);
         }

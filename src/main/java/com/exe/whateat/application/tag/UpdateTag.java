@@ -71,7 +71,7 @@ public final class UpdateTag {
                 throw WhatEatException
                         .builder()
                         .code(WhatEatErrorCode.WES_0001)
-                        .reason("lỗi gửi id", "gửi id sai hoặc không đúng định dạng")
+                        .reason("lỗi gửi id", "Gửi id sai hoặc không đúng định dạng")
                         .build();
             }
 
@@ -95,7 +95,7 @@ public final class UpdateTag {
                 throw WhatEatException
                         .builder()
                         .code(WhatEatErrorCode.WEB_0008)
-                        .reason("Tag Type", "Thể loại tag không phù hợp")
+                        .reason("tag không phù hợp", "Thể loại tag không có trong dữ liệu có sẵn")
                         .build();
             }
 
