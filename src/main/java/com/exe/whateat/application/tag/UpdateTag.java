@@ -94,7 +94,7 @@ public final class UpdateTag {
             if (!StringUtils.isNullOrEmpty(updateTagRequest.tagType) && !EnumUtils.isValidEnum(TagType.class, updateTagRequest.tagType)) {
                 throw WhatEatException
                         .builder()
-                        .code(WhatEatErrorCode.WEB_0009)
+                        .code(WhatEatErrorCode.WEB_0008)
                         .reason("Tag Type", "Thể loại tag không phù hợp")
                         .build();
             }

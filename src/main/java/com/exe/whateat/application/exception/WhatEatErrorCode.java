@@ -26,6 +26,7 @@ public enum WhatEatErrorCode {
     WEB_0005("Món ăn không tìm thấy", HttpStatus.BAD_REQUEST),
     WEB_0006("Món ăn được chỉ tới không hợp lệ", HttpStatus.BAD_REQUEST),
     WEB_0007("Trạng thái món ăn không hợp lệ", HttpStatus.BAD_REQUEST),
+    WEB_0008("Type không phù hợp", HttpStatus.BAD_REQUEST),
     WEV_0000("Invalid request", HttpStatus.BAD_REQUEST),
     WEV_0001("Invalid email address", HttpStatus.BAD_REQUEST),
     WEV_0002("Invalid password", HttpStatus.BAD_REQUEST),
@@ -49,7 +50,6 @@ public enum WhatEatErrorCode {
     WEA_0005("Invalid login credentials", HttpStatus.UNAUTHORIZED),
     WEA_0006("Invalid refresh token", HttpStatus.BAD_REQUEST),
     WEA_0007("Internal Server", HttpStatus.INTERNAL_SERVER_ERROR);
-
     private final String title;
     private final HttpStatus status;
 

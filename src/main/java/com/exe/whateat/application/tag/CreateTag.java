@@ -65,16 +65,7 @@ public final class CreateTag {
 
         private TagRepository tagRepository;
         private TagMapper tagMapper;
-        private WhatEatSecurityHelper whatEatSecurityHelper;
-
         public TagResponse createTag(CreateTagRequest createTagRequest) {
-
-            if (whatEatSecurityHelper.currentAccountIsNotAdminOrManager())
-                throw WhatEatException
-                        .builder()
-                        .code(WhatEatErrorCode.WEA_0008)
-                        .reason("Không đúng chức vụ", "Bạn phải là Admin hay Manager để có thể làm việc này")
-                        .build();
 
             //check duplicate tag name
             Optional<Tag> tagCheckDuplicate = tagRepository.findByName(createTagRequest.tagName);
@@ -89,7 +80,7 @@ public final class CreateTag {
             if (!EnumUtils.isValidEnum(TagType.class, createTagRequest.tagType)) {
                 throw WhatEatException
                         .builder()
-                        .code(WhatEatErrorCode.WEB_0009)
+                        .code(WhatEatErrorCode.WEB_0008)
                         .reason("Tag Type", "Thể loại tag không phù hợp")
                         .build();
             }

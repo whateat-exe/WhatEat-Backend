@@ -34,13 +34,6 @@ public class DeleteTag {
         @DeleteMapping("tags/{id}")
         public ResponseEntity<Object> deleteTag(@PathVariable Tsid id) {
 
-            if (whatEatSecurityHelper.currentAccountIsNotAdminOrManager())
-                throw WhatEatException
-                        .builder()
-                        .code(WhatEatErrorCode.WEA_0008)
-                        .reason("Không đúng chức vụ", "Bạn phải là Admin hay Manager để có thể làm việc này")
-                        .build();
-
             deleteTagService.deleteTag(id);
             return ResponseEntity.ok("Đã xóa thành công tag");
         }

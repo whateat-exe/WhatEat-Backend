@@ -44,12 +44,6 @@ public final class GetTag {
         private final WhatEatSecurityHelper whatEatSecurityHelper;
         public TagResponse getTag(Tsid tsid) {
 
-            if (whatEatSecurityHelper.currentAccountIsNotAdminOrManager())
-                throw WhatEatException
-                        .builder()
-                        .code(WhatEatErrorCode.WEA_0008)
-                        .reason("Không đúng chức vụ", "Bạn phải là Admin hay Manager để có thể làm việc này")
-                        .build();
             var tag = tagRepository.findById(WhatEatId.builder().id(tsid).build());
             if (!tag.isPresent()) {
                 throw WhatEatException
