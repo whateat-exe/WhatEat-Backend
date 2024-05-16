@@ -49,6 +49,7 @@ public class WhatEatSecurityConfiguration {
         handleAccountApi(http);
         handleRestaurantApi(http);
         handleFoodApi(http);
+        handleTagApi(http);
         if (environment.acceptsProfiles(Profiles.of("dev"))) {
             http.authorizeHttpRequests(c -> c.requestMatchers(resolvePath("/test/**")).permitAll());
         }
@@ -90,6 +91,18 @@ public class WhatEatSecurityConfiguration {
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.DELETE, foodPath)
                         .hasAnyAuthority(AccountRole.ADMIN.name(), AccountRole.MANAGER.name()))
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, foodPath)
+                        .authenticated());
+    }
+
+    private void handleTagApi(HttpSecurity http) throws Exception {
+        final String tagPath = resolvePath("/tags/**");
+        http.authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.POST, resolvePath("/tags"))
+                        .hasAnyAuthority(AccountRole.ADMIN.name(), AccountRole.MANAGER.name()))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.PATCH, tagPath)
+                        .hasAnyAuthority(AccountRole.ADMIN.name(), AccountRole.MANAGER.name()))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.DELETE, tagPath)
+                        .hasAnyAuthority(AccountRole.ADMIN.name(), AccountRole.MANAGER.name()))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, tagPath)
                         .authenticated());
     }
 
