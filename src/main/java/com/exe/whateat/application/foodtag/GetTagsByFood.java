@@ -1,9 +1,6 @@
 package com.exe.whateat.application.foodtag;
 
 import com.exe.whateat.application.common.request.PaginationRequest;
-import com.exe.whateat.application.food.GetFoods;
-import com.exe.whateat.application.food.mapper.FoodMapper;
-import com.exe.whateat.application.foodtag.response.FoodTagResponse;
 import com.exe.whateat.application.tag.mapper.TagMapper;
 import com.exe.whateat.application.tag.response.TagsResponse;
 import com.exe.whateat.entity.common.WhatEatId;
@@ -86,7 +83,8 @@ public final class GetTagsByFood {
             final JPAQuery<FoodTag> foodTagJPAQuery = new JPAQuery<>(entityManager)
                     .select(qFoodTag)
                     .from(qFoodTag)
-                    .leftJoin(qTag)
+                    .leftJoin(qFoodTag.tag, qTag)
+                    .where(qFoodTag.food.id.eq(WhatEatId.builder().id(tsid).build()))
                     .limit(getFoodTagsRequest.getLimit())
                     .offset(getFoodTagsRequest.getOffset());
             final List<FoodTag> foodTags = foodTagJPAQuery.fetch();

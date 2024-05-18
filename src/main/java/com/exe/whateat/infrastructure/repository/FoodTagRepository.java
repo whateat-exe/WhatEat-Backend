@@ -1,6 +1,7 @@
 package com.exe.whateat.infrastructure.repository;
 
 import com.exe.whateat.entity.common.WhatEatId;
+import com.exe.whateat.entity.food.Food;
 import com.exe.whateat.entity.food.FoodTag;
 import com.exe.whateat.entity.food.Tag;
 import io.github.x4ala1c.tsid.Tsid;
@@ -13,7 +14,7 @@ import java.util.Optional;
 
 public interface FoodTagRepository extends JpaRepository<FoodTag, WhatEatId> {
 
-    Optional<FoodTag> findByFood_Id(Tsid tsid);
+    List<FoodTag> findByFood(Food food);
 
     @Query("SELECT t FROM FoodTag t JOIN FETCH t.food JOIN FETCH t.tag WHERE t.id = :id")
     FoodTag FindByFoodTag_Id (@Param("id") WhatEatId id);

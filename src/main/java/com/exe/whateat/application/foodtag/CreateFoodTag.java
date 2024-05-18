@@ -90,13 +90,14 @@ public final class CreateFoodTag {
         private TagMapper tagMapper;
         private FoodMapper foodMapper;
 
+        @SuppressWarnings("java:S3457")
         public FoodTagResponse createFoodTag(CreateFoodTagRequest createFoodTagRequest) {
             //Check food có tồn tại
             var food = foodRepository.findById(WhatEatId.builder().id(createFoodTagRequest.foodId).build());
             if (!food.isPresent())
                 throw WhatEatException.builder()
                         .code(WhatEatErrorCode.WEB_0005)
-                        .reason("food", String.format("Món ăn  không tồn tại."))
+                        .reason("food", String.format("Món ăn không tồn tại."))
                         .build();
             // Check tag co ton tai
             var tag = tagRepository.findById(WhatEatId.builder().id(createFoodTagRequest.tagId).build());
@@ -107,13 +108,15 @@ public final class CreateFoodTag {
                         .reason("tag", "Tag này không tồn tại")
                         .build();
             //Check duplicate
-            var foodTagCheckDuplicated = foodTagRepository.findByFood_Id(createFoodTagRequest.foodId);
-            if (createFoodTagRequest.tagId.equals(foodTagCheckDuplicated.get().getTag().getId().asTsid()))
-                throw WhatEatException
-                        .builder()
-                        .code(WhatEatErrorCode.WES_0001)
-                        .reason("food tag duplicated", "Food tag was created before")
-                        .build();
+            var foodTags = foodTagRepository.findByFood(food.get());
+            for (var foodTagCheckDuplicated : foodTags) {
+                if (createFoodTagRequest.tagId.equals(foodTagCheckDuplicated.getTag().getId().asTsid()))
+                    throw WhatEatException
+                            .builder()
+                            .code(WhatEatErrorCode.WES_0001)
+                            .reason("food tag duplicated", "Food tag was created before")
+                            .build();
+            }
             // Create food tag
             FoodTag foodTag = FoodTag
                     .builder()
@@ -122,9 +125,10 @@ public final class CreateFoodTag {
                     .id(WhatEatId.generate())
                     .status(ActiveStatus.ACTIVE)
                     .build();
+            var foodTagCreated = foodTagRepository.saveAndFlush(foodTag);
             return FoodTagResponse
                     .builder()
-                    .tsid(foodTag.getId().asTsid())
+                    .tsid(foodTagCreated.getId().asTsid())
                     .tagResponse(tagMapper.convertToDto(foodTag.getTag()))
                     .foodResponse(foodMapper.convertToDto(foodTag.getFood()))
                     .build();

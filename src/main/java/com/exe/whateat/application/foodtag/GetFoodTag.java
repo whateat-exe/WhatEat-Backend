@@ -4,12 +4,8 @@ import com.exe.whateat.application.food.mapper.FoodMapper;
 import com.exe.whateat.application.foodtag.response.FoodTagResponse;
 import com.exe.whateat.application.tag.mapper.TagMapper;
 import com.exe.whateat.entity.common.WhatEatId;
-import com.exe.whateat.entity.food.FoodTag;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
-import com.exe.whateat.infrastructure.repository.FoodRepository;
 import com.exe.whateat.infrastructure.repository.FoodTagRepository;
-import com.exe.whateat.infrastructure.repository.TagRepository;
-import com.querydsl.jpa.impl.JPAQuery;
 import io.github.x4ala1c.tsid.Tsid;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -24,8 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.io.Serial;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class GetFoodTag {

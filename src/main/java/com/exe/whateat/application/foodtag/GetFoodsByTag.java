@@ -1,14 +1,11 @@
 package com.exe.whateat.application.foodtag;
 
-import com.exe.whateat.application.common.request.PaginationRequest;
 import com.exe.whateat.application.food.mapper.FoodMapper;
 import com.exe.whateat.application.food.response.FoodsResponse;
-import com.exe.whateat.application.tag.mapper.TagMapper;
-import com.exe.whateat.application.tag.response.TagsResponse;
+import com.exe.whateat.entity.common.WhatEatId;
 import com.exe.whateat.entity.food.FoodTag;
 import com.exe.whateat.entity.food.QFood;
 import com.exe.whateat.entity.food.QFoodTag;
-import com.exe.whateat.entity.food.QTag;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
 import com.exe.whateat.infrastructure.repository.FoodTagRepository;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -81,7 +78,8 @@ public class GetFoodsByTag {
             final JPAQuery<FoodTag> foodTagJPAQuery = new JPAQuery<>(entityManager)
                     .select(qFoodTag)
                     .from(qFoodTag)
-                    .leftJoin(qFood)
+                    .leftJoin(qFoodTag.food, qFood)
+                    .where(qFoodTag.tag.id.eq(WhatEatId.builder().id(tsid).build()))
                     .limit(getFoodTagsRequest.getLimit())
                     .offset(getFoodTagsRequest.getOffset());
             final List<FoodTag> foodTags = foodTagJPAQuery.fetch();
