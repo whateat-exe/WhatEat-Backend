@@ -27,6 +27,7 @@ public enum WhatEatErrorCode {
     WEB_0006("Món ăn được chỉ tới không hợp lệ", HttpStatus.BAD_REQUEST),
     WEB_0007("Trạng thái món ăn không hợp lệ", HttpStatus.BAD_REQUEST),
     WEB_0008("Type không phù hợp", HttpStatus.BAD_REQUEST),
+    WEB_0009("Food Tag đã tồn tại", HttpStatus.BAD_REQUEST),
     WEV_0000("Invalid request", HttpStatus.BAD_REQUEST),
     WEV_0001("Invalid email address", HttpStatus.BAD_REQUEST),
     WEV_0002("Invalid password", HttpStatus.BAD_REQUEST),
