@@ -122,7 +122,7 @@ public final class CreateUser {
                         Account.builder()
                                 .id(whatEatId)
                                 .email(createUserRequest.getEmail())
-                                .status(ActiveStatus.ACTIVE)
+                                .status(ActiveStatus.PENDING)
                                 .fullName(createUserRequest.getFullName())
                                 .password(passwordEncode)
                                 .role(AccountRole.USER)

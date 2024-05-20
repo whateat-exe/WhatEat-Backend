@@ -12,6 +12,7 @@ import com.exe.whateat.infrastructure.repository.AccountRepository;
 import com.exe.whateat.infrastructure.security.WhatEatSecurityHelper;
 import io.github.x4ala1c.tsid.Tsid;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -65,6 +66,7 @@ public class UpdateUser {
 
     @Service
     @AllArgsConstructor
+    @Transactional(rollbackOn = Exception.class)
     public static class UpdateUserService {
 
         private final AccountRepository accountRepository;
