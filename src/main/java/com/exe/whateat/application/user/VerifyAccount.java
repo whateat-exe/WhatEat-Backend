@@ -21,6 +21,7 @@ import jakarta.persistence.EntityManager;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -61,7 +62,7 @@ public final class VerifyAccount {
             var result = verifyAccountService.verfiAccount(id);
             if (result)
                 return ResponseEntity.ok("Xác thực thành công");
-            return ResponseEntity.ok("Xác thực không thành công vì code quá hạn");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Xác thực không thành công vì code quá hạn");
         }
     }
 
@@ -94,7 +95,7 @@ public final class VerifyAccount {
             throw WhatEatException
                     .builder()
                     .code(WhatEatErrorCode.WES_0001)
-                    .reason("loi server", "Loi backend")
+                    .reason("lỗi server", "Lỗi backend")
                     .build();
         }
     }
