@@ -10,11 +10,13 @@ import com.exe.whateat.entity.account.Account;
 import com.exe.whateat.entity.account.AccountRole;
 import com.exe.whateat.entity.common.ActiveStatus;
 import com.exe.whateat.entity.common.WhatEatId;
+import com.exe.whateat.infrastructure.email.SendEmailService;
 import com.exe.whateat.infrastructure.repository.AccountRepository;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -88,11 +90,13 @@ public final class CreateUser {
 
     @Service
     @AllArgsConstructor
-    public static final class CreateUserService {
+    @Transactional(rollbackOn = Exception.class)
+    public static class CreateUserService {
 
         private final AccountRepository accountRepository;
         private final PasswordEncoder passwordEncoder;
         private final AccountDTOMapper accountDTOMapper;
+        private SendEmailService sendEmailService;
 
         public UserResponse createUserService(CreateUserRequest createUserRequest) {
             var email = createUserRequest.getEmail();
@@ -125,6 +129,9 @@ public final class CreateUser {
                                 .phoneNumber(createUserRequest.getPhoneNumber())
                                 .build();
                 Account accountCreated = accountRepository.save(accountCreate);
+                if (accountCreated != null) {
+                    sendEmailService.sendMail(accountCreated.getEmail(), "Test body", "Test subject");
+                }
                 return accountDTOMapper.convertToDto(accountCreated);
             }
         }

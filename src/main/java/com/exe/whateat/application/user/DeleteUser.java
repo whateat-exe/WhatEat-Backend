@@ -63,7 +63,7 @@ public final class DeleteUser {
 
     @Service
     @AllArgsConstructor
-    public static final class DeleteUserService {
+    public static class DeleteUserService {
 
         private final AccountRepository accountRepository;
 

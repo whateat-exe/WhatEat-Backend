@@ -65,7 +65,7 @@ public class UpdateUser {
 
     @Service
     @AllArgsConstructor
-    public static final class UpdateUserService {
+    public static class UpdateUserService {
 
         private final AccountRepository accountRepository;
         private final AccountDTOMapper accountDTOMapper;
