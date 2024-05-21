@@ -52,7 +52,7 @@ public class ActiveAccount {
         @PatchMapping("/users/{id}/active")
         public ResponseEntity<Object> activeAnAccount(@PathVariable Tsid id) {
             activeUserService.activeUser(id);
-            return ResponseEntity.ok("Active user with id: " + id + "successfully");
+            return ResponseEntity.noContent().build();
         }
     }
 
@@ -74,19 +74,19 @@ public class ActiveAccount {
                     throw WhatEatException
                             .builder()
                             .code(WhatEatErrorCode.WEA_0007)
-                            .reason("user", "Khôgn thể kích hoạt tài khoản chưa được verify")
+                            .reason("user", "không thể kích hoạt tài khoản chưa được verify")
                             .build();
                 }
                 throw WhatEatException
                         .builder()
                         .code(WhatEatErrorCode.WEA_0007)
-                        .reason("user", "Không thể kích hoạt tài khoản đang đucợ kích hoạt")
+                        .reason("user", "Không thể kích hoạt tài khoản đang được kích hoạt")
                         .build();
             }
             throw WhatEatException
                     .builder()
                     .code(WhatEatErrorCode.WEA_0007)
-                    .reason("server", "can not find account by that user")
+                    .reason("server", "Không thể tìm thấy tài khoản này")
                     .build();
         }
     }
