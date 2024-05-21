@@ -8,13 +8,18 @@ import com.exe.whateat.application.user.mapper.AccountDTOMapper;
 import com.exe.whateat.application.user.response.UserResponse;
 import com.exe.whateat.entity.account.Account;
 import com.exe.whateat.entity.account.AccountRole;
+import com.exe.whateat.entity.account.AccountVerify;
 import com.exe.whateat.entity.common.ActiveStatus;
 import com.exe.whateat.entity.common.WhatEatId;
+import com.exe.whateat.infrastructure.common.GenerationCode;
+import com.exe.whateat.infrastructure.email.SendEmailService;
 import com.exe.whateat.infrastructure.repository.AccountRepository;
+import com.exe.whateat.infrastructure.repository.AccountVerifyRepository;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -33,6 +38,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Instant;
 import java.util.Optional;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -88,11 +94,14 @@ public final class CreateUser {
 
     @Service
     @AllArgsConstructor
-    public static final class CreateUserService {
+    @Transactional(rollbackOn = Exception.class)
+    public static class CreateUserService {
 
         private final AccountRepository accountRepository;
         private final PasswordEncoder passwordEncoder;
         private final AccountDTOMapper accountDTOMapper;
+        private SendEmailService sendEmailService;
+        private AccountVerifyRepository accountVerifyRepository;
 
         public UserResponse createUserService(CreateUserRequest createUserRequest) {
             var email = createUserRequest.getEmail();
@@ -101,7 +110,7 @@ public final class CreateUser {
                 throw WhatEatException
                         .builder()
                         .code(WhatEatErrorCode.WEV_0008)
-                        .reason("phone number", "Wrong phone number pattern")
+                        .reason("phoneNumber", "Wrong phone number pattern")
                         .build();
 
             Optional<Account> account = accountRepository.findByEmail(email);
@@ -118,13 +127,26 @@ public final class CreateUser {
                         Account.builder()
                                 .id(whatEatId)
                                 .email(createUserRequest.getEmail())
-                                .status(ActiveStatus.ACTIVE)
+                                .status(ActiveStatus.PENDING)
                                 .fullName(createUserRequest.getFullName())
                                 .password(passwordEncode)
                                 .role(AccountRole.USER)
                                 .phoneNumber(createUserRequest.getPhoneNumber())
                                 .build();
                 Account accountCreated = accountRepository.save(accountCreate);
+                if (accountCreated != null) {
+                    var code = GenerationCode.codeGeneration();
+                    sendEmailService.sendMail(accountCreated.getEmail(), code, "Send Code verify");
+                    var accountVerify = AccountVerify
+                            .builder()
+                            .account(accountCreated)
+                            .id(WhatEatId.generate())
+                            .CreatedAt(Instant.now())
+                            .LastModified(Instant.now())
+                            .verifiedCode(code)
+                            .build();
+                    accountVerifyRepository.saveAndFlush(accountVerify);
+                }
                 return accountDTOMapper.convertToDto(accountCreated);
             }
         }

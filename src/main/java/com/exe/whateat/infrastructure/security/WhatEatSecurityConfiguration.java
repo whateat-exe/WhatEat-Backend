@@ -62,6 +62,8 @@ public class WhatEatSecurityConfiguration {
                         .hasAnyAuthority(AccountRole.ADMIN.name(), AccountRole.MANAGER.name()))
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.POST, resolvePath("/users"))
                         .permitAll())
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.PATCH, resolvePath("/users/*/verify"))
+                        .permitAll())
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.DELETE, resolvePath("/users/**"))
                         .hasAuthority(AccountRole.ADMIN.name()))
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.PATCH, resolvePath("/users/**"))
