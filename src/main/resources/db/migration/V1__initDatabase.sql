@@ -10,7 +10,19 @@ CREATE TABLE account
     role          VARCHAR(255) NOT NULL,
     id            BIGINT       NOT NULL,
     restaurant_id BIGINT,
+    account_verify_id BIGINT,
     CONSTRAINT pk_account PRIMARY KEY (id)
+);
+
+CREATE TABLE account_verify
+(
+    version       INTEGER,
+    verify_code   VARCHAR(6)                  NOT NULL,
+    create_at     TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    last_mofified TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    account_id    BIGINT                      NOT NULL,
+    id            BIGINT                      NOT NULL,
+    CONSTRAINT pk_account_verify PRIMARY KEY (id)
 );
 
 CREATE TABLE dish
@@ -337,3 +349,7 @@ ALTER TABLE restaurant_subscription_payment
 
 ALTER TABLE trasaction_history
     ADD CONSTRAINT FK_TRASACTION_HISTORY_ON_RESTAURANTSUBSCRIPTIONPAYMENT FOREIGN KEY (restaurant_subscription_payment_id) REFERENCES restaurant_subscription_payment (id);
+ALTER TABLE account
+    ADD CONSTRAINT FK_ACCOUNT_ON_ACCOUNTVERIFY FOREIGN KEY (account_verify_id) REFERENCES account_verify (id);
+ALTER TABLE account_verify
+    ADD CONSTRAINT FK_ACCOUNT_VERIFY_ON_ACCOUNT FOREIGN KEY (account_id) REFERENCES account (id);

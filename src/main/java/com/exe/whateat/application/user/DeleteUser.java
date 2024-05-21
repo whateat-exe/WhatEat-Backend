@@ -16,6 +16,7 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,7 +38,7 @@ public final class DeleteUser {
         private final WhatEatSecurityHelper whatEatSecurityHelper;
 
 
-        @PutMapping("/users/{id}")
+        @DeleteMapping("/users/{id}")
         public ResponseEntity<Object> deleteUser(@PathVariable String id) {
 
             Optional<Account> account = whatEatSecurityHelper.getCurrentLoggedInAccount();
@@ -63,7 +64,7 @@ public final class DeleteUser {
 
     @Service
     @AllArgsConstructor
-    public static final class DeleteUserService {
+    public static class DeleteUserService {
 
         private final AccountRepository accountRepository;
 

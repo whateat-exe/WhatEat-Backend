@@ -81,6 +81,9 @@ public class Account extends AbstractEntity implements UserDetails {
     @OneToMany(mappedBy = "account", fetch = FetchType.LAZY)
     private List<PostComment> postComments;
 
+    @OneToOne(mappedBy = "account")
+    private AccountVerify accountVerify;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));
