@@ -30,6 +30,8 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Instant;
+
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class RegenerationVerifiedCode {
 
@@ -56,7 +58,7 @@ public final class RegenerationVerifiedCode {
                 content = @Content(schema = @Schema(implementation = WhatEatErrorResponse.class))
         )
         @PatchMapping("/users/{id}/re-send")
-        public ResponseEntity<Object> RegenerateCode(@PathVariable Tsid tsid) {
+        public ResponseEntity<Object> regenerateCode(@PathVariable Tsid tsid) {
             var result = regenerationCodeService.regenrateCode(tsid);
             if (result)
                 return ResponseEntity.ok("Code mới đã được tạo mới và chuyển về mail");
@@ -89,6 +91,7 @@ public final class RegenerationVerifiedCode {
                 AccountVerify accountVerify = accountVerifyQuery.fetchFirst();
                 var newCOde = GenerationCode.codeGeneration();
                 accountVerify.setVerifiedCode(newCOde);
+                accountVerify.setLastModified(Instant.now());
                 accountVerifyRepository.saveAndFlush(accountVerify);
                 //send mail
                 sendEmailService.sendMail(account.get().getEmail(), newCOde, "Resend Code");
