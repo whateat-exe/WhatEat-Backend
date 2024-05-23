@@ -4,7 +4,6 @@ import com.exe.whateat.application.exception.WhatEatErrorCode;
 import com.exe.whateat.application.exception.WhatEatException;
 import com.exe.whateat.application.image.FirebaseImageResponse;
 import com.exe.whateat.application.image.FirebaseImageService;
-import com.google.cloud.storage.Acl;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.Bucket;
 import com.google.firebase.cloud.StorageClient;
@@ -25,8 +24,9 @@ import java.util.regex.Pattern;
 public class FirebaseImageServiceImpl implements FirebaseImageService {
 
     private static final Map<String, String> MIMES;
-    private static final String IMAGE_URL_FORMAT = "https://storage.googleapis.com/storage/v1/b/%s/o/%s?alt=media";
+    private static final String IMAGE_URL_FORMAT = "https://firebasestorage.googleapis.com/v0/b/%s/o/%s?alt=media";
     private static final String IMAGE_URL_REGEX;
+    private static final String STATIC_FOLDER = "static";
 
     private static final int MAX_IMAGE_SIZE = 3145728;      // 3MB
     private static final String JPEG_MAGIC_BYTES_1 = "/9j/";
@@ -81,10 +81,8 @@ public class FirebaseImageServiceImpl implements FirebaseImageService {
         final byte[] imageBytes = Base64.getDecoder().decode(base64ImageParts[1]);
         final UUID imageId = UUID.randomUUID();
         final String imagePath = String.format("%s/%s", profile, imageId);
-        Blob blob = storageClient.bucket().create(imagePath, imageBytes, contentType,
+        storageClient.bucket().create(imagePath, imageBytes, contentType,
                 Bucket.BlobTargetOption.doesNotExist());
-        // Set ALL users to be able to access the link!
-        blob.createAcl(Acl.of(Acl.User.ofAllUsers(), Acl.Role.READER));
         return new FirebaseImageResponse(imagePath,
                 String.format(IMAGE_URL_FORMAT, firebaseStorageUrl, imagePath.replace("/", "%2F")));
     }
@@ -105,9 +103,18 @@ public class FirebaseImageServiceImpl implements FirebaseImageService {
         throw INVALID_FORMAT_EXCEPTION;
     }
 
+    /**
+     * Removes image. If it is in static folder, skip.
+     *
+     * @param imageArg   The argument of the image. Supports ID and base URL.
+     * @param deleteType Delete type.
+     */
     @Override
     public void deleteImage(String imageArg, DeleteType deleteType) {
         if (deleteType == DeleteType.ID) {
+            if (imageArg.startsWith(STATIC_FOLDER)) {
+                return;
+            }
             final Blob blob = storageClient.bucket().get(imageArg);
             if (blob != null) {
                 blob.delete();
@@ -124,6 +131,9 @@ public class FirebaseImageServiceImpl implements FirebaseImageService {
                         .code(WhatEatErrorCode.WES_0004)
                         .reason("image_url", "Unknown image URL format.")
                         .build();
+            }
+            if (imageId.startsWith(STATIC_FOLDER)) {
+                return;
             }
             final Blob blob = storageClient.bucket().get(imageId);
             if (blob != null) {

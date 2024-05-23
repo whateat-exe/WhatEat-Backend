@@ -79,7 +79,8 @@ public final class GeneralTestForDev {
 
         @Operation(hidden = true)
         @GetMapping("/test/tsid/generate")
-        public ResponseEntity<List<TsidResponse>> generateTsid(@RequestParam(defaultValue = "10") Integer amount) {
+        public ResponseEntity<Object> generateTsid(@RequestParam(defaultValue = "10") Integer amount,
+                                                   @RequestParam(defaultValue = "false") boolean longOnly) {
             if (amount <= 0) {
                 throw WhatEatException.builder()
                         .code(WhatEatErrorCode.WEV_0003)
@@ -89,6 +90,15 @@ public final class GeneralTestForDev {
             final List<Tsid> tsids = new LinkedList<>();
             for (int i = 0; i < amount; i++) {
                 tsids.add(TsidGenerator.globalGenerate());
+            }
+            if (longOnly) {
+                StringBuilder builder = new StringBuilder();
+                for (Tsid tsid : tsids) {
+                    builder.append('\'');
+                    builder.append(tsid.asLong());
+                    builder.append("\n");
+                }
+                return ResponseEntity.ok(builder.toString());
             }
             return ResponseEntity.ok(tsids.stream().map(id -> new TsidResponse(id.asString(), id.asLong())).toList());
         }
@@ -118,7 +128,8 @@ public final class GeneralTestForDev {
         @Operation(hidden = true)
         @PostMapping("/test/validation")
         @SuppressWarnings("unused")
-        public ResponseEntity<JakartaValidationRequest> testJakartaValidation(@Valid @RequestBody JakartaValidationRequest request) {
+        public ResponseEntity<JakartaValidationRequest> testJakartaValidation(
+                @Valid @RequestBody JakartaValidationRequest request) {
             return ResponseEntity.ok(request);
         }
 
