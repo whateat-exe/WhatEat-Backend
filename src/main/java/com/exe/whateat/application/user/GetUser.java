@@ -1,11 +1,27 @@
 package com.exe.whateat.application.user;
 
 import com.exe.whateat.application.common.AbstractController;
+import com.exe.whateat.application.common.request.PaginationRequest;
+import com.exe.whateat.application.food.response.FoodResponse;
+import com.exe.whateat.application.food.response.FoodsResponse;
 import com.exe.whateat.application.user.mapper.AccountDTOMapper;
 import com.exe.whateat.application.user.response.UserResponse;
+import com.exe.whateat.application.user.response.UsersResponse;
 import com.exe.whateat.entity.account.Account;
+import com.exe.whateat.entity.account.QAccount;
+import com.exe.whateat.entity.common.ActiveStatus;
+import com.exe.whateat.entity.food.Food;
+import com.exe.whateat.entity.food.QFood;
+import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
 import com.exe.whateat.infrastructure.repository.AccountRepository;
+import com.querydsl.jpa.impl.JPAQuery;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.EntityManager;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -23,6 +39,10 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class GetUser {
 
+    public static final class GetUserRequest extends PaginationRequest {
+
+    }
+
     @RestController
     @AllArgsConstructor
     @Tag(
@@ -34,11 +54,21 @@ public final class GetUser {
         private final GetUserService getUserService;
 
         @GetMapping("/users")
-        public ResponseEntity<List<UserResponse>> getAllAccount(
-                @RequestParam(value = "pageNumber", defaultValue = "0", required = false) int pageNumber,
-                @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize
-        ) {
-            final List<UserResponse> response = getUserService.getAllUser(pageNumber, pageSize);
+        @Operation(
+                summary = "Get users API. Returns the list of users paginated."
+        )
+        @ApiResponse(
+                description = "Successful. Returns list of the users.",
+                responseCode = "200",
+                content = @Content(schema = @Schema(implementation = UsersResponse.class))
+        )
+        @ApiResponse(
+                description = "Failed getting of the foods.",
+                responseCode = "400s/500s",
+                content = @Content(schema = @Schema(implementation = WhatEatErrorResponse.class))
+        )
+        public ResponseEntity<Object> getAllAccount(@Valid GetUserRequest getUserRequest) {
+            final UsersResponse response = getUserService.getAllUser(getUserRequest);
             return ResponseEntity.ok(response);
         }
     }
@@ -49,14 +79,22 @@ public final class GetUser {
 
         private final AccountRepository accountRepository;
         private final AccountDTOMapper accountDTOMapper;
+        private final EntityManager entityManager;
 
-        public List<UserResponse> getAllUser(int pageNumber, int pageSize) {
-            Pageable pageable = PageRequest.of(pageNumber, pageSize);
-            Page<Account> accountPage = accountRepository.findAll(pageable);
-            List<Account> accounts = accountPage.getContent();
-            return accounts
-                    .stream()
-                    .map(accountDTOMapper::convertToDto).toList();
+        public UsersResponse getAllUser(GetUserRequest getUserRequest) {
+
+            final QAccount qAccount = QAccount.account;
+            final JPAQuery<Account> accountJPAQuery = new JPAQuery<>(entityManager)
+                    .select(qAccount)
+                    .from(qAccount)
+                    .limit(getUserRequest.getLimit())
+                    .offset(getUserRequest.getOffset());
+            final List<Account> accounts = accountJPAQuery.fetch();
+            final long total = accountRepository.count();
+            final UsersResponse response = new UsersResponse(accounts.stream().map(accountDTOMapper::convertToDto).toList(), total);
+            response.setPage(getUserRequest.getPage());
+            response.setLimit(getUserRequest.getLimit());
+            return response;
         }
     }
 }
