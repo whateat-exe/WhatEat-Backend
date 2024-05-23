@@ -8,7 +8,6 @@ import com.exe.whateat.application.tag.response.TagResponse;
 import com.exe.whateat.entity.common.WhatEatId;
 import com.exe.whateat.entity.food.TagType;
 import com.exe.whateat.infrastructure.repository.TagRepository;
-import com.exe.whateat.infrastructure.security.WhatEatSecurityHelper;
 import com.querydsl.core.util.StringUtils;
 import io.github.x4ala1c.tsid.Tsid;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,6 +25,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -63,11 +63,12 @@ public final class UpdateTag {
 
         private final TagRepository tagRepository;
         private final TagMapper tagMapper;
+
         public TagResponse updateTag(UpdateTagRequest updateTagRequest, Tsid tsid) {
 
             var tag = tagRepository.findById(WhatEatId.builder().id(tsid).build());
             //Gửi tag id lỗi là lỗi server
-            if (!tag.isPresent()) {
+            if (tag.isEmpty()) {
                 throw WhatEatException
                         .builder()
                         .code(WhatEatErrorCode.WES_0001)
@@ -78,9 +79,9 @@ public final class UpdateTag {
             // Check name update trung
             var getAllTag = tagRepository.findAll();
             if (!StringUtils.isNullOrEmpty(updateTagRequest.getTagName())) {
-                Optional<com.exe.whateat.entity.food.Tag> optionalTag =  getAllTag.stream().filter(x ->
-                                        x.getName().equalsIgnoreCase(updateTagRequest.tagName)
-                                        && !x.getId().asTsid().equals(tag.get().getId())).findFirst();
+                Optional<com.exe.whateat.entity.food.Tag> optionalTag = getAllTag.stream().filter(x ->
+                        x.getName().equalsIgnoreCase(updateTagRequest.tagName)
+                                && Objects.equals(x.getId(), tag.get().getId())).findFirst();
                 if (optionalTag.isPresent()) {
                     throw WhatEatException
                             .builder()

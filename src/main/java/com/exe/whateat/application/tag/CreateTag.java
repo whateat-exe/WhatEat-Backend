@@ -3,8 +3,6 @@ package com.exe.whateat.application.tag;
 import com.exe.whateat.application.common.AbstractController;
 import com.exe.whateat.application.exception.WhatEatErrorCode;
 import com.exe.whateat.application.exception.WhatEatException;
-import com.exe.whateat.application.restaurant.CreateRestaurant;
-import com.exe.whateat.application.restaurant.response.RestaurantResponse;
 import com.exe.whateat.application.tag.mapper.TagMapper;
 import com.exe.whateat.application.tag.response.TagResponse;
 import com.exe.whateat.entity.common.WhatEatId;
@@ -12,7 +10,6 @@ import com.exe.whateat.entity.food.Tag;
 import com.exe.whateat.entity.food.TagType;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
 import com.exe.whateat.infrastructure.repository.TagRepository;
-import com.exe.whateat.infrastructure.security.WhatEatSecurityHelper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -89,6 +86,7 @@ public final class CreateTag {
 
         private TagRepository tagRepository;
         private TagMapper tagMapper;
+
         public TagResponse createTag(CreateTagRequest createTagRequest) {
 
             //check duplicate tag name
