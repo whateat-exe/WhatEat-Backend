@@ -17,7 +17,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityManager;
-
 import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -95,19 +94,17 @@ public final class VerifyAccount {
             long minutes = Duration.between(accountVerify.getLastModified(), Instant.now()).toMinutes();
             if (minutes > 15) {
                 return false;
-            } else if (minutes <= 15) {
+            } else {
                 if (accountVerify.getVerifiedCode().equals(verifyCode.verifyCode)) {
                     var account = accountRepository.findById(WhatEatId.builder().id(id).build());
                     if (account.isPresent()) {
                         account.get().setStatus(ActiveStatus.ACTIVE);
                         accountRepository.saveAndFlush(account.get());
                         return true;
-                    }
-                    else {
+                    } else {
                         return false;
                     }
                 }
-
             }
             throw WhatEatException
                     .builder()
