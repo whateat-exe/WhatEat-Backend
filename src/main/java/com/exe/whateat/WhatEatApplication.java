@@ -4,8 +4,10 @@ import io.github.x4ala1c.tsid.TsidConfiguration;
 import io.github.x4ala1c.tsid.TsidGenerator;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
+@EnableScheduling
 public class WhatEatApplication {
 
     private static final int TSID_NODE = 69;

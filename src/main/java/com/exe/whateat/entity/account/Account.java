@@ -26,6 +26,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 
@@ -62,6 +63,9 @@ public class Account extends AbstractEntity implements UserDetails {
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private AccountRole role;
+
+    @Column(name = "created_at", nullable = false)
+    private Instant createdAt;
 
     @OneToOne(mappedBy = "account")
     private Restaurant restaurant;
