@@ -81,8 +81,8 @@ public class Account extends AbstractEntity implements UserDetails {
     @OneToMany(mappedBy = "account", fetch = FetchType.LAZY)
     private List<PostComment> postComments;
 
-    @OneToOne(mappedBy = "account")
-    private AccountVerify accountVerify;
+    @OneToMany(mappedBy = "account")
+    private List<AccountVerify> accountVerify;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -101,7 +101,7 @@ public class Account extends AbstractEntity implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return (status != ActiveStatus.PENDING);
     }
 
     @Override

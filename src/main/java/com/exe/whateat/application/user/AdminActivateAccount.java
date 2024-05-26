@@ -26,43 +26,44 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Optional;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class ActiveAccount {
+public class AdminActivateAccount {
 
     @RestController
     @AllArgsConstructor
     @Tag(
             name = "user",
-            description = "active a user"
+            description = "APIs for user accounts."
     )
-    public static class ActiveAccountController extends AbstractController {
+    public static class UserActivateAccountController extends AbstractController {
 
-        private ActiveUserService activeUserService;
+        private UserActivateAccountService userActivateAccountService;
+
+        @PatchMapping("/users/{id}/active")
         @Operation(
-                summary = "An API for active account"
+                summary = "An API for activating account"
         )
         @ApiResponse(
-                description = "Successfully return account active.",
-                responseCode = "200"
+                description = "Successfully return the account.",
+                responseCode = "204"
         )
         @ApiResponse(
                 description = "Failed active.",
                 responseCode = "400s/500s",
                 content = @Content(schema = @Schema(implementation = WhatEatErrorResponse.class))
         )
-        @PatchMapping("/users/{id}/active")
-        public ResponseEntity<Object> activeAnAccount(@PathVariable Tsid id) {
-            activeUserService.activeUser(id);
+        public ResponseEntity<Object> activateAccount(@PathVariable Tsid id) {
+            userActivateAccountService.activateAccount(id);
             return ResponseEntity.noContent().build();
         }
     }
 
     @Service
     @AllArgsConstructor
-    public static class ActiveUserService {
+    public static class UserActivateAccountService {
 
         private final AccountRepository accountRepository;
 
-        public void activeUser(Tsid id) {
+        public void activateAccount(Tsid id) {
             Optional<Account> account = accountRepository.findById(WhatEatId.builder().id(id).build());
             if (account.isPresent()) {
                 if (account.get().getStatus().equals(ActiveStatus.INACTIVE)) {

@@ -6,6 +6,7 @@ import jakarta.persistence.Embeddable;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import org.springframework.lang.NonNull;
 
 import java.util.Objects;
 
@@ -14,7 +15,7 @@ import java.util.Objects;
 @NoArgsConstructor
 @Embeddable
 @SuppressWarnings("unused")
-public final class WhatEatId {
+public final class WhatEatId implements Comparable<WhatEatId> {
 
     private Tsid id;
 
@@ -49,5 +50,17 @@ public final class WhatEatId {
     @Override
     public String toString() {
         return id.asString();
+    }
+
+    @Override
+    public int compareTo(@NonNull WhatEatId o) {
+        final long result = this.id.asLong() - o.id.asLong();
+        if (result < 0) {
+            return -1;
+        }
+        if (result > 0) {
+            return 1;
+        }
+        return 0;
     }
 }

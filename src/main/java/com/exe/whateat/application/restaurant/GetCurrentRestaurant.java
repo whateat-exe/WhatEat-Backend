@@ -45,7 +45,7 @@ public final class GetCurrentRestaurant {
                 content = @Content(schema = @Schema(implementation = RestaurantResponse.class))
         )
         @ApiResponse(
-                description = "Failed creation of the restaurant.",
+                description = "Failed getting of the current restaurant.",
                 responseCode = "400s/500s",
                 content = @Content(schema = @Schema(implementation = WhatEatErrorResponse.class))
         )
