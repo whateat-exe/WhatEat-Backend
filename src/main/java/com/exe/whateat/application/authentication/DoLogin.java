@@ -114,20 +114,16 @@ public final class DoLogin {
                 if (account.getRole() == AccountRole.RESTAURANT) {
                     throw WhatEatException.builder()
                             .code(WhatEatErrorCode.WEA_0009)
-                            .reason(ACCOUNT, "Tài khoản nhà hàng chưa được kích hoạt. Mời liên hệ admin để được hướng dẫn.")
+                            .reason("restaurant", "Tài khoản nhà hàng chưa được kích hoạt. Mời liên hệ admin để được hướng dẫn.")
                             .build();
                 }
                 if (account.getRole() == AccountRole.USER) {
                     accountVerificationService.resendVerificationCode(account);
                     throw WhatEatException.builder()
-                            .code(WhatEatErrorCode.WEA_0009)
-                            .reason(ACCOUNT, "Tài khoản nhà hàng chưa được kích hoạt. Mời liên hệ admin để được hướng dẫn.")
+                            .code(WhatEatErrorCode.WEA_0010)
+                            .reason(ACCOUNT, "Tài khoản người dùng chưa được kích hoạt. Hãy kiểm tra lại email để xác thực.")
                             .build();
                 }
-                throw WhatEatException.builder()
-                        .code(WhatEatErrorCode.WEA_0010)
-                        .reason(ACCOUNT, "Tài khoản chưa được kích hoạt. Mời liên hệ admin để được hướng dẫn.")
-                        .build();
             }
             if (account.getStatus() == ActiveStatus.INACTIVE) {
                 throw WhatEatException.builder()
