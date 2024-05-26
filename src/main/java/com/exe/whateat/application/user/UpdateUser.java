@@ -4,6 +4,8 @@ import com.exe.whateat.application.common.AbstractController;
 import com.exe.whateat.application.common.WhatEatRegex;
 import com.exe.whateat.application.exception.WhatEatErrorCode;
 import com.exe.whateat.application.exception.WhatEatException;
+import com.exe.whateat.application.image.FirebaseImageResponse;
+import com.exe.whateat.application.image.FirebaseImageService;
 import com.exe.whateat.application.user.mapper.AccountDTOMapper;
 import com.exe.whateat.application.user.response.UserResponse;
 import com.exe.whateat.entity.account.Account;
@@ -21,6 +23,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -38,6 +41,7 @@ public class UpdateUser {
         private String email;
         private String fullName;
         private String phoneNumber;
+        private String image;
     }
 
     @RestController
@@ -91,13 +95,14 @@ public class UpdateUser {
 
         private final AccountRepository accountRepository;
         private final AccountDTOMapper accountDTOMapper;
+        private final FirebaseImageService firebaseImageService;
 
         public UserResponse updateUser(UpdateUserRequest updateUserRequest, String id) {
 
             WhatEatId whatEatId = WhatEatId.builder().id(Tsid.fromString(id)).build();
             Optional<Account> accountExisting = accountRepository.findById(whatEatId);
             if (accountExisting.isPresent()) {
-                if (!updateUserRequest.email.isBlank()) {
+                if (StringUtils.isNotBlank(updateUserRequest.getEmail())) {
                     if (WhatEatRegex.checkPattern(WhatEatRegex.EMAIL_PATTERN, updateUserRequest.email))
                         accountExisting.get().setEmail(updateUserRequest.email);
                     else
@@ -108,7 +113,7 @@ public class UpdateUser {
                                 .build();
                 }
 
-                if (!updateUserRequest.phoneNumber.isBlank()) {
+                if (StringUtils.isNotBlank(updateUserRequest.getPhoneNumber())) {
                     if (WhatEatRegex.checkPattern(WhatEatRegex.PHONE_PATTERN, updateUserRequest.phoneNumber))
                         accountExisting.get().setPhoneNumber(updateUserRequest.getPhoneNumber());
                     else
@@ -119,8 +124,28 @@ public class UpdateUser {
                                 .build();
                 }
 
-                if (!updateUserRequest.fullName.isBlank()) {
+                if (StringUtils.isNotBlank(updateUserRequest.getFullName())) {
                     accountExisting.get().setFullName(updateUserRequest.getFullName());
+                }
+
+                FirebaseImageResponse firebaseImageResponse = null;
+                try {
+                    if (StringUtils.isNotBlank(updateUserRequest.getImage())) {
+                        firebaseImageResponse = firebaseImageService.uploadBase64Image(updateUserRequest.getImage());
+                        accountExisting.get().setImage(firebaseImageResponse.url());
+                    }
+                } catch (Exception e) {
+                    // Image is created. Time to delete!
+                    if (firebaseImageResponse != null) {
+                        firebaseImageService.deleteImage(firebaseImageResponse.id(), FirebaseImageService.DeleteType.ID);
+                    }
+                    if (e instanceof WhatEatException whatEatException) {
+                        throw whatEatException;
+                    }
+                    throw WhatEatException.builder()
+                            .code(WhatEatErrorCode.WES_0001)
+                            .reason("accouunt", "Lỗi trong việc update account")
+                            .build();
                 }
 
                 Account accountUpdated = accountRepository.save(accountExisting.get());

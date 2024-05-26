@@ -67,7 +67,7 @@ public class WhatEatSecurityConfiguration {
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.DELETE, resolvePath("/users/**"))
                         .hasAuthority(AccountRole.ADMIN.name()))
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.PATCH, resolvePath("/users/**"))
-                        .authenticated());
+                        .permitAll());
     }
 
     private void handleRestaurantApi(HttpSecurity http) throws Exception {

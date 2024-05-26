@@ -18,4 +18,5 @@ public class UserResponse {
     private String phoneNumber;
     private String status;
     private String role;
+    private String imageUrl;
 }
