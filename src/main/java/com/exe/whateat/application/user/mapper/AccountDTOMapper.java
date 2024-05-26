@@ -17,6 +17,7 @@ public class AccountDTOMapper implements WhatEatMapper<Account, UserResponse> {
                 .phoneNumber(account.getPhoneNumber())
                 .status(account.getStatus().toString())
                 .role(account.getRole().name())
+                .imageUrl(account.getImage())
                 .build();
     }
 }

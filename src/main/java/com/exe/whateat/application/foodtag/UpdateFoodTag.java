@@ -87,6 +87,7 @@ public final class UpdateFoodTag {
         private TagRepository tagRepository;
         private FoodMapper foodMapper;
         private TagMapper tagMapper;
+
         public FoodTagResponse updateFoodTag(Tsid tsid, UpdateFoodTagRequest updateFoodTagRequest) {
             var foodTag = foodTagRepository.findById(WhatEatId.builder().id(tsid).build());
             if (!foodTag.isPresent())
@@ -96,10 +97,10 @@ public final class UpdateFoodTag {
                         .reason("lỗi gửi id food tag", "gửi id sai hoặc không đúng định dạng")
                         .build();
             // check food is valid
-            Optional<Food> food = null;
+            Optional<Food> food = Optional.empty();
             if (updateFoodTagRequest.foodId != null) {
                 food = foodRepository.findById(WhatEatId.builder().id(updateFoodTagRequest.foodId).build());
-                if (!food.isPresent())
+                if (food.isEmpty())
                     throw WhatEatException
                             .builder()
                             .code(WhatEatErrorCode.WES_0001)
@@ -111,7 +112,7 @@ public final class UpdateFoodTag {
             Optional<com.exe.whateat.entity.food.Tag> tag = null;
             if (updateFoodTagRequest.tagId != null) {
                 tag = tagRepository.findById(WhatEatId.builder().id(updateFoodTagRequest.foodId).build());
-                if (!tag.isPresent())
+                if (tag.isEmpty())
                     throw WhatEatException
                             .builder()
                             .code(WhatEatErrorCode.WES_0001)
@@ -122,6 +123,7 @@ public final class UpdateFoodTag {
             FoodTag foodTagUpdated = null;
             if (updateFoodTagRequest.tagId != null || updateFoodTagRequest.foodId != null)
                 foodTagUpdated = foodTagRepository.saveAndFlush(foodTag.get());
+            // ??? Why not checking null
             return FoodTagResponse
                     .builder()
                     .tsid(foodTagUpdated.getId().asTsid())
