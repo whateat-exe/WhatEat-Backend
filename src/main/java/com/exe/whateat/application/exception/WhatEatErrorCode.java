@@ -28,6 +28,8 @@ public enum WhatEatErrorCode {
     WEB_0007("Trạng thái món ăn không hợp lệ", HttpStatus.BAD_REQUEST),
     WEB_0008("Type không phù hợp", HttpStatus.BAD_REQUEST),
     WEB_0009("Food Tag đã tồn tại", HttpStatus.BAD_REQUEST),
+    WEB_0010("ID không tồn tại", HttpStatus.BAD_REQUEST),
+    WEB_0011("Tài khoản không hợp lệ để gửi mã xác thực", HttpStatus.BAD_REQUEST),
     WEV_0000("Invalid request", HttpStatus.BAD_REQUEST),
     WEV_0001("Invalid email address", HttpStatus.BAD_REQUEST),
     WEV_0002("Invalid password", HttpStatus.BAD_REQUEST),
@@ -47,10 +49,16 @@ public enum WhatEatErrorCode {
     WEA_0001("Not authorized", HttpStatus.UNAUTHORIZED),
     WEA_0002("Forbidden", HttpStatus.FORBIDDEN),
     WEA_0003("Invalid authentication token", HttpStatus.UNAUTHORIZED),
-    WEA_0004("Inactive account", HttpStatus.FORBIDDEN),
+    WEA_0004("Inactive account", HttpStatus.UNAUTHORIZED),
     WEA_0005("Invalid login credentials", HttpStatus.UNAUTHORIZED),
     WEA_0006("Invalid refresh token", HttpStatus.BAD_REQUEST),
-    WEA_0007("Internal Server", HttpStatus.INTERNAL_SERVER_ERROR);
+    WEA_0007("Internal Server", HttpStatus.INTERNAL_SERVER_ERROR),
+    WEA_0008("Unverified user account", HttpStatus.UNAUTHORIZED),
+    WEA_0009("Unverified restaurant account", HttpStatus.UNAUTHORIZED),
+    WEA_0010("Unverified account", HttpStatus.UNAUTHORIZED),
+    WEA_0011("Mã xác thực không hợp lệ.", HttpStatus.BAD_REQUEST),
+    WEA_0012("Lỗi mã xác thực tài khoản", HttpStatus.BAD_REQUEST),
+    WEA_0013("Lỗi xác thực tài khoản", HttpStatus.BAD_REQUEST);
 
     private final String title;
     private final HttpStatus status;

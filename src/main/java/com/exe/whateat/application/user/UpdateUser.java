@@ -11,6 +11,10 @@ import com.exe.whateat.entity.common.WhatEatId;
 import com.exe.whateat.infrastructure.repository.AccountRepository;
 import com.exe.whateat.infrastructure.security.WhatEatSecurityHelper;
 import io.github.x4ala1c.tsid.Tsid;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
@@ -40,7 +44,7 @@ public class UpdateUser {
     @AllArgsConstructor
     @Tag(
             name = "user",
-            description = "APIs for update a user with Id"
+            description = "APIs for user accounts."
     )
     public static final class UpdateUserController extends AbstractController {
 
@@ -48,9 +52,25 @@ public class UpdateUser {
         private final WhatEatSecurityHelper whatEatSecurityHelper;
 
         @PatchMapping("/users/{id}")
+        @Operation(
+                summary = "Update user account.",
+                requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                        description = "Information of the user.",
+                        content = @Content(schema = @Schema(implementation = UpdateUserRequest.class))
+                )
+        )
+        @ApiResponse(
+                responseCode = "204",
+                description = "Create a new user successfully. No content will be returned."
+        )
+        @ApiResponse(
+                responseCode = "400s/500s",
+                description = "Can not create a new user",
+                content = @Content(schema = @Schema(implementation = UserResponse.class))
+        )
         public ResponseEntity<UserResponse> updateUser(
-                @RequestBody UpdateUserRequest updateUserRequest, @PathVariable String id
-        ) {
+                @RequestBody UpdateUserRequest updateUserRequest,
+                @PathVariable String id) {
             Optional<Account> account = whatEatSecurityHelper.getCurrentLoggedInAccount();
             if (account.isEmpty()) {
                 throw WhatEatException
@@ -78,7 +98,7 @@ public class UpdateUser {
             Optional<Account> accountExisting = accountRepository.findById(whatEatId);
             if (accountExisting.isPresent()) {
                 if (!updateUserRequest.email.isBlank()) {
-                    if (WhatEatRegex.checkPattern(WhatEatRegex.emailPattern, updateUserRequest.email))
+                    if (WhatEatRegex.checkPattern(WhatEatRegex.EMAIL_PATTERN, updateUserRequest.email))
                         accountExisting.get().setEmail(updateUserRequest.email);
                     else
                         throw WhatEatException
@@ -89,7 +109,7 @@ public class UpdateUser {
                 }
 
                 if (!updateUserRequest.phoneNumber.isBlank()) {
-                    if (WhatEatRegex.checkPattern(WhatEatRegex.phonePattern, updateUserRequest.phoneNumber))
+                    if (WhatEatRegex.checkPattern(WhatEatRegex.PHONE_PATTERN, updateUserRequest.phoneNumber))
                         accountExisting.get().setPhoneNumber(updateUserRequest.getPhoneNumber());
                     else
                         throw WhatEatException

@@ -9,4 +9,6 @@ import java.util.Optional;
 public interface AccountRepository extends JpaRepository<Account, WhatEatId> {
 
     Optional<Account> findByEmail(String email);
+
+    Boolean existsByEmail(String email);
 }

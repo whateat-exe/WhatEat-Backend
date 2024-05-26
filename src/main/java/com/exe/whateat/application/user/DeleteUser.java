@@ -7,9 +7,14 @@ import com.exe.whateat.entity.account.Account;
 import com.exe.whateat.entity.account.AccountRole;
 import com.exe.whateat.entity.common.ActiveStatus;
 import com.exe.whateat.entity.common.WhatEatId;
+import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
 import com.exe.whateat.infrastructure.repository.AccountRepository;
 import com.exe.whateat.infrastructure.security.WhatEatSecurityHelper;
 import io.github.x4ala1c.tsid.Tsid;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -29,7 +34,7 @@ public final class DeleteUser {
     @AllArgsConstructor
     @Tag(
             name = "user",
-            description = "Disable a user"
+            description = "APIs for user accounts."
     )
     public static final class DeleteUserController extends AbstractController {
 
@@ -38,8 +43,19 @@ public final class DeleteUser {
 
 
         @DeleteMapping("/users/{id}")
+        @Operation(
+                summary = "Delete user account."
+        )
+        @ApiResponse(
+                responseCode = "204",
+                description = "Delete user successfully. No content will be returned."
+        )
+        @ApiResponse(
+                responseCode = "400s/500s",
+                description = "Can not delete the user",
+                content = @Content(schema = @Schema(implementation = WhatEatErrorResponse.class))
+        )
         public ResponseEntity<Object> deleteUser(@PathVariable String id) {
-
             Optional<Account> account = whatEatSecurityHelper.getCurrentLoggedInAccount();
             if (account.isEmpty()) {
                 throw WhatEatException

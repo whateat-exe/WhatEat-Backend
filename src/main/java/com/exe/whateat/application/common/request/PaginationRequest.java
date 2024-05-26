@@ -1,5 +1,6 @@
 package com.exe.whateat.application.common.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.Min;
 import lombok.Setter;
 import lombok.ToString;
@@ -25,6 +26,7 @@ public class PaginationRequest {
         return limit;
     }
 
+    @JsonIgnore
     public final long getOffset() {
         return ((long) getPage() * getLimit());
     }

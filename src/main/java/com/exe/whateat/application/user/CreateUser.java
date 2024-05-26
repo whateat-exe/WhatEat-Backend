@@ -1,20 +1,18 @@
 package com.exe.whateat.application.user;
 
+import com.exe.whateat.application.account.verification.AccountVerificationService;
 import com.exe.whateat.application.common.AbstractController;
 import com.exe.whateat.application.common.WhatEatRegex;
 import com.exe.whateat.application.exception.WhatEatErrorCode;
 import com.exe.whateat.application.exception.WhatEatException;
-import com.exe.whateat.application.user.mapper.AccountDTOMapper;
 import com.exe.whateat.application.user.response.UserResponse;
 import com.exe.whateat.entity.account.Account;
 import com.exe.whateat.entity.account.AccountRole;
-import com.exe.whateat.entity.account.AccountVerify;
 import com.exe.whateat.entity.common.ActiveStatus;
 import com.exe.whateat.entity.common.WhatEatId;
-import com.exe.whateat.infrastructure.common.GenerationCode;
-import com.exe.whateat.infrastructure.email.SendEmailService;
+import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
 import com.exe.whateat.infrastructure.repository.AccountRepository;
-import com.exe.whateat.infrastructure.repository.AccountVerifyRepository;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -23,23 +21,18 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.time.Instant;
-import java.util.Optional;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class CreateUser {
@@ -48,20 +41,20 @@ public final class CreateUser {
     @Setter
     public static class CreateUserRequest {
 
-        @NotBlank(message = "Email is required")
-        @Email
+        @NotBlank(message = "Email là bắt buộc.")
+        @Email(message = "Email phải có cấu trúc hợp lệ của một email.")
         private String email;
 
-        @NotNull
-        @Size(min = 8, max = 32, message = "The length of password has to be larger than 8 and less than 32 ")
+        @NotBlank(message = "Mật khẩu là bắt buộc.")
+        @Size(min = 8, max = 32, message = "Mật khẩu phải từ 8 đến 32 kí tự.")
         private String password;
 
-        @NotBlank
-        @Size(max = 100, message = "The length of full name has to be less than 100")
+        @NotBlank(message = "Tên đầy đủ là bắt buộc.")
+        @Size(min = 1, max = 100, message = "Tên đầy đủ phải dưới hoặc bằng 100 kí tự.")
         private String fullName;
 
-        @NotBlank
-        @Size(max = 20, message = "The length of phone number has to be less than 20")
+        @NotBlank(message = "Số điện thoại là bắt buộc.")
+        @Size(min = 1, max = 20, message = "Số điện thoại phải dưới 20 chữ số.")
         private String phoneNumber;
     }
 
@@ -69,26 +62,32 @@ public final class CreateUser {
     @AllArgsConstructor
     @Tag(
             name = "user",
-            description = "APIs for create a user"
+            description = "APIs for user accounts."
     )
     public static final class CreateUserController extends AbstractController {
 
         private final CreateUserService createUserService;
 
         @PostMapping("/users")
-        @ApiResponse(
-                responseCode = "201",
-                description = "Create a new user successfully",
-                content = @Content(schema = @Schema(implementation = UserResponse.class))
+        @Operation(
+                summary = "Create/Register user account.",
+                requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                        description = "Information of the user.",
+                        content = @Content(schema = @Schema(implementation = CreateUserRequest.class))
+                )
         )
         @ApiResponse(
-                responseCode = "400s",
+                responseCode = "204",
+                description = "Create a new user successfully. No content will be returned."
+        )
+        @ApiResponse(
+                responseCode = "400s/500s",
                 description = "Can not create a new user",
-                content = @Content(schema = @Schema(implementation = UserResponse.class))
+                content = @Content(schema = @Schema(implementation = WhatEatErrorResponse.class))
         )
         public ResponseEntity<UserResponse> createUser(@RequestBody @Valid CreateUserRequest createUserRequest) {
-            final UserResponse userResponse = createUserService.createUserService(createUserRequest);
-            return ResponseEntity.status(HttpStatus.CREATED).body(userResponse);
+            createUserService.createUserService(createUserRequest);
+            return ResponseEntity.noContent().build();
         }
     }
 
@@ -99,56 +98,37 @@ public final class CreateUser {
 
         private final AccountRepository accountRepository;
         private final PasswordEncoder passwordEncoder;
-        private final AccountDTOMapper accountDTOMapper;
-        private SendEmailService sendEmailService;
-        private AccountVerifyRepository accountVerifyRepository;
+        private final AccountVerificationService accountVerificationService;
 
-        public UserResponse createUserService(CreateUserRequest createUserRequest) {
+        public void createUserService(CreateUserRequest createUserRequest) {
             var email = createUserRequest.getEmail();
-            var phoneNumberCheck = WhatEatRegex.checkPattern(WhatEatRegex.phonePattern, createUserRequest.getPhoneNumber());
+            var phoneNumberCheck = WhatEatRegex.checkPattern(WhatEatRegex.PHONE_PATTERN, createUserRequest.getPhoneNumber());
             if (!phoneNumberCheck)
                 throw WhatEatException
                         .builder()
                         .code(WhatEatErrorCode.WEV_0008)
-                        .reason("phoneNumber", "Wrong phone number pattern")
+                        .reason("phoneNumber", "Số điện thoại không đúng format quy định.")
                         .build();
-
-            Optional<Account> account = accountRepository.findByEmail(email);
-            if (account.isPresent()) {
+            if (accountRepository.existsByEmail(email)) {
                 throw WhatEatException
                         .builder()
                         .code(WhatEatErrorCode.WEV_0001)
-                        .reason("email", "Email has been registered")
+                        .reason("email", "Email này đã được đăng ký sử dụng trước đó.")
                         .build();
-            } else {
-                String passwordEncode = passwordEncoder.encode(createUserRequest.getPassword());
-                WhatEatId whatEatId = WhatEatId.generate();
-                Account accountCreate =
-                        Account.builder()
-                                .id(whatEatId)
-                                .email(createUserRequest.getEmail())
-                                .status(ActiveStatus.PENDING)
-                                .fullName(createUserRequest.getFullName())
-                                .password(passwordEncode)
-                                .role(AccountRole.USER)
-                                .phoneNumber(createUserRequest.getPhoneNumber())
-                                .build();
-                Account accountCreated = accountRepository.save(accountCreate);
-                if (accountCreated != null) {
-                    var code = GenerationCode.codeGeneration();
-                    sendEmailService.sendMail(accountCreated.getEmail(), code, "Send Code verify");
-                    var accountVerify = AccountVerify
-                            .builder()
-                            .account(accountCreated)
-                            .id(WhatEatId.generate())
-                            .CreatedAt(Instant.now())
-                            .LastModified(Instant.now())
-                            .verifiedCode(code)
-                            .build();
-                    accountVerifyRepository.saveAndFlush(accountVerify);
-                }
-                return accountDTOMapper.convertToDto(accountCreated);
             }
+            final String passwordEncode = passwordEncoder.encode(createUserRequest.getPassword());
+            final WhatEatId whatEatId = WhatEatId.generate();
+            Account createdAccount = Account.builder()
+                    .id(whatEatId)
+                    .email(email)
+                    .status(ActiveStatus.PENDING)
+                    .fullName(createUserRequest.getFullName())
+                    .password(passwordEncode)
+                    .role(AccountRole.USER)
+                    .phoneNumber(createUserRequest.getPhoneNumber())
+                    .build();
+            createdAccount = accountRepository.save(createdAccount);
+            accountVerificationService.sendVerificationCode(createdAccount);
         }
     }
 }

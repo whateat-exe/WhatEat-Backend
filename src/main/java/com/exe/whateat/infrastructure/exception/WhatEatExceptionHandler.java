@@ -23,17 +23,24 @@ public class WhatEatExceptionHandler {
 
     @ExceptionHandler({AuthenticationException.class, UsernameNotFoundException.class})
     public ResponseEntity<WhatEatErrorResponse> handleAuthenticationException(Exception ex) {
-        if (ex instanceof DisabledException || ex instanceof LockedException) {
+        if (ex instanceof DisabledException) {
             final WhatEatException whatEatException = WhatEatException.builder()
                     .code(WhatEatErrorCode.WEA_0004)
-                    .reason("account", "Account is inactive. Contact admin for further guidance.")
+                    .reason("account", "Tài khoản đã bị vô hiệu hóa. Liên hệ với admin để biết thêm chi tiết.")
+                    .build();
+            return createResponse(whatEatException);
+        }
+        if (ex instanceof LockedException) {
+            final WhatEatException whatEatException = WhatEatException.builder()
+                    .code(WhatEatErrorCode.WEA_0008)
+                    .reason("account", "Tài khoản chưa được xác thực. Check email đăng ký để xác thực.")
                     .build();
             return createResponse(whatEatException);
         }
         if (ex instanceof BadCredentialsException || ex instanceof UsernameNotFoundException) {
             final WhatEatException whatEatException = WhatEatException.builder()
                     .code(WhatEatErrorCode.WEA_0005)
-                    .reason("credential", "Invalid email or password.")
+                    .reason("credential", "Email hoặc mật khẩu không hợp lệ.")
                     .build();
             return createResponse(whatEatException);
         }

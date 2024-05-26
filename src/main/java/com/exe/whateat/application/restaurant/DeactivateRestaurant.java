@@ -47,7 +47,7 @@ public final class DeactivateRestaurant {
                 responseCode = "204"
         )
         @ApiResponse(
-                description = "Failed creation of the restaurant.",
+                description = "Failed deactivation of the restaurant.",
                 responseCode = "400s/500s",
                 content = @Content(schema = @Schema(implementation = WhatEatErrorResponse.class))
         )

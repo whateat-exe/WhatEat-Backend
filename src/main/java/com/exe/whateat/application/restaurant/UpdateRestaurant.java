@@ -77,7 +77,7 @@ public final class UpdateRestaurant {
                 content = @Content(schema = @Schema(implementation = RestaurantResponse.class))
         )
         @ApiResponse(
-                description = "Failed creation of the restaurant.",
+                description = "Failed updating of the restaurant.",
                 responseCode = "400s/500s",
                 content = @Content(schema = @Schema(implementation = WhatEatErrorResponse.class))
         )

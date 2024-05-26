@@ -10,8 +10,5 @@ CREATE TABLE tag_category
 ALTER TABLE tag_category
     ADD CONSTRAINT UK_tag_id_category UNIQUE (tag_id, category);
 
-ALTER TABLE account_verify
-    ADD CONSTRAINT uc_account_verify_account UNIQUE (account_id);
-
 ALTER TABLE tag_category
     ADD CONSTRAINT FK_TAG_CATEGORY_ON_TAG FOREIGN KEY (tag_id) REFERENCES tag (id);

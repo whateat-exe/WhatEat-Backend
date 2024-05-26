@@ -14,5 +14,5 @@ public interface FoodTagRepository extends JpaRepository<FoodTag, WhatEatId> {
     List<FoodTag> findByFood(Food food);
 
     @Query("SELECT t FROM FoodTag t JOIN FETCH t.food JOIN FETCH t.tag WHERE t.id = :id")
-    FoodTag FindByFoodTag_Id (@Param("id") WhatEatId id);
+    FoodTag FindByFoodTag_Id(@Param("id") WhatEatId id);
 }
