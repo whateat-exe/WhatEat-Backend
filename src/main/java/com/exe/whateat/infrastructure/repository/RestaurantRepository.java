@@ -17,8 +17,8 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, WhatEatI
                     )
                     """
     )
-    Boolean existsByNameAndAccountEmail(@Param("restaurantName") String restaurantName,
+    boolean existsByNameAndAccountEmail(@Param("restaurantName") String restaurantName,
                                         @Param("accountEmail") String accountEmail);
 
-    Boolean existsByName(String name);
+    boolean existsByNameIgnoreCase(String name);
 }

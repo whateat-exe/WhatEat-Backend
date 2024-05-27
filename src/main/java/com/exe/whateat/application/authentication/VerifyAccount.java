@@ -48,8 +48,8 @@ public final class VerifyAccount {
     @RestController
     @AllArgsConstructor
     @Tag(
-            name = "user",
-            description = "APIs for user accounts."
+            name = "auth",
+            description = "APIs for authentication/authorization."
     )
     public static class VerifyAccountController extends AbstractController {
 

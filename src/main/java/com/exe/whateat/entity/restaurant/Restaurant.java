@@ -8,8 +8,6 @@ import com.exe.whateat.entity.subscription.RestaurantSubscription;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
@@ -40,11 +38,7 @@ public class Restaurant extends AbstractEntity {
     @Column(name = "image", nullable = false)
     private String image;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, length = 10)
-    private RestaurantStatus status;
-
-    @OneToOne(optional = false, cascade = {CascadeType.PERSIST})
+    @OneToOne(optional = false, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "account_id", columnDefinition = AbstractEntity.ID_COLUMN)
     private Account account;
 

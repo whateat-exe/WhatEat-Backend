@@ -6,7 +6,6 @@ import com.exe.whateat.application.exception.WhatEatException;
 import com.exe.whateat.entity.common.ActiveStatus;
 import com.exe.whateat.entity.common.WhatEatId;
 import com.exe.whateat.entity.restaurant.Restaurant;
-import com.exe.whateat.entity.restaurant.RestaurantStatus;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
 import com.exe.whateat.infrastructure.repository.RestaurantRepository;
 import io.github.x4ala1c.tsid.Tsid;
@@ -21,8 +20,8 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -38,7 +37,7 @@ public final class DeactivateRestaurant {
 
         private final DeactivateRestaurantService service;
 
-        @DeleteMapping("/restaurants/{id}")
+        @PostMapping("/restaurants/{id}/deactivate")
         @Operation(
                 summary = "Update restaurant API. Returns the new information of restaurant."
         )
@@ -68,17 +67,15 @@ public final class DeactivateRestaurant {
             final WhatEatId whatEatId = new WhatEatId(id);
             final Restaurant restaurant = restaurantRepository.findById(whatEatId)
                     .orElseThrow(() -> WhatEatException.builder()
-                            .code(WhatEatErrorCode.WES_0001)
-                            .reason("restaurant", "Forbidden to deactivate.")
+                            .code(WhatEatErrorCode.WEB_0002)
+                            .reason("restaurantId", String.format("Tài khoản nhà hàng với ID '%s' không tồn tại.", whatEatId))
                             .build());
-            if ((restaurant.getStatus() != RestaurantStatus.ACTIVE)
-                    && (restaurant.getAccount().getStatus() != ActiveStatus.ACTIVE)) {
+            if (restaurant.getAccount().getStatus() == ActiveStatus.INACTIVE) {
                 throw WhatEatException.builder()
                         .code(WhatEatErrorCode.WEB_0003)
-                        .reason("restaurant", "Forbidden to deactivate.")
+                        .reason("restaurant", "Tài khoản đã bị vô hiệu hóa trước đó.")
                         .build();
             }
-            restaurant.setStatus(RestaurantStatus.INACTIVE);
             restaurant.getAccount().setStatus(ActiveStatus.INACTIVE);
             restaurantRepository.save(restaurant);
         }

@@ -42,8 +42,8 @@ public final class RegenerateVerificationCode {
     @RestController
     @AllArgsConstructor
     @Tag(
-            name = "user",
-            description = "APIs for user accounts."
+            name = "auth",
+            description = "APIs for authentication/authorization."
     )
     public static class RegenerateVerificationCodeController extends AbstractController {
 
