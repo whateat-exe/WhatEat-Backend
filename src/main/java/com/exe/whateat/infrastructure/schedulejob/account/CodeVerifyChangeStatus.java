@@ -10,19 +10,23 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-
 import java.time.Instant;
 
 @Service
-public class CodeVerifyCleanUp {
+public class CodeVerifyChangeStatus {
+
+    private static final long MAX_TIME_EXPIRED = 15L * 60;
+
+    @Value("${whateat.tsid.epoch}")
+    private long tsidEpoch;
 
     @Autowired
     private AccountVerifyRepository accountVerifyRepository;
 
-    @Scheduled(cron = "0 0/15 * * * *") // runs every 15 minutes
-    public void deleteUnsedCode() {
-        var expireCodes = accountVerifyRepository.findAllByStatus(VerificationStatus.EXPIRED);
-        expireCodes.forEach(x -> accountVerifyRepository.delete(x));
+    @Scheduled(cron = "0 * * * * *") // every minute
+    public void changeUnusedCode() {
+        final long exceedSixtyMinutes = Instant.now().toEpochMilli() - tsidEpoch + MAX_TIME_EXPIRED;// exceed 15 minutes change to expire
+        final WhatEatId maximumIdExpired = new WhatEatId(Tsid.fromLong(exceedSixtyMinutes << 22));
+        accountVerifyRepository.updateTheCodeToExpired(maximumIdExpired);
     }
-
 }

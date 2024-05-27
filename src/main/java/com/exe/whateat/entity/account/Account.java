@@ -64,9 +64,6 @@ public class Account extends AbstractEntity implements UserDetails {
     @Column(name = "role", nullable = false)
     private AccountRole role;
 
-    @Column(name = "created_at", nullable = false)
-    private Instant createdAt;
-
     @OneToOne(mappedBy = "account")
     private Restaurant restaurant;
 

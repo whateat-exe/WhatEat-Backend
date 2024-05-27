@@ -45,4 +45,21 @@ public interface AccountVerifyRepository extends JpaRepository<AccountVerify, Wh
     )
     @Modifying
     void updateTheCodeToBeVerified(WhatEatId accountId, String verificationCode);
+
+    @Query(value = """
+                    UPDATE AccountVerify av SET av.status = 'EXPIRED'
+                    WHERE av.id < ?1
+                   """)
+    @Modifying
+    void updateTheCodeToExpired(WhatEatId id);
+
+    @Query(
+            value = """
+                    SELECT av FROM AccountVerify av
+                    WHERE av.id < ?1 AND av.status = 'PENDING'
+                    """
+    )
+    List<AccountVerify> findPendingCode(WhatEatId maximumId);
+
+    List<AccountVerify> findAllByStatus(VerificationStatus status);
 }
