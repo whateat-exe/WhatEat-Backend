@@ -3,6 +3,8 @@ package com.exe.whateat.infrastructure.security.jwt;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.exe.whateat.application.exception.WhatEatErrorCode;
+import com.exe.whateat.entity.account.Account;
+import com.exe.whateat.entity.common.ActiveStatus;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
@@ -29,6 +31,14 @@ import java.util.regex.Pattern;
 @AllArgsConstructor
 public class WhatEatJwtAuthenticationFilter extends OncePerRequestFilter {
 
+    private static final class AccountNotActiveException extends RuntimeException {
+
+        public AccountNotActiveException(String message) {
+            super(message);
+        }
+    }
+
+    private static final String CONTENT_TYPE = "application/json; charset=UTF-8";
     private static final String BEARER_REGEX = "^Bearer\\s+(\\S+)$";
 
     private final WhatEatJwtHelper jwtHelper;
@@ -43,6 +53,9 @@ public class WhatEatJwtAuthenticationFilter extends OncePerRequestFilter {
             if (StringUtils.isNotBlank(authorizationHeader)) {
                 final DecodedJWT jwt = extractToken(authorizationHeader);
                 final UserDetails userDetails = userDetailsService.loadUserByUsername(jwtHelper.extractEmail(jwt));
+                if (userDetails instanceof Account account && account.getStatus() != ActiveStatus.ACTIVE) {
+                    throw new AccountNotActiveException("Tài khoản không trong trạng thái ACTIVE.");
+                }
                 final UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -50,20 +63,31 @@ public class WhatEatJwtAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
         } catch (JWTVerificationException e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setContentType("application/json");
+            response.setContentType(CONTENT_TYPE);
+            response.setCharacterEncoding("UTF-8");
             PrintWriter writer = response.getWriter();
             writer.write(objectMapper.writeValueAsString(WhatEatErrorResponse.builder()
                     .code(WhatEatErrorCode.WEA_0003)
-                    .reason("auth_token", e.getMessage())
+                    .reason("token", e.getMessage())
                     .build()));
             writer.flush();
         } catch (UsernameNotFoundException e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setContentType("application/json");
+            response.setContentType(CONTENT_TYPE);
+            response.setCharacterEncoding("UTF-8");
             PrintWriter writer = response.getWriter();
             writer.write(objectMapper.writeValueAsString(WhatEatErrorResponse.builder()
                     .code(WhatEatErrorCode.WEA_0003)
-                    .reason("auth_token", "Account not found by email.")
+                    .reason("token", "Token không hợp lệ.")
+                    .build()));
+            writer.flush();
+        } catch (AccountNotActiveException e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType(CONTENT_TYPE);
+            PrintWriter writer = response.getWriter();
+            writer.write(objectMapper.writeValueAsString(WhatEatErrorResponse.builder()
+                    .code(WhatEatErrorCode.WEA_0004)
+                    .reason("account", e.getMessage())
                     .build()));
             writer.flush();
         }
@@ -73,7 +97,7 @@ public class WhatEatJwtAuthenticationFilter extends OncePerRequestFilter {
         final Pattern pattern = Pattern.compile(BEARER_REGEX);
         final Matcher matcher = pattern.matcher(authorizationHeader);
         if (!matcher.matches()) {
-            throw new JWTVerificationException("No Bearer token found");
+            throw new JWTVerificationException("Cấu trúc của Authorization Header hoặc token không hợp lệ.");
         }
         final String token = matcher.group(1);
         return jwtHelper.verifyToken(token);

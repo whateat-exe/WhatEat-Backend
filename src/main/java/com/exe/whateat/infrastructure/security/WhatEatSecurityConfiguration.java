@@ -30,12 +30,14 @@ public class WhatEatSecurityConfiguration {
 
     private final WhatEatJwtAuthenticationFilter jwtAuthenticationFilter;
     private final Environment environment;
+    private final WhatEatAccessDeniedHandler accessDeniedHandler;
 
     @Autowired
     public WhatEatSecurityConfiguration(WhatEatJwtAuthenticationFilter jwtAuthenticationFilter,
-                                        Environment environment) {
+                                        Environment environment, WhatEatAccessDeniedHandler accessDeniedHandler) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.environment = environment;
+        this.accessDeniedHandler = accessDeniedHandler;
     }
 
     @Bean
@@ -44,6 +46,7 @@ public class WhatEatSecurityConfiguration {
                 .cors(Customizer.withDefaults())
                 .sessionManagement(c -> c.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(c -> c.accessDeniedHandler(accessDeniedHandler))
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath("/docs/**")).permitAll())
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.POST, resolvePath("/auth/**")).permitAll());
         handleAccountApi(http);
@@ -70,18 +73,24 @@ public class WhatEatSecurityConfiguration {
                         .permitAll());
     }
 
+    @SuppressWarnings("java:S1075")
     private void handleRestaurantApi(HttpSecurity http) throws Exception {
         final String restaurantPath = "/restaurants/**";
-        http.authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.POST, resolvePath("/restaurants"))
-                        .permitAll())
-                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.PATCH, resolvePath(restaurantPath))
-                        .hasAnyAuthority(AccountRole.RESTAURANT.name(), AccountRole.ADMIN.name()))
+        final String restaurantIdPath = "/restaurants/{id}";
+        http.authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.PATCH, resolvePath(restaurantPath))
+                        .hasAnyAuthority(AccountRole.RESTAURANT.name()))
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.DELETE, resolvePath(restaurantPath))
                         .hasAnyAuthority(AccountRole.RESTAURANT.name(), AccountRole.ADMIN.name()))
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath("/restaurants/current"))
-                        .hasAnyAuthority(AccountRole.RESTAURANT.name(), AccountRole.ADMIN.name()))
+                        .hasAnyAuthority(AccountRole.RESTAURANT.name()))
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath(restaurantPath))
-                        .hasAnyAuthority(AccountRole.RESTAURANT.name(), AccountRole.ADMIN.name()));
+                        .hasAnyAuthority(AccountRole.ADMIN.name(), AccountRole.MANAGER.name()))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.POST, resolvePath(restaurantIdPath + "/activate"))
+                        .hasAnyAuthority(AccountRole.ADMIN.name(), AccountRole.MANAGER.name()))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.POST, resolvePath(restaurantIdPath + "/deactivate"))
+                        .hasAnyAuthority(AccountRole.ADMIN.name(), AccountRole.MANAGER.name()))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.POST, resolvePath("/restaurants"))
+                        .permitAll());
     }
 
     private void handleFoodApi(HttpSecurity http) throws Exception {

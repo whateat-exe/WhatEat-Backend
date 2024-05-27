@@ -19,7 +19,7 @@ public final class RestaurantMapper implements WhatEatMapper<Restaurant, Restaur
                 .address(restaurant.getAddress())
                 .description(restaurant.getDescription())
                 .image(restaurant.getImage())
-                .status(restaurant.getStatus())
+                .status(restaurant.getAccount().getStatus())
                 .build();
     }
 }
