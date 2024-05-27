@@ -10,7 +10,6 @@ import com.exe.whateat.application.restaurant.response.RestaurantResponse;
 import com.exe.whateat.entity.common.ActiveStatus;
 import com.exe.whateat.entity.common.WhatEatId;
 import com.exe.whateat.entity.restaurant.Restaurant;
-import com.exe.whateat.entity.restaurant.RestaurantStatus;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
 import com.exe.whateat.infrastructure.repository.RestaurantRepository;
 import io.github.x4ala1c.tsid.Tsid;
@@ -32,6 +31,8 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Objects;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class UpdateRestaurant {
@@ -105,18 +106,18 @@ public final class UpdateRestaurant {
                             .code(WhatEatErrorCode.WEB_0002)
                             .reason("restaurant_id", "Unknown restaurant ID.")
                             .build());
-            if ((restaurant.getStatus() != RestaurantStatus.ACTIVE)
-                    && (restaurant.getAccount().getStatus() != ActiveStatus.ACTIVE)) {
+            if (restaurant.getAccount().getStatus() != ActiveStatus.ACTIVE) {
                 throw WhatEatException.builder()
                         .code(WhatEatErrorCode.WEB_0003)
                         .reason("restaurant_status", "Restaurant must be active to be updated.")
                         .build();
             }
             if (StringUtils.isNotEmpty(request.getName())) {
-                if (!restaurantRepository.existsByName(request.getName())) {
+                if (!Objects.equals(restaurant.getName(), request.getName())
+                        && restaurantRepository.existsByNameIgnoreCase(request.getName())) {
                     throw WhatEatException.builder()
                             .code(WhatEatErrorCode.WEB_0001)
-                            .reason("restaurant_name", "Restaurant name already exists.")
+                            .reason("restaurantName", "Tên nhà hàng đã tồn tại.")
                             .build();
                 }
                 restaurant.setName(request.getName());

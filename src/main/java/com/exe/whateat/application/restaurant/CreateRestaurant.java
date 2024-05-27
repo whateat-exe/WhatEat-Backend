@@ -14,7 +14,6 @@ import com.exe.whateat.entity.common.WhatEatId;
 import com.exe.whateat.entity.request.RequestType;
 import com.exe.whateat.entity.request.RestaurantRequest;
 import com.exe.whateat.entity.restaurant.Restaurant;
-import com.exe.whateat.entity.restaurant.RestaurantStatus;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
 import com.exe.whateat.infrastructure.repository.RestaurantRepository;
 import com.exe.whateat.infrastructure.repository.RestaurantRequestRepository;
@@ -32,7 +31,6 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -44,12 +42,6 @@ import java.time.Instant;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class CreateRestaurant {
-
-    private static final String REQUEST_CONTENT = """
-            Restaurant ID: %s
-            Name: %s
-            Address: %s
-            """;
 
     @Data
     public static final class CreateRestaurantRequest {
@@ -118,6 +110,14 @@ public final class CreateRestaurant {
     @AllArgsConstructor
     public static class CreateRestaurantService {
 
+        private static final String TITLE = "Xác nhận việc tạo nhà hàng '%s' - %s";
+        private static final String REQUEST_CONTENT = """
+                ID: %s
+                Tên nhà hàng: %s
+                Địa chỉ: %s
+                Số điện thoại: %s
+                """;
+
         private final RestaurantRepository restaurantRepository;
         private final FirebaseImageService firebaseImageService;
         private final RestaurantRequestRepository restaurantRequestRepository;
@@ -128,7 +128,7 @@ public final class CreateRestaurant {
             if (restaurantRepository.existsByNameAndAccountEmail(request.getName(), request.getEmail())) {
                 throw WhatEatException.builder()
                         .code(WhatEatErrorCode.WEB_0001)
-                        .reason("name_email", "Restaurant's name and email must be unique.")
+                        .reason("restaurant", "Tên và email của nhà hàng không được trùng.")
                         .build();
             }
             final Account account = Account.builder()
@@ -138,7 +138,7 @@ public final class CreateRestaurant {
                     .fullName(request.getName())
                     .phoneNumber(request.getPhoneNumber())
                     .role(AccountRole.RESTAURANT)
-                    .status(ActiveStatus.ACTIVE)
+                    .status(ActiveStatus.PENDING)
                     .build();
             Restaurant restaurant = Restaurant.builder()
                     .id(WhatEatId.generate())
@@ -146,8 +146,6 @@ public final class CreateRestaurant {
                     .name(request.getName())
                     .description(request.getDescription())
                     .address(request.getAddress())
-                    .status(RestaurantStatus.PENDING)
-                    .image(StringUtils.EMPTY)
                     .build();
             FirebaseImageResponse firebaseImageResponse = null;
             try {
@@ -158,9 +156,9 @@ public final class CreateRestaurant {
                 final RestaurantRequest restaurantRequest = RestaurantRequest.builder()
                         .id(WhatEatId.generate())
                         .restaurant(restaurant)
-                        .title("Request for creation of Restaurant \"%s\"")
-                        .content(String.format(REQUEST_CONTENT, restaurant.getId().asTsid().toString(),
-                                restaurant.getName(), restaurant.getAddress()))
+                        .title(String.format(TITLE, restaurant.getName(), restaurant.getAccount().getEmail()))
+                        .content(String.format(REQUEST_CONTENT, restaurant.getId(), restaurant.getName(),
+                                restaurant.getAddress(), restaurant.getAccount().getPhoneNumber()))
                         .type(RequestType.NEW_RESTAURANT)
                         .createdAt(Instant.now())
                         .build();
@@ -176,7 +174,7 @@ public final class CreateRestaurant {
                 }
                 throw WhatEatException.builder()
                         .code(WhatEatErrorCode.WES_0001)
-                        .reason("restaurant", "Error while creating restaurant. Please contact admin.")
+                        .reason("restaurant", "Lỗi khi tạo tài khoản nhà hàng..")
                         .build();
             }
         }
