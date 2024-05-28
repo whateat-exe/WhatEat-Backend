@@ -42,14 +42,14 @@ public final class UpdateTag {
     @RestController
     @AllArgsConstructor
     @Tag(
-            name = "tag",
-            description = "update tag"
+            name = "tags",
+            description = "APIs for tags"
     )
     public static final class UpdateTagController extends AbstractController {
 
         private UpdateTagService updateTagService;
 
-        @PatchMapping("tags/{id}")
+        @PatchMapping("/tags/{id}")
         public ResponseEntity<Object> updateTag(@RequestBody UpdateTagRequest updateTagRequest, @PathVariable Tsid id) {
             var response = updateTagService.updateTag(updateTagRequest, id);
             return ResponseEntity.ok(response);

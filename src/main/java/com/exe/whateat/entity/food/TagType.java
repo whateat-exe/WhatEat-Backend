@@ -3,11 +3,9 @@ package com.exe.whateat.entity.food;
 public enum TagType {
 
     FORM,
-    FLAVOR,
+    FLAVOUR,
     INGREDIENT,
     COOKING_METHOD,
-    CUISINE,
     DIETARY,
-    MEAL_TYPE,
-    TEXTURE
+    TEMPERATURE
 }

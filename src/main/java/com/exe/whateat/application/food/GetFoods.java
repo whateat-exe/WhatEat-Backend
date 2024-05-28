@@ -26,6 +26,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -69,7 +70,7 @@ public final class GetFoods {
                 responseCode = "400s/500s",
                 content = @Content(schema = @Schema(implementation = WhatEatErrorResponse.class))
         )
-        public ResponseEntity<Object> getFoods(GetFoodsRequest request) {
+        public ResponseEntity<Object> getFoods(@ParameterObject GetFoodsRequest request) {
             final FoodsResponse response = service.get(request);
             return ResponseEntity.ok(response);
         }

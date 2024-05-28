@@ -24,6 +24,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -67,7 +68,7 @@ public final class GetUsers {
                 responseCode = "400s/500s",
                 content = @Content(schema = @Schema(implementation = WhatEatErrorResponse.class))
         )
-        public ResponseEntity<Object> getAllAccount(GetUsersRequest request) {
+        public ResponseEntity<Object> getAllAccount(@ParameterObject GetUsersRequest request) {
             final UsersResponse response = getUsersService.getAllUser(request);
             return ResponseEntity.ok(response);
         }
