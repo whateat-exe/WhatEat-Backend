@@ -6,7 +6,6 @@ import com.exe.whateat.application.exception.WhatEatException;
 import com.exe.whateat.entity.common.WhatEatId;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
 import com.exe.whateat.infrastructure.repository.TagRepository;
-import com.exe.whateat.infrastructure.security.WhatEatSecurityHelper;
 import io.github.x4ala1c.tsid.Tsid;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -29,15 +28,14 @@ public class DeleteTag {
     @RestController
     @AllArgsConstructor
     @Tag(
-            name = "tag",
-            description = "delete tag"
+            name = "tags",
+            description = "APIs for tags"
     )
     public static final class DeleteTagController extends AbstractController {
 
-        private WhatEatSecurityHelper whatEatSecurityHelper;
         private DeleteTagService deleteTagService;
 
-        @DeleteMapping("tags/{id}")
+        @DeleteMapping("/tags/{id}")
         @Operation(
                 summary = "Delete tag API"
         )
@@ -66,7 +64,7 @@ public class DeleteTag {
 
         public void deleteTag(Tsid tsid) {
             var tag = tagRepository.findById(WhatEatId.builder().id(tsid).build());
-            if (!tag.isPresent()) {
+            if (tag.isEmpty()) {
                 throw WhatEatException
                         .builder()
                         .code(WhatEatErrorCode.WES_0001)

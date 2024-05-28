@@ -29,14 +29,14 @@ public final class GetTag {
     @RestController
     @AllArgsConstructor
     @Tag(
-            name = "tag",
-            description = "Get a tag by id"
+            name = "tags",
+            description = "APIs for tags"
     )
     public static final class GetTagController extends AbstractController {
 
         private final GetTagService getTagService;
 
-        @GetMapping("tags/{id}")
+        @GetMapping("/tags/{id}")
         @Operation(
                 summary = "Get a tag through its ID API. Returns the information of the tag. Only for ADMIN and Manager."
         )

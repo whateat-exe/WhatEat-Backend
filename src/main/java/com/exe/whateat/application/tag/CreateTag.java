@@ -48,14 +48,14 @@ public final class CreateTag {
     @AllArgsConstructor
     @RestController
     @io.swagger.v3.oas.annotations.tags.Tag(
-            name = "tag",
-            description = "Create a tag"
+            name = "tags",
+            description = "APIs for tags"
     )
     public static final class CreateTagController extends AbstractController {
 
         private CreateTagService createTagService;
 
-        @PostMapping("tags")
+        @PostMapping("/tags")
         @Operation(
                 summary = "Create tag API. Returns the new information of tag.",
                 requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
