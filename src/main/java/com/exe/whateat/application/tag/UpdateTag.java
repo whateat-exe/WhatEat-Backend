@@ -7,9 +7,13 @@ import com.exe.whateat.application.tag.mapper.TagMapper;
 import com.exe.whateat.application.tag.response.TagResponse;
 import com.exe.whateat.entity.common.WhatEatId;
 import com.exe.whateat.entity.food.TagType;
+import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
 import com.exe.whateat.infrastructure.repository.TagRepository;
-import com.querydsl.core.util.StringUtils;
 import io.github.x4ala1c.tsid.Tsid;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
@@ -17,7 +21,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.apache.commons.lang3.EnumUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -26,7 +30,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Objects;
-import java.util.Optional;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class UpdateTag {
@@ -35,8 +38,8 @@ public final class UpdateTag {
     @Setter
     public static class UpdateTagRequest {
 
-        private String tagName;
-        private String tagType;
+        private String name;
+        private TagType type;
     }
 
     @RestController
@@ -50,6 +53,19 @@ public final class UpdateTag {
         private UpdateTagService updateTagService;
 
         @PatchMapping("/tags/{id}")
+        @Operation(
+                summary = "Update a tag through its ID API. Returns the information of the tag. Only for ADMIN and MANAGER."
+        )
+        @ApiResponse(
+                description = "Successfully found.",
+                responseCode = "200",
+                content = @Content(schema = @Schema(implementation = TagResponse.class))
+        )
+        @ApiResponse(
+                description = "Failed returning of the tag.",
+                responseCode = "400s/500s",
+                content = @Content(schema = @Schema(implementation = WhatEatErrorResponse.class))
+        )
         public ResponseEntity<Object> updateTag(@RequestBody UpdateTagRequest updateTagRequest, @PathVariable Tsid id) {
             var response = updateTagService.updateTag(updateTagRequest, id);
             return ResponseEntity.ok(response);
@@ -64,51 +80,27 @@ public final class UpdateTag {
         private final TagRepository tagRepository;
         private final TagMapper tagMapper;
 
-        public TagResponse updateTag(UpdateTagRequest updateTagRequest, Tsid tsid) {
-
-            var tag = tagRepository.findById(WhatEatId.builder().id(tsid).build());
-            //Gửi tag id lỗi là lỗi server
-            if (tag.isEmpty()) {
-                throw WhatEatException
-                        .builder()
-                        .code(WhatEatErrorCode.WES_0001)
-                        .reason("lỗi gửi id", "Gửi id sai hoặc không đúng định dạng")
-                        .build();
-            }
-
-            // Check name update trung
-            var getAllTag = tagRepository.findAll();
-            if (!StringUtils.isNullOrEmpty(updateTagRequest.getTagName())) {
-                Optional<com.exe.whateat.entity.food.Tag> optionalTag = getAllTag.stream().filter(x ->
-                        x.getName().equalsIgnoreCase(updateTagRequest.tagName)
-                                && Objects.equals(x.getId(), tag.get().getId())).findFirst();
-                if (optionalTag.isPresent()) {
+        public TagResponse updateTag(UpdateTagRequest request, Tsid id) {
+            var tag = tagRepository.findById(new WhatEatId(id))
+                    .orElseThrow(() -> WhatEatException
+                            .builder()
+                            .code(WhatEatErrorCode.WEB_0010)
+                            .reason("id", "Nhãn món ăn không tồn tại.")
+                            .build());
+            if (StringUtils.isNotBlank(request.getName()) && !Objects.equals(tag.getName(), request.getName())) {
+                if (tagRepository.existsByNameIgnoreCase(request.getName())) {
                     throw WhatEatException
                             .builder()
                             .code(WhatEatErrorCode.WEB_0004)
-                            .reason("Tag bị trùng", "Tag tạo mới đã bị trùng tên")
+                            .reason("name", "Nhãn món ăn tạo mới đã bị trùng tên.")
                             .build();
                 }
+                tag.setName(request.getName());
             }
-
-            // Check type co chuan voi enum
-            if (!StringUtils.isNullOrEmpty(updateTagRequest.tagType) && !EnumUtils.isValidEnum(TagType.class, updateTagRequest.tagType)) {
-                throw WhatEatException
-                        .builder()
-                        .code(WhatEatErrorCode.WEB_0008)
-                        .reason("tag không phù hợp", "Thể loại tag không có trong dữ liệu có sẵn")
-                        .build();
+            if (request.getType() != null) {
+                tag.setType(request.getType());
             }
-
-            if (!StringUtils.isNullOrEmpty(updateTagRequest.tagName)) {
-                tag.get().setName(updateTagRequest.tagName);
-            }
-
-            if (!StringUtils.isNullOrEmpty(updateTagRequest.tagType)) {
-                tag.get().setType(TagType.valueOf(updateTagRequest.tagType));
-            }
-
-            var tagUpdated = tagRepository.saveAndFlush(tag.get());
+            var tagUpdated = tagRepository.save(tag);
             return tagMapper.convertToDto(tagUpdated);
         }
     }
