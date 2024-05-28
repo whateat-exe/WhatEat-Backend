@@ -37,11 +37,11 @@ public class DeleteTag {
 
         @DeleteMapping("/tags/{id}")
         @Operation(
-                summary = "Delete tag API"
+                summary = "Delete tag API. Only for ADMIN and MANAGER."
         )
         @ApiResponse(
                 description = "Successful deactivation.",
-                responseCode = "200"
+                responseCode = "204"
         )
         @ApiResponse(
                 description = "Failed deleting",
@@ -49,9 +49,8 @@ public class DeleteTag {
                 content = @Content(schema = @Schema(implementation = WhatEatErrorResponse.class))
         )
         public ResponseEntity<Object> deleteTag(@PathVariable Tsid id) {
-
             deleteTagService.deleteTag(id);
-            return ResponseEntity.ok("Đã xóa thành công tag");
+            return ResponseEntity.noContent().build();
         }
     }
 
@@ -62,16 +61,14 @@ public class DeleteTag {
 
         private TagRepository tagRepository;
 
-        public void deleteTag(Tsid tsid) {
-            var tag = tagRepository.findById(WhatEatId.builder().id(tsid).build());
-            if (tag.isEmpty()) {
-                throw WhatEatException
-                        .builder()
-                        .code(WhatEatErrorCode.WES_0001)
-                        .reason("lỗi gửi id", "gửi id sai hoặc không đúng định dạng")
-                        .build();
-            }
-            tagRepository.delete(tag.get());
+        public void deleteTag(Tsid id) {
+            var tag = tagRepository.findById(new WhatEatId(id))
+                    .orElseThrow(() -> WhatEatException
+                            .builder()
+                            .code(WhatEatErrorCode.WEB_0010)
+                            .reason("id", "Nhãn món ăn không tồn tại.")
+                            .build());
+            tagRepository.delete(tag);
         }
     }
 }

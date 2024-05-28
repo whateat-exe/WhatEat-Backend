@@ -38,7 +38,7 @@ public final class GetTag {
 
         @GetMapping("/tags/{id}")
         @Operation(
-                summary = "Get a tag through its ID API. Returns the information of the tag. Only for ADMIN and Manager."
+                summary = "Get a tag through its ID API. Returns the information of the tag. Only for ADMIN and MANAGER."
         )
         @ApiResponse(
                 description = "Successfully found.",
@@ -51,7 +51,6 @@ public final class GetTag {
                 content = @Content(schema = @Schema(implementation = WhatEatErrorResponse.class))
         )
         public ResponseEntity<Object> getTag(@PathVariable Tsid id) {
-
             return ResponseEntity.ok(getTagService.getTag(id));
         }
     }
@@ -63,16 +62,14 @@ public final class GetTag {
         private final TagRepository tagRepository;
         private final TagMapper tagMapper;
 
-        public TagResponse getTag(Tsid tsid) {
-            var tag = tagRepository.findById(WhatEatId.builder().id(tsid).build());
-            if (tag.isEmpty()) {
-                throw WhatEatException
-                        .builder()
-                        .code(WhatEatErrorCode.WES_0001)
-                        .reason("lỗi gửi id", "gửi id sai hoặc không đúng định dạng")
-                        .build();
-            }
-            return tagMapper.convertToDto(tag.get());
+        public TagResponse getTag(Tsid id) {
+            var tag = tagRepository.findById(new WhatEatId(id))
+                    .orElseThrow(() -> WhatEatException
+                            .builder()
+                            .code(WhatEatErrorCode.WEB_0010)
+                            .reason("id", "Nhãn món ăn không tồn tại.")
+                            .build());
+            return tagMapper.convertToDto(tag);
         }
     }
 }
