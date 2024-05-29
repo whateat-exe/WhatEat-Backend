@@ -19,29 +19,29 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class DeactiveFoodTag {
+public final class DeactivateFoodTag {
 
     @RestController
     @AllArgsConstructor
     @Tag(
-            name = "foodtag",
-            description = "Deactive a food tag"
+            name = "foodtags",
+            description = "APIs for food tags."
     )
-    public static final class DeactiveFoodTagController extends AbstractController {
+    public static final class DeactivateFoodTagController extends AbstractController {
 
-        private DeactiveFoodTagService deactiveFoodTagService;
+        private DeactivateFoodTagService deactivateFoodTagService;
 
-        @DeleteMapping("/foodtags/{id}")
+        @PostMapping("/foodtags/{id}/deactivate")
         @Operation(
-                summary = "Deactivate food tag API. ADMIN/MANAGER only."
+                summary = "Deactivates food tag API. ADMIN/MANAGER only."
         )
         @ApiResponse(
-                description = "Successful. Returns the food tag.",
+                description = "Successful. No content is returned.",
                 responseCode = "204"
         )
         @ApiResponse(
@@ -50,27 +50,34 @@ public final class DeactiveFoodTag {
                 content = @Content(schema = @Schema(implementation = WhatEatErrorResponse.class))
         )
         public ResponseEntity<Object> deactiveFoodTag(@PathVariable Tsid id) {
-            deactiveFoodTagService.deactiveFoodTag(id);
+            deactivateFoodTagService.deactivate(id);
             return ResponseEntity.ok("Deactive foodtag successfully");
         }
     }
 
     @Service
-    @AllArgsConstructor
     @Transactional(rollbackOn = Exception.class)
-    public static class DeactiveFoodTagService {
+    @AllArgsConstructor
+    public static class DeactivateFoodTagService {
 
         private FoodTagRepository foodTagRepository;
 
-        public void deactiveFoodTag(Tsid id) {
-            var foodTag = foodTagRepository.findById(WhatEatId.builder().id(id).build());
-            if (!foodTag.isPresent())
+        public void deactivate(Tsid id) {
+            var foodTag = foodTagRepository.findById(new WhatEatId(id))
+                    .orElseThrow(() -> WhatEatException
+                            .builder()
+                            .code(WhatEatErrorCode.WEB_0010)
+                            .reason("id", "Món ăn với nhãn trên không tồn tại.")
+                            .build());
+            if (foodTag.getStatus() == ActiveStatus.INACTIVE) {
                 throw WhatEatException
                         .builder()
-                        .code(WhatEatErrorCode.WES_0001)
-                        .reason("lỗi gửi id", "gửi id sai hoặc không đúng định dạng")
+                        .code(WhatEatErrorCode.WEB_0012)
+                        .reason("status", "Món ăn với nhãn trên đã bị vô hiệu hóa trước đó.")
                         .build();
-            foodTag.get().setStatus(ActiveStatus.INACTIVE);
+            }
+            foodTag.setStatus(ActiveStatus.INACTIVE);
+            foodTagRepository.save(foodTag);
         }
     }
 }

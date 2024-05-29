@@ -1,13 +1,11 @@
 package com.exe.whateat.application.foodtag;
 
 import com.exe.whateat.application.common.AbstractController;
+import com.exe.whateat.application.common.WhatEatMapper;
 import com.exe.whateat.application.exception.WhatEatErrorCode;
 import com.exe.whateat.application.exception.WhatEatException;
-import com.exe.whateat.application.food.mapper.FoodMapper;
 import com.exe.whateat.application.foodtag.response.FoodTagResponse;
-import com.exe.whateat.application.tag.mapper.TagMapper;
 import com.exe.whateat.entity.common.WhatEatId;
-import com.exe.whateat.entity.food.Food;
 import com.exe.whateat.entity.food.FoodTag;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
 import com.exe.whateat.infrastructure.repository.FoodRepository;
@@ -22,8 +20,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -31,12 +30,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Optional;
+import java.util.Objects;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class UpdateFoodTag {
 
-    @Data
+    @Getter
+    @Setter
     public static class UpdateFoodTagRequest {
 
         private Tsid foodId;
@@ -46,8 +46,8 @@ public final class UpdateFoodTag {
     @RestController
     @AllArgsConstructor
     @Tag(
-            name = "foodtag",
-            description = "update food tag"
+            name = "foodtags",
+            description = "APIs for food tags."
     )
     public static final class UpdateFoodTagController extends AbstractController {
 
@@ -58,78 +58,59 @@ public final class UpdateFoodTag {
                 summary = "Create food tag API. Returns the new information of food and tag. ADMIN/MANAGER only.",
                 requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                         description = "Information of the food and tag.",
-                        content = @Content(schema = @Schema(implementation = UpdateFoodTag.UpdateFoodTagRequest.class))
+                        content = @Content(schema = @Schema(implementation = UpdateFoodTagRequest.class))
                 )
         )
         @ApiResponse(
-                description = "Successful creation. Returns new information of the food and tag.",
+                description = "Successful update. Returns new information of the food and tag.",
                 responseCode = "200",
                 content = @Content(schema = @Schema(implementation = FoodTagResponse.class))
         )
         @ApiResponse(
-                description = "Failed creation of the food tag.",
+                description = "Failed updating of the food tag.",
                 responseCode = "400s/500s",
                 content = @Content(schema = @Schema(implementation = WhatEatErrorResponse.class))
         )
-        public ResponseEntity<Object> updateFoodTag(@PathVariable Tsid id, @RequestBody UpdateFoodTagRequest updateFoodTagRequest) {
-            var response = updateFoodTagService.updateFoodTag(id, updateFoodTagRequest);
+        public ResponseEntity<Object> updateFoodTag(@PathVariable Tsid id, @RequestBody UpdateFoodTagRequest request) {
+            var response = updateFoodTagService.updateFoodTag(id, request);
             return ResponseEntity.ok(response);
         }
     }
 
     @Service
-    @AllArgsConstructor
     @Transactional(rollbackOn = Exception.class)
+    @AllArgsConstructor
     public static class UpdateFoodTagService {
 
         private FoodTagRepository foodTagRepository;
         private FoodRepository foodRepository;
         private TagRepository tagRepository;
-        private FoodMapper foodMapper;
-        private TagMapper tagMapper;
+        private WhatEatMapper<FoodTag, FoodTagResponse> mapper;
 
-        public FoodTagResponse updateFoodTag(Tsid tsid, UpdateFoodTagRequest updateFoodTagRequest) {
-            var foodTag = foodTagRepository.findById(WhatEatId.builder().id(tsid).build());
-            if (!foodTag.isPresent())
+        public FoodTagResponse updateFoodTag(Tsid id, UpdateFoodTagRequest request) {
+            final WhatEatId foodTagId = new WhatEatId(id);
+            FoodTag foodTag = foodTagRepository.findByIdPopulated(foodTagId)
+                    .orElseThrow(() -> WhatEatException
+                            .builder()
+                            .code(WhatEatErrorCode.WEB_0009)
+                            .reason("foodTag", "Món ăn với nhãn trên không tồn tại.")
+                            .build());
+            final WhatEatId foodId = new WhatEatId(request.getFoodId());
+            final WhatEatId tagId = new WhatEatId(request.getTagId());
+            if (Objects.equals(foodTag.getFood().getId(), foodId) && Objects.equals(foodTag.getTag().getId(), tagId)) {
+                return mapper.convertToDto(foodTag);
+            }
+            if (foodTagRepository.foodTagAlreadyExists(foodId, tagId)) {
                 throw WhatEatException
                         .builder()
-                        .code(WhatEatErrorCode.WES_0001)
-                        .reason("lỗi gửi id food tag", "gửi id sai hoặc không đúng định dạng")
+                        .code(WhatEatErrorCode.WEB_0009)
+                        .reason("foodTag", "Món ăn với nhãn trên đã tồn tại.")
                         .build();
-            // check food is valid
-            Optional<Food> food = Optional.empty();
-            if (updateFoodTagRequest.foodId != null) {
-                food = foodRepository.findById(WhatEatId.builder().id(updateFoodTagRequest.foodId).build());
-                if (food.isEmpty())
-                    throw WhatEatException
-                            .builder()
-                            .code(WhatEatErrorCode.WES_0001)
-                            .reason("lỗi gửi id food", "gửi id sai hoặc không đúng định dạng của food")
-                            .build();
-                foodTag.get().setFood(food.get());
             }
-            // Check tag is valid
-            Optional<com.exe.whateat.entity.food.Tag> tag = null;
-            if (updateFoodTagRequest.tagId != null) {
-                tag = tagRepository.findById(WhatEatId.builder().id(updateFoodTagRequest.foodId).build());
-                if (tag.isEmpty())
-                    throw WhatEatException
-                            .builder()
-                            .code(WhatEatErrorCode.WES_0001)
-                            .reason("lỗi gửi id tag", "gửi id sai hoặc không đúng định dạng của tag")
-                            .build();
-                foodTag.get().setTag(tag.get());
-            }
-            FoodTag foodTagUpdated = null;
-            if (updateFoodTagRequest.tagId != null || updateFoodTagRequest.foodId != null)
-                foodTagUpdated = foodTagRepository.saveAndFlush(foodTag.get());
-            // ??? Why not checking null
-            return FoodTagResponse
-                    .builder()
-                    .tsid(foodTagUpdated.getId().asTsid())
-                    .foodResponse(foodMapper.convertToDto(food.get()))
-                    .tagResponse(tagMapper.convertToDto(tag.get()))
-                    .build();
+            foodTag.setFood(foodRepository.getReferenceById(foodId));
+            foodTag.setTag(tagRepository.getReferenceById(tagId));
+            foodTag = foodTagRepository.save(foodTag);
+            return mapper.convertToDto(foodTag);
         }
     }
 }
