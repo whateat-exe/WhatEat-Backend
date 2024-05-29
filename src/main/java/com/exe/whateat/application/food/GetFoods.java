@@ -10,7 +10,6 @@ import com.exe.whateat.entity.food.Food;
 import com.exe.whateat.entity.food.QFood;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
 import com.exe.whateat.infrastructure.repository.FoodRepository;
-import com.exe.whateat.infrastructure.security.WhatEatSecurityHelper;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import io.swagger.v3.oas.annotations.Operation;
@@ -58,7 +57,7 @@ public final class GetFoods {
 
         @GetMapping("/foods")
         @Operation(
-                summary = "Get foods API. Returns the list of foods paginated. ADMIN & MANAGER will return all, while others will return only ACTIVE foods."
+                summary = "Get foods API. Returns the list of foods paginated. ADMIN & MANAGER will return all."
         )
         @ApiResponse(
                 description = "Successful. Returns list of the foods.",
@@ -81,17 +80,14 @@ public final class GetFoods {
 
         private final FoodRepository foodRepository;
         private final WhatEatMapper<Food, FoodResponse> mapper;
-        private final WhatEatSecurityHelper securityHelper;
 
         @PersistenceContext
         private EntityManager entityManager;
 
         @Autowired
-        public GetFoodsService(FoodRepository foodRepository, WhatEatMapper<Food, FoodResponse> mapper,
-                               WhatEatSecurityHelper securityHelper) {
+        public GetFoodsService(FoodRepository foodRepository, WhatEatMapper<Food, FoodResponse> mapper) {
             this.foodRepository = foodRepository;
             this.mapper = mapper;
-            this.securityHelper = securityHelper;
         }
 
         public FoodsResponse get(GetFoodsRequest request) {
@@ -109,9 +105,6 @@ public final class GetFoods {
                     .where(predicates)
                     .limit(request.getLimit())
                     .offset(request.getOffset());
-            if (securityHelper.currentAccountIsNotAdminOrManager()) {
-                foodQuery.where(qFood.status.eq(ActiveStatus.ACTIVE));
-            }
             final List<Food> foods = foodQuery.fetch();
             final long total = foodRepository.count();
             final FoodsResponse response = new FoodsResponse(foods.stream().map(mapper::convertToDto).toList(), total);

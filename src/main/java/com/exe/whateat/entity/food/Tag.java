@@ -36,6 +36,9 @@ public class Tag extends AbstractEntity {
     private List<FoodTag> foodTags;
 
     @OneToMany(mappedBy = "tag")
+    private List<TagCategory> categories;
+
+    @OneToMany(mappedBy = "tag")
     private List<PersonalProfile> personalProfiles;
 
     @Override

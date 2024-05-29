@@ -48,11 +48,13 @@ public class WhatEatSecurityConfiguration {
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(c -> c.accessDeniedHandler(accessDeniedHandler))
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath("/docs/**")).permitAll())
-                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.POST, resolvePath("/auth/**")).permitAll());
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.POST, resolvePath("/auth/**")).permitAll())
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, "/error").permitAll());
         handleAccountApi(http);
         handleRestaurantApi(http);
         handleFoodApi(http);
         handleTagApi(http);
+        handleFoodTagApi(http);
         if (environment.acceptsProfiles(Profiles.of("dev"))) {
             http.authorizeHttpRequests(c -> c.requestMatchers(resolvePath("/test/**")).permitAll());
         }
@@ -79,8 +81,6 @@ public class WhatEatSecurityConfiguration {
         final String restaurantIdPath = "/restaurants/{id}";
         http.authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.PATCH, resolvePath(restaurantPath))
                         .hasAnyAuthority(AccountRole.RESTAURANT.name()))
-                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.DELETE, resolvePath(restaurantPath))
-                        .hasAnyAuthority(AccountRole.RESTAURANT.name(), AccountRole.ADMIN.name()))
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath("/restaurants/current"))
                         .hasAnyAuthority(AccountRole.RESTAURANT.name()))
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath(restaurantPath))
@@ -115,6 +115,22 @@ public class WhatEatSecurityConfiguration {
                         .hasAnyAuthority(AccountRole.ADMIN.name(), AccountRole.MANAGER.name()))
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, tagPath)
                         .authenticated());
+    }
+
+    @SuppressWarnings("java:S1075")
+    private void handleFoodTagApi(HttpSecurity http) throws Exception {
+        final String foodTagPath = "/foodtags/**";
+        final String foodTagIdPath = "/foodtags/{id}";
+        http.authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.POST, resolvePath("/foodtags"))
+                        .hasAnyAuthority(AccountRole.ADMIN.name(), AccountRole.MANAGER.name()))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.PATCH, resolvePath(foodTagPath))
+                        .hasAnyAuthority(AccountRole.ADMIN.name(), AccountRole.MANAGER.name()))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath(foodTagPath))
+                        .hasAnyAuthority(AccountRole.ADMIN.name(), AccountRole.MANAGER.name()))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.POST, resolvePath(foodTagIdPath + "/activate"))
+                        .hasAnyAuthority(AccountRole.ADMIN.name(), AccountRole.MANAGER.name()))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.POST, resolvePath(foodTagIdPath + "/deactivate"))
+                        .hasAnyAuthority(AccountRole.ADMIN.name(), AccountRole.MANAGER.name()));
     }
 
     private String resolvePath(String path) {

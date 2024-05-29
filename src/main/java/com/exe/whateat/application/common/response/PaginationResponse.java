@@ -65,7 +65,7 @@ public abstract class PaginationResponse<T> {
     }
 
     public void setLimit(Integer limit) {
-        if (limit == null || limit < 1 || limit < count) {
+        if (limit == null || limit < 1) {
             throw WhatEatException.builder()
                     .code(WhatEatErrorCode.WES_0001)
                     .reason("limit", "Lỗi khi gắn biến 'limit'.")
