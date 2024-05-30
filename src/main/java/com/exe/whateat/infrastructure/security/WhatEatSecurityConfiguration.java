@@ -101,6 +101,8 @@ public class WhatEatSecurityConfiguration {
                         .hasAnyAuthority(AccountRole.ADMIN.name(), AccountRole.MANAGER.name()))
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.DELETE, foodPath)
                         .hasAnyAuthority(AccountRole.ADMIN.name(), AccountRole.MANAGER.name()))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath("/foods/random"))
+                        .hasAuthority(AccountRole.USER.name()))
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, foodPath)
                         .authenticated());
     }

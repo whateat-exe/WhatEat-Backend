@@ -7,9 +7,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -34,10 +31,6 @@ public class Food extends AbstractEntity {
 
     @Column(name = "image", nullable = false)
     private String image;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_food_id", columnDefinition = AbstractEntity.ID_COLUMN)
-    private Food parentFood;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)

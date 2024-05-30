@@ -64,7 +64,7 @@ public final class GetTagsOfFood {
 
         @GetMapping("/foods/{id}/tags")
         @Operation(
-                summary = "Get tags of a food API. Returns the list of tags on said food paginated. ADMIN & MANAGER will return all."
+                summary = "Get tags of a food API. Returns the list of tags on said food paginated. ADMIN & MANAGER only."
         )
         @ApiResponse(
                 description = "Successful. Returns list of the foods.",
