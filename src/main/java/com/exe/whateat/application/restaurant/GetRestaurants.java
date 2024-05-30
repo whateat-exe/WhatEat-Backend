@@ -5,10 +5,12 @@ import com.exe.whateat.application.common.WhatEatMapper;
 import com.exe.whateat.application.common.request.PaginationRequest;
 import com.exe.whateat.application.restaurant.response.RestaurantResponse;
 import com.exe.whateat.application.restaurant.response.RestaurantsResponse;
+import com.exe.whateat.entity.common.ActiveStatus;
 import com.exe.whateat.entity.restaurant.QRestaurant;
 import com.exe.whateat.entity.restaurant.Restaurant;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
 import com.exe.whateat.infrastructure.repository.RestaurantRepository;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -19,7 +21,11 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -31,8 +37,12 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class GetRestaurants {
 
+    @Getter
+    @Setter
     public static final class GetRestaurantsRequest extends PaginationRequest {
 
+        private String name;
+        private ActiveStatus status;
     }
 
     @RestController
@@ -59,7 +69,7 @@ public final class GetRestaurants {
                 responseCode = "400s/500s",
                 content = @Content(schema = @Schema(implementation = WhatEatErrorResponse.class))
         )
-        public ResponseEntity<Object> getRestaurants(GetRestaurantsRequest request) {
+        public ResponseEntity<Object> getRestaurants(@ParameterObject GetRestaurantsRequest request) {
             final RestaurantsResponse response = service.get(request);
             return ResponseEntity.ok(response);
         }
@@ -83,9 +93,17 @@ public final class GetRestaurants {
 
         public RestaurantsResponse get(GetRestaurantsRequest request) {
             final QRestaurant qRestaurant = QRestaurant.restaurant;
+            BooleanExpression predicates = qRestaurant.isNotNull();
+            if (StringUtils.isNotBlank(request.getName())) {
+                predicates = predicates.and(qRestaurant.name.containsIgnoreCase(request.getName()));
+            }
+            if (request.getStatus() != null) {
+                predicates = predicates.and(qRestaurant.account.status.eq(request.getStatus()));
+            }
             final JPAQuery<Restaurant> restaurantQuery = new JPAQuery<>(entityManager)
                     .select(qRestaurant)
                     .from(qRestaurant)
+                    .where(predicates)
                     .limit(request.getLimit())
                     .offset(request.getOffset());
             final List<Restaurant> restaurants = restaurantQuery.fetch();

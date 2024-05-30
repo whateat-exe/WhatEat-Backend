@@ -22,14 +22,11 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.apache.commons.lang3.EnumUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Optional;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class CreateTag {
@@ -38,29 +35,29 @@ public final class CreateTag {
     @Setter
     public static final class CreateTagRequest {
 
-        @NotNull(message = "tag name is required")
-        private String tagName;
+        @NotNull(message = "Tên của nhãn món ăn là cần thiết.")
+        private String name;
 
-        @NotNull(message = "tag type is required")
-        private String tagType;
+        @NotNull(message = "Loại của nhãn món ăn là cần thiết.")
+        private TagType type;
     }
 
     @AllArgsConstructor
     @RestController
     @io.swagger.v3.oas.annotations.tags.Tag(
-            name = "tag",
-            description = "Create a tag"
+            name = "tags",
+            description = "APIs for tags"
     )
     public static final class CreateTagController extends AbstractController {
 
         private CreateTagService createTagService;
 
-        @PostMapping("tags")
+        @PostMapping("/tags")
         @Operation(
-                summary = "Create tag API. Returns the new information of tag.",
+                summary = "Create tag API. Returns the new information of tag. Only for ADMIN and MANAGER.",
                 requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                         description = "Information of the tag.",
-                        content = @Content(schema = @Schema(implementation = CreateTag.CreateTagRequest.class))
+                        content = @Content(schema = @Schema(implementation = CreateTagRequest.class))
                 )
         )
         @ApiResponse(
@@ -73,8 +70,8 @@ public final class CreateTag {
                 responseCode = "400s/500s",
                 content = @Content(schema = @Schema(implementation = WhatEatErrorResponse.class))
         )
-        public ResponseEntity<Object> createTag(@RequestBody @Valid CreateTagRequest createTagRequest) {
-            var response = createTagService.createTag(createTagRequest);
+        public ResponseEntity<Object> createTag(@RequestBody @Valid CreateTagRequest request) {
+            var response = createTagService.createTag(request);
             return ResponseEntity.ok(response);
         }
     }
@@ -87,34 +84,21 @@ public final class CreateTag {
         private TagRepository tagRepository;
         private TagMapper tagMapper;
 
-        public TagResponse createTag(CreateTagRequest createTagRequest) {
-
-            //check duplicate tag name
-            Optional<Tag> tagCheckDuplicate = tagRepository.findByName(createTagRequest.tagName);
-            if (tagCheckDuplicate.isPresent()) {
+        public TagResponse createTag(CreateTagRequest request) {
+            if (tagRepository.existsByNameIgnoreCase(request.getName())) {
                 throw WhatEatException
                         .builder()
                         .code(WhatEatErrorCode.WEB_0004)
-                        .reason("Tag bị trùng", "Tag tạo mới đã bị trùng tên")
+                        .reason("name", "Nhãn món ăn tạo mới đã bị trùng tên")
                         .build();
             }
-
-            if (!EnumUtils.isValidEnum(TagType.class, createTagRequest.tagType)) {
-                throw WhatEatException
-                        .builder()
-                        .code(WhatEatErrorCode.WEB_0008)
-                        .reason("Tag Type", "Thể loại tag không phù hợp")
-                        .build();
-            }
-
-            Tag tag = Tag
-                    .builder()
+            Tag tag = Tag.builder()
                     .id(WhatEatId.generate())
-                    .name(createTagRequest.tagName)
-                    .type(TagType.valueOf(createTagRequest.tagType))
+                    .name(request.getName())
+                    .type(request.getType())
                     .build();
-            Tag tagCreated = tagRepository.saveAndFlush(tag);
-            return tagMapper.convertToDto(tagCreated);
+            tag = tagRepository.save(tag);
+            return tagMapper.convertToDto(tag);
         }
     }
 }

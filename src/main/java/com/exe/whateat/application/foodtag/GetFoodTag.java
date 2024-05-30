@@ -1,9 +1,12 @@
 package com.exe.whateat.application.foodtag;
 
-import com.exe.whateat.application.food.mapper.FoodMapper;
+import com.exe.whateat.application.common.AbstractController;
+import com.exe.whateat.application.common.WhatEatMapper;
+import com.exe.whateat.application.exception.WhatEatErrorCode;
+import com.exe.whateat.application.exception.WhatEatException;
 import com.exe.whateat.application.foodtag.response.FoodTagResponse;
-import com.exe.whateat.application.tag.mapper.TagMapper;
 import com.exe.whateat.entity.common.WhatEatId;
+import com.exe.whateat.entity.food.FoodTag;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
 import com.exe.whateat.infrastructure.repository.FoodTagRepository;
 import io.github.x4ala1c.tsid.Tsid;
@@ -27,10 +30,10 @@ public class GetFoodTag {
     @RestController
     @AllArgsConstructor
     @Tag(
-            name = "foodtag",
-            description = "get a foodtag by id"
+            name = "foodtags",
+            description = "APIs for food tags."
     )
-    public static final class GetFoodTagController {
+    public static final class GetFoodTagController extends AbstractController {
 
         private GetFoodTagService getFoodTagService;
 
@@ -59,17 +62,16 @@ public class GetFoodTag {
     public static class GetFoodTagService {
 
         private FoodTagRepository foodTagRepository;
-        private FoodMapper foodMapper;
-        private TagMapper tagMapper;
+        private WhatEatMapper<FoodTag, FoodTagResponse> mapper;
 
-        public FoodTagResponse getFoodTag(Tsid tsid) {
-            var foodtag = foodTagRepository.FindByFoodTag_Id(WhatEatId.builder().id(tsid).build());
-            return FoodTagResponse
-                    .builder()
-                    .tsid(foodtag.getId().asTsid())
-                    .tagResponse(tagMapper.convertToDto(foodtag.getTag()))
-                    .foodResponse(foodMapper.convertToDto(foodtag.getFood()))
-                    .build();
+        public FoodTagResponse getFoodTag(Tsid id) {
+            var foodtag = foodTagRepository.findByIdPopulated(new WhatEatId(id))
+                    .orElseThrow(() -> WhatEatException
+                            .builder()
+                            .code(WhatEatErrorCode.WEB_0009)
+                            .reason("foodTag", "Món ăn với nhãn trên không tồn tại.")
+                            .build());
+            return mapper.convertToDto(foodtag);
         }
     }
 }

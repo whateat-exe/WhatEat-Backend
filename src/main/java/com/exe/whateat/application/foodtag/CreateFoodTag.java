@@ -1,11 +1,10 @@
 package com.exe.whateat.application.foodtag;
 
 import com.exe.whateat.application.common.AbstractController;
+import com.exe.whateat.application.common.WhatEatMapper;
 import com.exe.whateat.application.exception.WhatEatErrorCode;
 import com.exe.whateat.application.exception.WhatEatException;
-import com.exe.whateat.application.food.mapper.FoodMapper;
 import com.exe.whateat.application.foodtag.response.FoodTagResponse;
-import com.exe.whateat.application.tag.mapper.TagMapper;
 import com.exe.whateat.entity.common.ActiveStatus;
 import com.exe.whateat.entity.common.WhatEatId;
 import com.exe.whateat.entity.food.FoodTag;
@@ -26,6 +25,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 public final class CreateFoodTag {
 
     @Getter
+    @Setter
     public static class CreateFoodTagRequest {
 
         @NotNull(message = "Food Id can not be null")
@@ -48,19 +49,19 @@ public final class CreateFoodTag {
     @RestController
     @AllArgsConstructor
     @Tag(
-            name = "foodtag",
-            description = "Create food tag"
+            name = "foodtags",
+            description = "APIs for food tags."
     )
     public static final class CreateFoodTagController extends AbstractController {
 
-        private CreateFoodTagService createFoodTagService;
+        private CreateFoodTagService service;
 
         @PostMapping("/foodtags")
         @Operation(
                 summary = "Create food tag API. Returns the new information of food and tag. ADMIN/MANAGER only.",
                 requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                         description = "Information of the food and tag.",
-                        content = @Content(schema = @Schema(implementation = CreateFoodTag.CreateFoodTagRequest.class))
+                        content = @Content(schema = @Schema(implementation = CreateFoodTagRequest.class))
                 )
         )
         @ApiResponse(
@@ -74,7 +75,7 @@ public final class CreateFoodTag {
                 content = @Content(schema = @Schema(implementation = WhatEatErrorResponse.class))
         )
         public ResponseEntity<Object> createTag(@RequestBody @Valid CreateFoodTagRequest createFoodTagRequest) {
-            var response = createFoodTagService.createFoodTag(createFoodTagRequest);
+            var response = service.createFoodTag(createFoodTagRequest);
             return ResponseEntity.ok(response);
         }
     }
@@ -87,51 +88,26 @@ public final class CreateFoodTag {
         private FoodTagRepository foodTagRepository;
         private FoodRepository foodRepository;
         private TagRepository tagRepository;
-        private TagMapper tagMapper;
-        private FoodMapper foodMapper;
+        private WhatEatMapper<FoodTag, FoodTagResponse> mapper;
 
-        @SuppressWarnings("java:S3457")
-        public FoodTagResponse createFoodTag(CreateFoodTagRequest createFoodTagRequest) {
-            //Check food có tồn tại
-            var food = foodRepository.findById(WhatEatId.builder().id(createFoodTagRequest.foodId).build());
-            if (!food.isPresent())
-                throw WhatEatException.builder()
-                        .code(WhatEatErrorCode.WEB_0005)
-                        .reason("food", String.format("Món ăn không tồn tại."))
-                        .build();
-            // Check tag co ton tai
-            var tag = tagRepository.findById(WhatEatId.builder().id(createFoodTagRequest.tagId).build());
-            if (!tag.isPresent())
+        public FoodTagResponse createFoodTag(CreateFoodTagRequest request) {
+            final WhatEatId foodId = new WhatEatId(request.getFoodId());
+            final WhatEatId tagId = new WhatEatId(request.getTagId());
+            if (foodTagRepository.foodTagAlreadyExists(foodId, tagId)) {
                 throw WhatEatException
                         .builder()
-                        .code(WhatEatErrorCode.WES_0001)
-                        .reason("tag", "Tag này không tồn tại")
+                        .code(WhatEatErrorCode.WEB_0009)
+                        .reason("foodTag", "Món ăn với nhãn trên đã tồn tại.")
                         .build();
-            //Check duplicate
-            var foodTags = foodTagRepository.findByFood(food.get());
-            for (var foodTagCheckDuplicated : foodTags) {
-                if (createFoodTagRequest.tagId.equals(foodTagCheckDuplicated.getTag().getId().asTsid()))
-                    throw WhatEatException
-                            .builder()
-                            .code(WhatEatErrorCode.WES_0001)
-                            .reason("food tag duplicated", "Food tag was created before")
-                            .build();
             }
-            // Create food tag
-            FoodTag foodTag = FoodTag
-                    .builder()
-                    .food(food.get())
-                    .tag(tag.get())
+            FoodTag foodTag = FoodTag.builder()
                     .id(WhatEatId.generate())
+                    .food(foodRepository.getReferenceById(foodId))
+                    .tag(tagRepository.getReferenceById(tagId))
                     .status(ActiveStatus.ACTIVE)
                     .build();
-            var foodTagCreated = foodTagRepository.saveAndFlush(foodTag);
-            return FoodTagResponse
-                    .builder()
-                    .tsid(foodTagCreated.getId().asTsid())
-                    .tagResponse(tagMapper.convertToDto(foodTag.getTag()))
-                    .foodResponse(foodMapper.convertToDto(foodTag.getFood()))
-                    .build();
+            foodTag = foodTagRepository.save(foodTag);
+            return mapper.convertToDto(foodTag);
         }
     }
 }
