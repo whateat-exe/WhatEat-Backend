@@ -12,7 +12,6 @@ import com.exe.whateat.entity.common.WhatEatId;
 import com.exe.whateat.entity.food.Food;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
 import com.exe.whateat.infrastructure.repository.FoodRepository;
-import io.github.x4ala1c.tsid.Tsid;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -41,8 +40,6 @@ public final class CreateFood {
 
         @NotBlank(message = "Tên của món ăn bắt buộc phải có.")
         private String name;
-
-        private Tsid parentFoodId;
 
         @NotBlank(message = "Ảnh của món ăn bắt buộc phải có.")
         private String image;
@@ -99,19 +96,9 @@ public final class CreateFood {
                         .reason("name", "Tên của món ăn đã tồn tại.")
                         .build();
             }
-            final Tsid parentFoodId = request.getParentFoodId();
-            if (request.getParentFoodId() != null && !foodRepository.existsById(new WhatEatId(request.getParentFoodId()))) {
-                throw WhatEatException.builder()
-                        .code(WhatEatErrorCode.WEB_0005)
-                        .reason("parentFood", String.format("Món ăn với ID '%s' không tồn tại.", request.getParentFoodId()))
-                        .build();
-            }
             Food food = Food.builder()
                     .id(WhatEatId.generate())
                     .name(request.getName())
-                    .parentFood(parentFoodId != null
-                            ? foodRepository.getReferenceById(new WhatEatId(parentFoodId))
-                            : null)
                     .status(ActiveStatus.ACTIVE)
                     .build();
             FirebaseImageResponse firebaseImageResponse = null;

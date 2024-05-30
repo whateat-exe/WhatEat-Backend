@@ -31,8 +31,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Objects;
-
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class UpdateFood {
 
@@ -99,9 +97,6 @@ public final class UpdateFood {
             if (StringUtils.isNotBlank(request.getName())) {
                 verifyAndSetName(request, food);
             }
-            if (request.getParentFoodId() != null) {
-                verifyAndSetParentFood(id, request, food);
-            }
             FirebaseImageResponse firebaseImageResponse = null;
             try {
                 if (StringUtils.isNotBlank(request.getImage())) {
@@ -132,28 +127,6 @@ public final class UpdateFood {
                         .build();
             }
             food.setName(request.getName());
-        }
-
-        private void verifyAndSetParentFood(Tsid id, UpdateFoodRequest request, Food food) {
-            if (Objects.equals(request.getParentFoodId(), Tsid.fromLong(0))) {
-                // Special case to set parent to null
-                food.setParentFood(null);
-            } else {
-                final WhatEatId parentFoodId = new WhatEatId(request.getParentFoodId());
-                if (!foodRepository.existsById(parentFoodId)) {
-                    throw WhatEatException.builder()
-                            .code(WhatEatErrorCode.WEB_0005)
-                            .reason("parentFood", "Món ăn được chỉ tới không tồn tại.")
-                            .build();
-                }
-                if (foodRepository.parentFoodIsNotValidToSet(id.asLong(), request.getParentFoodId().asLong())) {
-                    throw WhatEatException.builder()
-                            .code(WhatEatErrorCode.WEB_0006)
-                            .reason("parentFood", "Món ăn được chỉ tới là chính bản thân hoặc đang chỉ chính món được cập nhật.")
-                            .build();
-                }
-                food.setParentFood(foodRepository.getReferenceById(parentFoodId));
-            }
         }
     }
 }

@@ -64,7 +64,6 @@ public final class GetRestaurant {
         private final RestaurantRepository restaurantRepository;
         private final WhatEatMapper<Restaurant, RestaurantResponse> mapper;
 
-        @SuppressWarnings("Duplicates")
         public RestaurantResponse get(Tsid id) {
             final WhatEatId whatEatId = new WhatEatId(id);
             final Restaurant restaurant = restaurantRepository.findById(whatEatId)

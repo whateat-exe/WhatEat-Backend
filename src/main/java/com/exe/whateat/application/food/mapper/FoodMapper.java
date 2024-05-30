@@ -18,9 +18,6 @@ public final class FoodMapper implements WhatEatMapper<Food, FoodResponse> {
                 .name(food.getName())
                 .status(food.getStatus().name())
                 .image(food.getImage());
-        if (food.getParentFood() != null) {
-            builder.parentFood(food.getParentFood().getId().asTsid());
-        }
         return builder.build();
     }
 }
