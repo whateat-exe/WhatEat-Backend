@@ -8,6 +8,7 @@ import com.exe.whateat.entity.post.PostVoting;
 import com.exe.whateat.entity.profile.PersonalProfile;
 import com.exe.whateat.entity.random.RandomHistory;
 import com.exe.whateat.entity.restaurant.Restaurant;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -22,10 +23,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.NaturalId;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 
@@ -81,7 +85,7 @@ public class Account extends AbstractEntity implements UserDetails {
     @OneToMany(mappedBy = "account", fetch = FetchType.LAZY)
     private List<PostComment> postComments;
 
-    @OneToMany(mappedBy = "account")
+    @OneToMany(mappedBy = "account", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<AccountVerify> accountVerify;
 
     @Override
