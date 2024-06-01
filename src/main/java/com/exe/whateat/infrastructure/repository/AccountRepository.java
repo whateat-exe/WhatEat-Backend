@@ -3,6 +3,7 @@ package com.exe.whateat.infrastructure.repository;
 import com.exe.whateat.entity.account.Account;
 import com.exe.whateat.entity.common.WhatEatId;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
@@ -14,10 +15,20 @@ public interface AccountRepository extends JpaRepository<Account, WhatEatId> {
 
     Boolean existsByEmail(String email);
 
-    @Query(value =
-            """
-            SELECT ac FROM Account ac
-            WHERE ac.status = 'PENDING' AND ac.id < ?1
-           """)
-    List<Account> findAllByStatusPendingForDelete(WhatEatId id);
+    @Query(value = """
+                SELECT ac.* FROM account ac
+                inner join account_verify av 
+                on ac.id = av.account_id
+                WHERE ac.status = 'PENDING' 
+                AND av.status = 'PENDING'
+                AND (?1 - (av.id >> 22))  > ?2
+                """, nativeQuery = true)
+    List<Account> getAllAccountPendingExpired(Long present, Long exceed);
+
+    @Query(value = """
+                delete from account
+                where id in ?1
+            """, nativeQuery = true)
+    @Modifying
+    void deleteUnusedAccount(List<Long> ids);
 }
