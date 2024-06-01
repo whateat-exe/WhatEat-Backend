@@ -54,13 +54,6 @@ public final class WhatEatId implements Comparable<WhatEatId> {
 
     @Override
     public int compareTo(@NonNull WhatEatId o) {
-        final long result = this.id.asLong() - o.id.asLong();
-        if (result < 0) {
-            return -1;
-        }
-        if (result > 0) {
-            return 1;
-        }
-        return 0;
+        return id.compareTo(o.id);
     }
 }

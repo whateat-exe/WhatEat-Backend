@@ -54,6 +54,7 @@ public class WhatEatSecurityConfiguration {
         handleRestaurantApi(http);
         handleFoodApi(http);
         handleTagApi(http);
+        handleRandomApi(http);
         handleFoodTagApi(http);
         if (environment.acceptsProfiles(Profiles.of("dev"))) {
             http.authorizeHttpRequests(c -> c.requestMatchers(resolvePath("/test/**")).permitAll());
@@ -133,6 +134,15 @@ public class WhatEatSecurityConfiguration {
                         .hasAnyAuthority(AccountRole.ADMIN.name(), AccountRole.MANAGER.name()))
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.POST, resolvePath(foodTagIdPath + "/deactivate"))
                         .hasAnyAuthority(AccountRole.ADMIN.name(), AccountRole.MANAGER.name()));
+    }
+
+    @SuppressWarnings("java:S1075")
+    private void handleRandomApi(HttpSecurity http) throws Exception {
+        final String path = "/foods/random";
+        http.authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath(path + "/history"))
+                        .hasAuthority(AccountRole.USER.name()))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath(path + "/status"))
+                        .hasAuthority(AccountRole.USER.name()));
     }
 
     private String resolvePath(String path) {
