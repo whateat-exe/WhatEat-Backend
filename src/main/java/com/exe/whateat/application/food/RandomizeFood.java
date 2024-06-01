@@ -5,9 +5,13 @@ import com.exe.whateat.application.common.WhatEatMapper;
 import com.exe.whateat.application.exception.WhatEatErrorCode;
 import com.exe.whateat.application.exception.WhatEatException;
 import com.exe.whateat.application.food.response.FoodResponse;
+import com.exe.whateat.application.randomhistory.RandomService;
+import com.exe.whateat.application.randomhistory.response.RandomResponse;
+import com.exe.whateat.entity.account.Account;
 import com.exe.whateat.entity.food.Food;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
 import com.exe.whateat.infrastructure.repository.FoodRepository;
+import com.exe.whateat.infrastructure.security.WhatEatSecurityHelper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -31,8 +35,8 @@ public final class RandomizeFood {
     @RestController
     @AllArgsConstructor
     @Tag(
-            name = "food",
-            description = "APIs for food."
+            name = "random",
+            description = "APIs for randomization."
     )
     public static final class RandomizeFoodController extends AbstractController {
 
@@ -66,8 +70,22 @@ public final class RandomizeFood {
 
         private final FoodRepository foodRepository;
         private final WhatEatMapper<Food, FoodResponse> mapper;
+        private final RandomService randomService;
+        private final WhatEatSecurityHelper securityHelper;
 
         public FoodResponse random() {
+            final Account account = securityHelper.getCurrentLoggedInAccount()
+                    .orElseThrow(() -> WhatEatException.builder()
+                            .code(WhatEatErrorCode.WEA_0013)
+                            .reason("account", "Không xác định được tài khoản đang thực hiện hành động này.")
+                            .build());
+            final RandomResponse randomResponse = randomService.checkIfAllowedToRandomize(account);
+            if (randomResponse.notAllowedToRandomize()) {
+                throw WhatEatException.builder()
+                        .code(WhatEatErrorCode.WEB_0013)
+                        .reason("cooldown", "Số lượng ngẫu nhiên đã đạt tới giới hạn.")
+                        .build();
+            }
             final List<Food> foods = foodRepository.random();
             if (foods.isEmpty()) {
                 throw WhatEatException.builder()
@@ -76,6 +94,8 @@ public final class RandomizeFood {
                         .build();
             }
             final int position = RANDOM.nextInt(foods.size());
+            final Food food = foods.get(position);
+            randomService.saveRandomHistory(account, food);
             return mapper.convertToDto(foods.get(position));
         }
     }

@@ -39,7 +39,6 @@ public final class UpdateFood {
     public static final class UpdateFoodRequest {
 
         private String name;
-        private Tsid parentFoodId;
         private String image;
     }
 
