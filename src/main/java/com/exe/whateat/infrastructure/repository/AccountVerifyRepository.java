@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface AccountVerifyRepository extends JpaRepository<AccountVerify, WhatEatId> {
@@ -43,4 +44,26 @@ public interface AccountVerifyRepository extends JpaRepository<AccountVerify, Wh
     )
     @Modifying
     void updateTheCodeToBeVerified(WhatEatId accountId, String verificationCode);
+
+    @Query(value = """
+                    update account_verify as av set status = 'EXPIRED'
+                    where status = 'PENDING'
+                    and  (?1 - (av.id >> 22))  > ?2
+                   """, nativeQuery = true)
+    @Modifying
+    void updateTheCodeToExpired(Long present, Long exceed);
+
+    @Query(value = """
+                     delete from account_verify
+                     where status = 'EXPIRED'
+                    """, nativeQuery = true)
+    @Modifying
+    void deleteAllCodeExpired();
+
+    @Query(value = """
+                     delete from account_verify
+                     where id in ?1
+                    """, nativeQuery = true)
+    @Modifying
+    void deleteAllCodePendingUnused(List<Long> ids);
 }

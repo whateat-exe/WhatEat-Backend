@@ -3,7 +3,6 @@ package com.exe.whateat.entity.random;
 import com.exe.whateat.entity.account.Account;
 import com.exe.whateat.entity.common.AbstractEntity;
 import com.exe.whateat.entity.food.Food;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
@@ -16,7 +15,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
-import java.time.Instant;
 import java.util.List;
 
 @Getter
@@ -35,9 +33,6 @@ public class RandomHistory extends AbstractEntity {
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "food_id", columnDefinition = AbstractEntity.ID_COLUMN)
     private Food food;
-
-    @Column(name = "created_at", nullable = false)
-    private Instant createdAt;
 
     @OneToMany(mappedBy = "randomHistory")
     private List<RandomHistoryDish> randomHistoryDishes;
