@@ -73,6 +73,7 @@ public class RandomServiceImpl implements RandomService {
         final List<RandomHistory> recentRandomHistory = new BlazeJPAQuery<RandomHistory>(entityManager, criteriaBuilderFactory)
                 .select(qRandomHistory)
                 .from(qRandomHistory)
+                .where(qRandomHistory.account.eq(account))
                 .orderBy(qRandomHistory.id.id.desc())
                 .limit(maxCount)
                 .fetch();

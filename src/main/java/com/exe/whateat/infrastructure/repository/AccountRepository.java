@@ -16,13 +16,13 @@ public interface AccountRepository extends JpaRepository<Account, WhatEatId> {
     Boolean existsByEmail(String email);
 
     @Query(value = """
-                SELECT ac.* FROM account ac
-                inner join account_verify av 
-                on ac.id = av.account_id
-                WHERE ac.status = 'PENDING' 
-                AND av.status = 'PENDING'
-                AND (?1 - (av.id >> 22))  > ?2
-                """, nativeQuery = true)
+            SELECT ac.* FROM account ac
+            inner join account_verify av
+            on ac.id = av.account_id
+            WHERE ac.status = 'PENDING'
+            AND av.status = 'PENDING'
+            AND (?1 - (av.id >> 22))  > ?2
+            """, nativeQuery = true)
     List<Account> getAllAccountPendingExpired(Long present, Long exceed);
 
     @Query(value = """
