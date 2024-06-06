@@ -20,11 +20,14 @@ public class AccountCleanUpService {
     @Value("${whateat.tsid.epoch}")
     private long tsidEpoch;
 
-    @Autowired
-    private AccountRepository accountRepository;
+    private final AccountRepository accountRepository;
+    private final AccountVerifyRepository accountVerifyRepository;
 
     @Autowired
-    private AccountVerifyRepository accountVerifyRepository;
+    public AccountCleanUpService(AccountRepository accountRepository, AccountVerifyRepository accountVerifyRepository) {
+        this.accountRepository = accountRepository;
+        this.accountVerifyRepository = accountVerifyRepository;
+    }
 
     @Scheduled(cron = "0 0 0 * * *") // every hour
     @Transactional(rollbackOn = Exception.class)
@@ -35,7 +38,7 @@ public class AccountCleanUpService {
         for (var account : accounts) {
             accountIds.add(account.getId().asTsid().asLong());
             List<Long> idCodeList = new ArrayList<>();
-            if(!account.getAccountVerify().isEmpty()) {
+            if (!account.getAccountVerify().isEmpty()) {
                 var codeList = account.getAccountVerify();
                 codeList.forEach(x -> idCodeList.add(x.getId().asTsid().asLong()));
                 accountVerifyRepository.deleteAllCodePendingUnused(idCodeList);

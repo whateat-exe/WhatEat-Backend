@@ -1,18 +1,15 @@
 package com.exe.whateat.application.dish;
 
 import com.exe.whateat.application.common.AbstractController;
-import com.exe.whateat.application.common.WhatEatMapper;
 import com.exe.whateat.application.dish.mapper.DishMapper;
 import com.exe.whateat.application.dish.response.DishResponse;
 import com.exe.whateat.application.exception.WhatEatErrorCode;
 import com.exe.whateat.application.exception.WhatEatException;
-import com.exe.whateat.application.food.response.FoodResponse;
 import com.exe.whateat.application.image.FirebaseImageResponse;
 import com.exe.whateat.application.image.FirebaseImageService;
 import com.exe.whateat.entity.common.Money;
 import com.exe.whateat.entity.common.WhatEatId;
 import com.exe.whateat.entity.food.Dish;
-import com.exe.whateat.entity.food.Food;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
 import com.exe.whateat.infrastructure.repository.DishRepository;
 import com.exe.whateat.infrastructure.repository.FoodRepository;
@@ -98,7 +95,7 @@ public final class UpdateDish {
             var dishId = WhatEatId.builder().id(id).build();
             var foodId = WhatEatId.builder().id(request.getFoodId()).build();
             var dish = dishRepository.findById(dishId);
-            if (!dish.isPresent()) {
+            if (dish.isEmpty()) {
                 throw WhatEatException.builder()
                         .code(WhatEatErrorCode.WEB_0015)
                         .reason("dish", "Món ăn không tồn tại")
@@ -113,7 +110,7 @@ public final class UpdateDish {
             if (request.price != null) {
                 dish.get().setPrice(request.getPrice());
             }
-            if(request.foodId != null) {
+            if (request.foodId != null) {
                 dish.get().setFood(foodRepository.getReferenceById(foodId));
             }
             FirebaseImageResponse firebaseImageResponse = null;

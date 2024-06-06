@@ -4,7 +4,6 @@ import com.exe.whateat.application.food.response.FoodResponse;
 import com.exe.whateat.application.restaurant.response.RestaurantResponse;
 import com.exe.whateat.entity.common.Money;
 import io.github.x4ala1c.tsid.Tsid;
-import jakarta.persistence.Embedded;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
