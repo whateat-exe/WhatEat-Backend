@@ -8,11 +8,11 @@ import org.springframework.data.jpa.repository.Query;
 public interface DishRepository extends JpaRepository<Dish, WhatEatId> {
 
     @Query(value = """ 
-                    SELECT d FROM Dish d
-                    JOIN FETCH d.food
-                    JOIN FETCH d.restaurant
-                    WHERE d.id = ?1
-                """)
+                SELECT d FROM Dish d
+                JOIN FETCH d.food
+                JOIN FETCH d.restaurant
+                WHERE d.id = ?1
+            """)
     Dish findByIdOfDish(WhatEatId whatEatId);
 
     boolean existsByNameIgnoreCase(String name);

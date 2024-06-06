@@ -1,7 +1,6 @@
 package com.exe.whateat.application.dish.response;
 
 import com.exe.whateat.application.common.response.PaginationResponse;
-import com.exe.whateat.application.food.response.FoodResponse;
 
 import java.util.List;
 

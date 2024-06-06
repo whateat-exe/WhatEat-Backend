@@ -1,7 +1,5 @@
 package com.exe.whateat.application.dish;
 
-import com.blazebit.persistence.CriteriaBuilderFactory;
-import com.blazebit.persistence.querydsl.BlazeJPAQuery;
 import com.exe.whateat.application.common.AbstractController;
 import com.exe.whateat.application.dish.mapper.DishMapper;
 import com.exe.whateat.application.dish.response.DishResponse;
@@ -9,10 +7,6 @@ import com.exe.whateat.application.dish.response.DishesResponse;
 import com.exe.whateat.application.exception.WhatEatErrorCode;
 import com.exe.whateat.application.exception.WhatEatException;
 import com.exe.whateat.entity.common.WhatEatId;
-import com.exe.whateat.entity.food.Dish;
-import com.exe.whateat.entity.food.Food;
-import com.exe.whateat.entity.food.FoodTag;
-import com.exe.whateat.entity.food.QDish;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
 import com.exe.whateat.infrastructure.repository.DishRepository;
 import io.github.x4ala1c.tsid.Tsid;
@@ -21,7 +15,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.persistence.EntityManager;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -75,7 +68,7 @@ public final class GetDish {
             var whatEatDishId = WhatEatId.builder().id(tsid).build();
             var dish = dishRepository.findByIdOfDish(whatEatDishId);
             if (dish == null)
-                throw  WhatEatException
+                throw WhatEatException
                         .builder()
                         .code(WhatEatErrorCode.WEB_0014)
                         .reason("món ăn", "Món ăn không tồn tại")

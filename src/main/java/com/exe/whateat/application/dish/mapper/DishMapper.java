@@ -20,7 +20,7 @@ public class DishMapper implements WhatEatMapper<Dish, DishResponse> {
         if (dish == null) {
             return null;
         }
-        return  DishResponse.builder()
+        return DishResponse.builder()
                 .id(dish.getId().asTsid())
                 .name(dish.getName())
                 .status(dish.getStatus().name())
