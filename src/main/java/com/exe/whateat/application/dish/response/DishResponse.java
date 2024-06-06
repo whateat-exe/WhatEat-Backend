@@ -19,7 +19,7 @@ public class DishResponse {
     private String description;
     private String image;
     private String status;
-    private long price;
+    private Money price;
     private RestaurantResponse restaurantResponse;
     private FoodResponse foodResponse;
 }

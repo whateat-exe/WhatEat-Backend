@@ -6,10 +6,12 @@ import com.exe.whateat.application.common.AbstractController;
 import com.exe.whateat.application.common.request.PaginationRequest;
 import com.exe.whateat.application.dish.mapper.DishMapper;
 import com.exe.whateat.application.dish.response.DishesResponse;
+import com.exe.whateat.entity.common.WhatEatId;
 import com.exe.whateat.entity.food.Dish;
 import com.exe.whateat.entity.food.FoodTag;
 import com.exe.whateat.entity.food.QDish;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
+import io.github.x4ala1c.tsid.Tsid;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -24,15 +26,16 @@ import lombok.NoArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class GetDishes {
+public final class GetDishByRestaurant {
 
     @Data
-    private static final class GetDishesRequest extends PaginationRequest {
+    private static final class GetDishesByRestaurantRequest extends PaginationRequest {
 
     }
 
@@ -40,14 +43,14 @@ public final class GetDishes {
     @AllArgsConstructor
     @Tag(
             name = "dish",
-            description = "get dishes"
+            description = "get dishes by restaurant"
     )
     public static class GetDishesController extends AbstractController {
 
-        private GetDishesService getDishesService;
+        private GetDishesByRestaurantService getDishesByRestaurant;
 
         @Operation(
-                summary = "Get dishes API. Returns the list of dishes paginated"
+                summary = "Get dishes API of a restaurant. Returns the list of dishes paginated"
         )
         @ApiResponse(
                 description = "Successful. Returns list of the dishes.",
@@ -59,22 +62,23 @@ public final class GetDishes {
                 responseCode = "400s/500s",
                 content = @Content(schema = @Schema(implementation = WhatEatErrorResponse.class))
         )
-        @GetMapping("/dishes")
-        public ResponseEntity<Object> getDishes(@Valid GetDishesRequest getDishesRequest) {
-            var response = getDishesService.getDishes(getDishesRequest);
+        @GetMapping("/dishes/restaurants/{id}")
+        public ResponseEntity<Object> getDishes(@PathVariable Tsid id, @Valid GetDishesByRestaurantRequest getDishesRequest) {
+            var response = getDishesByRestaurant.getDishesByRestaurant(getDishesRequest, id);
             return ResponseEntity.ok(response);
         }
     }
 
     @Service
     @AllArgsConstructor
-    public static class GetDishesService {
+    public static class GetDishesByRestaurantService {
 
         private DishMapper dishMapper;
         private EntityManager entityManager;
         private final CriteriaBuilderFactory criteriaBuilderFactory;
 
-        public DishesResponse getDishes(GetDishesRequest getDishesRequest) {
+        public DishesResponse getDishesByRestaurant(GetDishesByRestaurantRequest getDishesByRestaurantRequest, Tsid tsid) {
+            final WhatEatId whatEatRestaurantId = WhatEatId.builder().id(tsid).build();
             final QDish qDish = QDish.dish;
             BlazeJPAQuery<Dish> query = new BlazeJPAQuery<>(entityManager, criteriaBuilderFactory);
             final List<Dish> dishes = query
@@ -82,16 +86,17 @@ public final class GetDishes {
                     .from(qDish)
                     .leftJoin(qDish.food).fetchJoin()
                     .leftJoin(qDish.restaurant).fetchJoin()
-                    .limit(getDishesRequest.getLimit())
-                    .offset(getDishesRequest.getOffset())
+                    .where(qDish.restaurant.id.eq(whatEatRestaurantId))
+                    .limit(getDishesByRestaurantRequest.getLimit())
+                    .offset(getDishesByRestaurantRequest.getOffset())
                     .fetch();
             final long count = new BlazeJPAQuery<FoodTag>(entityManager, criteriaBuilderFactory)
                     .select(qDish)
                     .from(qDish)
                     .fetchCount();
             final DishesResponse response = new DishesResponse(dishes.stream().map(dishMapper::convertToDto).toList(), count);
-            response.setLimit(getDishesRequest.getLimit());
-            response.setPage(getDishesRequest.getPage());
+            response.setLimit(getDishesByRestaurantRequest.getLimit());
+            response.setPage(getDishesByRestaurantRequest.getPage());
             return response;
         }
     }

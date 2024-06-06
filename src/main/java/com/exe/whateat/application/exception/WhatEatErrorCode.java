@@ -32,6 +32,8 @@ public enum WhatEatErrorCode {
     WEB_0011("Tài khoản không hợp lệ để gửi mã xác thực", HttpStatus.BAD_REQUEST),
     WEB_0012("Trạng thái hoạt động không hợp lệ", HttpStatus.BAD_REQUEST),
     WEB_0013("Món ăn không lấy ngẫu nhiên được.", HttpStatus.BAD_REQUEST),
+    WEB_0014("Món ăn đã bị trùng.", HttpStatus.BAD_REQUEST),
+    WEB_0015("Món ăn không tồn tại.", HttpStatus.BAD_REQUEST),
     WEV_0000("Invalid request", HttpStatus.BAD_REQUEST),
     WEV_0001("Invalid email address", HttpStatus.BAD_REQUEST),
     WEV_0002("Invalid password", HttpStatus.BAD_REQUEST),
