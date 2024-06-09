@@ -7,23 +7,22 @@ import com.exe.whateat.application.exception.WhatEatException;
 import com.exe.whateat.application.randomhistory.response.RandomResponse;
 import com.exe.whateat.entity.account.Account;
 import com.exe.whateat.entity.account.AccountRole;
-import com.exe.whateat.entity.common.AbstractEntity;
 import com.exe.whateat.entity.common.ActiveStatus;
 import com.exe.whateat.entity.common.WhatEatId;
 import com.exe.whateat.entity.food.Food;
+import com.exe.whateat.entity.random.QRandomCooldown;
 import com.exe.whateat.entity.random.QRandomHistory;
+import com.exe.whateat.entity.random.RandomCooldown;
 import com.exe.whateat.entity.random.RandomHistory;
+import com.exe.whateat.infrastructure.repository.RandomCooldownRepository;
 import com.exe.whateat.infrastructure.repository.RandomHistoryRepository;
 import io.github.x4ala1c.tsid.Tsid;
+import io.github.x4ala1c.tsid.TsidGenerator;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import java.time.Instant;
-import java.util.Comparator;
-import java.util.List;
 
 @Service
 public class RandomServiceImpl implements RandomService {
@@ -38,26 +37,35 @@ public class RandomServiceImpl implements RandomService {
     private long epoch;
 
     private final RandomHistoryRepository randomHistoryRepository;
+    private final RandomCooldownRepository randomCooldownRepository;
     private final EntityManager entityManager;
     private final CriteriaBuilderFactory criteriaBuilderFactory;
 
     @Autowired
-    public RandomServiceImpl(RandomHistoryRepository randomHistoryRepository, EntityManager entityManager,
-                             CriteriaBuilderFactory criteriaBuilderFactory) {
+    public RandomServiceImpl(RandomHistoryRepository randomHistoryRepository, RandomCooldownRepository randomCooldownRepository,
+                             EntityManager entityManager, CriteriaBuilderFactory criteriaBuilderFactory) {
         this.randomHistoryRepository = randomHistoryRepository;
+        this.randomCooldownRepository = randomCooldownRepository;
         this.entityManager = entityManager;
         this.criteriaBuilderFactory = criteriaBuilderFactory;
     }
 
     @Override
     @Transactional
-    public void saveRandomHistory(Account account, Food randomizedFood) {
+    public void saveRandomHistory(Account account, Food randomizedFood, boolean shouldBeReset) {
         checkAccount(account);
         if (randomizedFood == null) {
             throw WhatEatException.builder()
                     .code(WhatEatErrorCode.WES_0001)
                     .reason("food", "Món ăn không hợp lệ để lưu lịch sử random món ăn.")
                     .build();
+        }
+        if (shouldBeReset) {
+            final RandomCooldown randomCooldown = RandomCooldown.builder()
+                    .id(WhatEatId.generate())
+                    .account(account)
+                    .build();
+            randomCooldownRepository.save(randomCooldown);
         }
         randomHistoryRepository.save(RandomHistory.builder()
                 .id(WhatEatId.generate())
@@ -69,53 +77,50 @@ public class RandomServiceImpl implements RandomService {
     @Override
     public RandomResponse checkIfAllowedToRandomize(Account account) {
         checkAccount(account);
+        final Tsid currentTimestamp = TsidGenerator.globalGenerate();
+        long timestampInMillisMaxTimeAgo = currentTimestamp.asLong() >>> 22;
+        timestampInMillisMaxTimeAgo -= maxTime * 1000;
+        timestampInMillisMaxTimeAgo <<= 22;
+        final Tsid currentTimestampMaxTimeAgo = Tsid.fromLong(timestampInMillisMaxTimeAgo);
+        final QRandomCooldown qRandomCooldown = QRandomCooldown.randomCooldown;
+        final RandomCooldown recentStartOfCooldown = new BlazeJPAQuery<>(entityManager, criteriaBuilderFactory)
+                .select(qRandomCooldown)
+                .from(qRandomCooldown)
+                .where(qRandomCooldown.account.eq(account).and(qRandomCooldown.id.id.gt(currentTimestampMaxTimeAgo)))
+                .orderBy(qRandomCooldown.id.id.desc())
+                .fetchFirst();
+        if (recentStartOfCooldown == null) {
+            return RandomResponse.builder()
+                    .timeLeft(0)
+                    .maxCount(maxCount)
+                    .countLeft(maxCount)
+                    .reset(true)
+                    .build();
+        }
         final QRandomHistory qRandomHistory = QRandomHistory.randomHistory;
-        final List<RandomHistory> recentRandomHistory = new BlazeJPAQuery<RandomHistory>(entityManager, criteriaBuilderFactory)
+        final long recentRandomHistoryCount = new BlazeJPAQuery<>(entityManager, criteriaBuilderFactory)
                 .select(qRandomHistory)
                 .from(qRandomHistory)
-                .where(qRandomHistory.account.eq(account))
+                .where(qRandomHistory.account.eq(account).and(qRandomHistory.id.id.gt(recentStartOfCooldown.getId().asTsid())))
                 .orderBy(qRandomHistory.id.id.desc())
                 .limit(maxCount)
-                .fetch();
-        if (recentRandomHistory.isEmpty()) {
-            return RandomResponse.builder()
-                    .countLeft(maxCount)
-                    .maxCount(maxCount)
-                    .timeLeft(0)
-                    .build();
-        }
-        final long currentTimestamp = Instant.now().toEpochMilli() - epoch;
-        final List<RandomHistory> recentBelowMaxTimeHistory = recentRandomHistory.stream()
-                .filter(rh -> {
-                    final long result = extractTimestampDifference(rh.getId().asTsid(), currentTimestamp) / 1000;
-                    return result < maxTime;
-                })
-                .toList();
-        if (recentBelowMaxTimeHistory.isEmpty()) {
-            return RandomResponse.builder()
-                    .countLeft(maxCount)
-                    .maxCount(maxCount)
-                    .timeLeft(0)
-                    .build();
-        }
-        final RandomHistory minRandomHistoryRecently = recentBelowMaxTimeHistory.stream()
-                .min(Comparator.comparing(AbstractEntity::getId))
-                .orElseThrow(() -> WhatEatException.builder()
-                        .code(WhatEatErrorCode.WES_0001)
-                        .reason("randomStatus", "Không truy xuất được thời gian còn lại cho lần random tiếp theo.")
-                        .build());
-        final long timeLeft = recentBelowMaxTimeHistory.size() < maxCount
+                .fetchCount();
+        final int count = (int) (maxCount - recentRandomHistoryCount);
+        final long timeLeft = count > 0
                 ? 0
-                : (maxTime - (extractTimestampDifference(minRandomHistoryRecently.getId().asTsid(), currentTimestamp) / 1000));
+                : calculateTimeLeft(currentTimestamp, recentStartOfCooldown.getId().asTsid());
         return RandomResponse.builder()
-                .countLeft(maxCount - recentBelowMaxTimeHistory.size())
-                .maxCount(maxCount)
                 .timeLeft(timeLeft)
+                .maxCount(maxCount)
+                .countLeft(count)
+                .reset(false)
                 .build();
     }
 
-    private static long extractTimestampDifference(Tsid id, long currentTimestamp) {
-        return currentTimestamp - (id.asLong() >>> 22);
+    private long calculateTimeLeft(Tsid currentTimestamp, Tsid randomTime) {
+        final long currentTimestampAsMillis = (currentTimestamp.asLong() >>> 22) + epoch;
+        final long lastRandomTimeAsMillis = (randomTime.asLong() >>> 22) + epoch;
+        return (maxTime - ((currentTimestampAsMillis - lastRandomTimeAsMillis) / 1000L));
     }
 
     private static void checkAccount(Account account) {
