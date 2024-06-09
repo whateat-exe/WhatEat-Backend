@@ -95,7 +95,7 @@ public final class RandomizeFood {
             }
             final int position = RANDOM.nextInt(foods.size());
             final Food food = foods.get(position);
-            randomService.saveRandomHistory(account, food);
+            randomService.saveRandomHistory(account, food, randomResponse.shouldBeReset());
             return mapper.convertToDto(foods.get(position));
         }
     }

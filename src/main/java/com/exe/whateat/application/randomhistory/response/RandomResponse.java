@@ -13,7 +13,15 @@ public final class RandomResponse {
     private long timeLeft;
 
     @JsonIgnore
+    private boolean reset;
+
+    @JsonIgnore
     public boolean notAllowedToRandomize() {
         return (timeLeft > 0);
+    }
+
+    @JsonIgnore
+    public boolean shouldBeReset() {
+        return reset;
     }
 }

@@ -6,7 +6,7 @@ import com.exe.whateat.entity.food.Food;
 
 public interface RandomService {
 
-    void saveRandomHistory(Account account, Food randomizedFood);
+    void saveRandomHistory(Account account, Food randomizedFood, boolean shouldBeReset);
 
     RandomResponse checkIfAllowedToRandomize(Account account);
 }
