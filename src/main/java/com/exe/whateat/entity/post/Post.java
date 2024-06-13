@@ -3,6 +3,7 @@ package com.exe.whateat.entity.post;
 import com.exe.whateat.entity.account.Account;
 import com.exe.whateat.entity.common.AbstractAuditableEntity;
 import com.exe.whateat.entity.common.AbstractEntity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
@@ -36,13 +37,13 @@ public class Post extends AbstractAuditableEntity {
     /**
      * Maximum 3 images only.
      */
-    @OneToMany(mappedBy = "post")
+    @OneToMany(mappedBy = "post", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<PostImage> postImages;
 
     /**
      * Must be lazying loaded, and calculations of votes should be handled on database level.
      */
-    @OneToMany(mappedBy = "post")
+    @OneToMany(mappedBy = "post", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<PostVoting> postVoting;
 
     /**
