@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
+@Transactional
 public class RandomServiceImpl implements RandomService {
 
     @Value("${whateat.random.maxcount}")
@@ -51,7 +52,6 @@ public class RandomServiceImpl implements RandomService {
     }
 
     @Override
-    @Transactional
     public void saveRandomHistory(Account account, Food randomizedFood, boolean shouldBeReset) {
         checkAccount(account);
         if (randomizedFood == null) {
