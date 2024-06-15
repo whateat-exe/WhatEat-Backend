@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import io.github.x4ala1c.tsid.Tsid;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.jackson.JsonComponent;
 
 import java.io.IOException;
@@ -37,6 +38,9 @@ public final class WhatEatTsidHandler {
         public Tsid deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) {
             try {
                 final String value = jsonParser.getValueAsString();
+                if (StringUtils.isBlank(value)) {
+                    return null;
+                }
                 return Tsid.fromString(value);
             } catch (Exception e) {
                 throw WhatEatException.builder()
