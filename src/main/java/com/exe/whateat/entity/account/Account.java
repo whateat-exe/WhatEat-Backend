@@ -29,6 +29,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -67,8 +68,8 @@ public class Account extends AbstractEntity implements UserDetails {
     @OneToOne(mappedBy = "account")
     private Restaurant restaurant;
 
-    @OneToMany(mappedBy = "account", fetch = FetchType.LAZY)
-    private List<PersonalProfile> personalProfiles;
+    @OneToMany(mappedBy = "account", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, orphanRemoval = true)
+    private Set<PersonalProfile> personalProfiles;
 
     @OneToMany(mappedBy = "account", fetch = FetchType.LAZY)
     private List<RandomHistory> randomHistories;

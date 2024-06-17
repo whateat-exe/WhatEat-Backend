@@ -56,6 +56,7 @@ public class WhatEatSecurityConfiguration {
         handleTagApi(http);
         handleRandomApi(http);
         handleFoodTagApi(http);
+        handlePersonalProfileApi(http);
         if (environment.acceptsProfiles(Profiles.of("dev"))) {
             http.authorizeHttpRequests(c -> c.requestMatchers(resolvePath("/test/**")).permitAll());
         }
@@ -142,6 +143,19 @@ public class WhatEatSecurityConfiguration {
         http.authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath(path + "/history"))
                         .hasAuthority(AccountRole.USER.name()))
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath(path + "/status"))
+                        .hasAuthority(AccountRole.USER.name()));
+    }
+
+    @SuppressWarnings("java:S1075")
+    private void handlePersonalProfileApi(HttpSecurity http) throws Exception {
+        final String path = "/personal-profiles";
+        http.authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath(path))
+                        .hasAuthority(AccountRole.USER.name()))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.POST, resolvePath(path))
+                        .hasAuthority(AccountRole.USER.name()))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.DELETE, resolvePath(path))
+                        .hasAuthority(AccountRole.USER.name()))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.DELETE, resolvePath(path + "/all"))
                         .hasAuthority(AccountRole.USER.name()));
     }
 
