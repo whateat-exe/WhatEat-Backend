@@ -18,7 +18,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -28,7 +32,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
-import java.util.Optional;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class UpdateReview {
@@ -49,11 +52,11 @@ public final class UpdateReview {
 
         private final UpdateReviewService service;
 
-        @PatchMapping("/dishes/{dishId}/reviews/{reviewId}")
+        @PatchMapping("/reviews/{reviewId}")
         @Operation(summary = "Update review API.", requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Information of the review.", content = @Content(schema = @Schema(implementation = UpdateReviewRequest.class))))
         @ApiResponse(description = "Successful update.", responseCode = "200", content = @Content(schema = @Schema(implementation = FoodResponse.class)))
         @ApiResponse(description = "Failed update.", responseCode = "400s/500s", content = @Content(schema = @Schema(implementation = WhatEatErrorResponse.class)))
-        public ResponseEntity<Object> update(@PathVariable Tsid dishId, @PathVariable Tsid reviewId, @RequestBody UpdateReviewRequest request) {
+        public ResponseEntity<Object> update(@PathVariable Tsid reviewId, @RequestBody UpdateReviewRequest request) {
             final ReviewResponse response = service.update(reviewId, request);
             return ResponseEntity.ok(response);
         }
@@ -69,7 +72,11 @@ public final class UpdateReview {
         private final WhatEatSecurityHelper securityHelper;
 
         public ReviewResponse update(Tsid id, UpdateReviewRequest request) {
-            Optional<Account> acc = securityHelper.getCurrentLoggedInAccount();
+            final Account acc = securityHelper.getCurrentLoggedInAccount()
+                    .orElseThrow(() -> WhatEatException.builder()
+                            .code(WhatEatErrorCode.WEA_0013)
+                            .reason("account", "Không xác định được tài khoản đang thực hiện hành động này.")
+                            .build());
 
             var reviewId = WhatEatId.builder().id(id).build();
             var review = reviewRepository.findById(reviewId);
@@ -78,7 +85,7 @@ public final class UpdateReview {
                 throw WhatEatException.builder().code(WhatEatErrorCode.WEB_0016).reason("name", "Đánh giá không tồn tại.").build();
             }
 
-            if (!review.get().getAccount().getEmail().equals(acc.get().getEmail())) {
+            if (!review.get().getAccount().getEmail().equals(acc.getEmail())) {
                 throw WhatEatException.builder().code(WhatEatErrorCode.WEA_0002).reason("name", "Bạn không có quyền thực hiện").build();
             }
 
@@ -93,9 +100,6 @@ public final class UpdateReview {
             review.get().setLastModified(Instant.now());
 
             return reviewMapper.convertToDto(reviewRepository.saveAndFlush(review.get()));
-
         }
-
     }
-
 }

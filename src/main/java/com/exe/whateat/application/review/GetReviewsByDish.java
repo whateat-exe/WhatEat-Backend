@@ -24,7 +24,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -37,8 +36,8 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class GetReviewsByDish {
 
-     @Data
-    private static final class GetReviewsByDishRequest extends PaginationRequest {
+    @NoArgsConstructor
+    public static final class GetReviewsByDishRequest extends PaginationRequest {
 
     }
 
@@ -64,25 +63,25 @@ public final class GetReviewsByDish {
         )
         @GetMapping("/dishes/{id}/reviews")
         public ResponseEntity<Object> getDishes(@Valid GetReviewsByDishRequest request, @PathVariable Tsid id) {
-            var response = getReviewsByDishService.get(request,id);
+            var response = getReviewsByDishService.get(request, id);
             return ResponseEntity.ok(response);
         }
     }
 
-     @Service
+    @Service
     @AllArgsConstructor
     public static class GetReviewsByDishService {
-           private ReviewMapper reviewMapper;
+        private ReviewMapper reviewMapper;
         private EntityManager entityManager;
         private final CriteriaBuilderFactory criteriaBuilderFactory;
         private final DishRepository dishRepository;
 
         public ReviewsResponse get(GetReviewsByDishRequest request, Tsid tsid) {
-             final WhatEatId whatEatDishId = WhatEatId.builder().id(tsid).build();
+            final WhatEatId whatEatDishId = WhatEatId.builder().id(tsid).build();
 
-             if (!dishRepository.existsById(whatEatDishId)) {
-                 throw WhatEatException.builder().code(WhatEatErrorCode.WEB_0015).reason("name", "Món ăn không tồn tại.").build();
-             }
+            if (!dishRepository.existsById(whatEatDishId)) {
+                throw WhatEatException.builder().code(WhatEatErrorCode.WEB_0015).reason("name", "Món ăn không tồn tại.").build();
+            }
 
             final QRating qReview = QRating.rating;
             BlazeJPAQuery<Rating> query = new BlazeJPAQuery<>(entityManager, criteriaBuilderFactory);
@@ -104,6 +103,6 @@ public final class GetReviewsByDish {
             response.setPage(request.getPage());
             return response;
         }
-     }
+    }
 
 }
