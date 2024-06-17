@@ -1,18 +1,14 @@
-package com.exe.whateat.application.postvoting;
+package com.exe.whateat.application.postcomment;
 
 import com.exe.whateat.application.common.AbstractController;
 import com.exe.whateat.application.exception.WhatEatErrorCode;
 import com.exe.whateat.application.exception.WhatEatException;
-import com.exe.whateat.application.food.response.FoodResponse;
-import com.exe.whateat.application.postvoting.mapper.PostVotingMapper;
+import com.exe.whateat.application.postcomment.mapper.PostCommentMapper;
+import com.exe.whateat.application.postcomment.response.PostCommentResponse;
 import com.exe.whateat.application.postvoting.response.PostVotingResponse;
-import com.exe.whateat.entity.common.PostVotingType;
 import com.exe.whateat.entity.common.WhatEatId;
-import com.exe.whateat.entity.post.PostVoting;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
-import com.exe.whateat.infrastructure.repository.AccountRepository;
-import com.exe.whateat.infrastructure.repository.PostRepository;
-import com.exe.whateat.infrastructure.repository.PostVotingRepository;
+import com.exe.whateat.infrastructure.repository.PostCommentRepository;
 import io.github.x4ala1c.tsid.Tsid;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -22,9 +18,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,36 +30,37 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-public class UpdatePostVoting {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class UpdatePostComment {
 
     @Data
     @Builder
-    public static final class UpdatePostVotingRequest {
+    public static final class UpdatePostCommentRequest {
 
-        @NotNull(message = "Loại của voting phải có.")
-        private PostVotingType type;
+        @NotNull(message = "Nội dung thay đổi cần có.")
+        private String content;
     }
 
     @RestController
     @AllArgsConstructor
     @Tag(
-            name = "post_voting",
+            name = "post_comment",
             description = "APIs for post voting."
     )
     public static final class UpdatePostVotingController extends AbstractController {
 
-        private final UpdatePostVotingService service;
+        private final UpdatePostCommentService service;
 
-        @PutMapping("/posts/post_voting/{id}")
+        @PutMapping("/posts/comments/{commentId}")
         @Operation(
-                summary = "Create post voting.",
+                summary = "Create post comment.",
                 requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                        description = "Information of the post voting.",
-                        content = @Content(schema = @Schema(implementation = UpdatePostVotingRequest.class))
+                        description = "Information of the post comment.",
+                        content = @Content(schema = @Schema(implementation = UpdatePostCommentRequest.class))
                 )
         )
         @ApiResponse(
-                description = "Successful creation. Returns number of voting for each",
+                description = "Successful creation. Returns comment",
                 responseCode = "200",
                 content = @Content(schema = @Schema(implementation = PostVotingResponse.class))
         )
@@ -70,8 +69,8 @@ public class UpdatePostVoting {
                 responseCode = "400s/500s",
                 content = @Content(schema = @Schema(implementation = WhatEatErrorResponse.class))
         )
-        public ResponseEntity<Object> updatePostVoting(@RequestBody @Valid UpdatePostVotingRequest request, @PathVariable Tsid id) {
-            final PostVotingResponse response = service.updatePostVoting(request, id);
+        public ResponseEntity<Object> updatePostComment(@RequestBody @Valid UpdatePostCommentRequest request, @PathVariable Tsid id) {
+            final PostCommentResponse response = service.updatePostComment(request, id);
             return ResponseEntity.ok(response);
         }
     }
@@ -79,22 +78,22 @@ public class UpdatePostVoting {
     @Service
     @Transactional(rollbackOn = Exception.class)
     @AllArgsConstructor
-    public static class UpdatePostVotingService {
+    public static class UpdatePostCommentService {
 
-        private final PostVotingRepository postVotingRepository;
-        private final PostVotingMapper postVotingMapper;
+        private final PostCommentRepository postCommentRepository;
+        private final PostCommentMapper postCommentMapper;
 
-        public PostVotingResponse updatePostVoting(UpdatePostVotingRequest request, Tsid id) {
-            final WhatEatId postVotingId = new WhatEatId(id);
-            var postVotingExist = postVotingRepository.findById(postVotingId);
-            if (postVotingExist != null) {
-                postVotingExist.get().setType(request.type);
-                return postVotingMapper.convertToDto(postVotingRepository.saveAndFlush(postVotingExist.get()));
+        public PostCommentResponse updatePostComment(UpdatePostCommentRequest request, Tsid id) {
+            final WhatEatId postCommentId = new WhatEatId(id);
+            var postCommentExist = postCommentRepository.findById(postCommentId);
+            if (postCommentExist.isPresent()) {
+                postCommentExist.get().setContent(request.content);
+                return postCommentMapper.convertToDto(postCommentRepository.saveAndFlush(postCommentExist.get()));
             }
             throw WhatEatException
                     .builder()
                     .code(WhatEatErrorCode.WES_0001)
-                    .reason("postvoting", "post voting này chưa có")
+                    .reason("post_comment", "post comment này chưa có")
                     .build();
         }
     }

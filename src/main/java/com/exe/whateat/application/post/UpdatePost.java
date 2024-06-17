@@ -1,151 +1,181 @@
-//package com.exe.whateat.application.post;
-//
-//import com.exe.whateat.application.common.AbstractController;
-//import com.exe.whateat.application.dish.mapper.DishMapper;
-//import com.exe.whateat.application.dish.response.DishResponse;
-//import com.exe.whateat.application.exception.WhatEatErrorCode;
-//import com.exe.whateat.application.exception.WhatEatException;
-//import com.exe.whateat.application.image.FirebaseImageResponse;
-//import com.exe.whateat.application.image.FirebaseImageService;
-//import com.exe.whateat.entity.common.Money;
-//import com.exe.whateat.entity.common.WhatEatId;
-//import com.exe.whateat.entity.food.Dish;
-//import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
-//import com.exe.whateat.infrastructure.repository.DishRepository;
-//import com.exe.whateat.infrastructure.repository.FoodRepository;
-//import io.github.x4ala1c.tsid.Tsid;
-//import io.swagger.v3.oas.annotations.Operation;
-//import io.swagger.v3.oas.annotations.media.Content;
-//import io.swagger.v3.oas.annotations.media.Schema;
-//import io.swagger.v3.oas.annotations.responses.ApiResponse;
-//import io.swagger.v3.oas.annotations.tags.Tag;
-//import jakarta.transaction.Transactional;
-//import jakarta.validation.constraints.NotNull;
-//import jakarta.validation.constraints.Size;
-//import lombok.AccessLevel;
-//import lombok.AllArgsConstructor;
-//import lombok.Builder;
-//import lombok.Data;
-//import lombok.NoArgsConstructor;
-//import org.apache.commons.lang3.StringUtils;
-//import org.springframework.http.ResponseEntity;
-//import org.springframework.stereotype.Service;
-//import org.springframework.web.bind.annotation.PatchMapping;
-//import org.springframework.web.bind.annotation.PathVariable;
-//import org.springframework.web.bind.annotation.RequestBody;
-//import org.springframework.web.bind.annotation.RestController;
-//
-//import java.util.List;
-//
-//@NoArgsConstructor(access = AccessLevel.PRIVATE)
-//public final class UpdatePost {
-//
-//    @Data
-//    @Builder
-//    public static final class UpdatePostRequest {
-//
-//        private String content;
-//
-//        private List<String> images;
-//
-//        private String caption;
-//    }
-//
-//    @RestController
-//    @AllArgsConstructor
-//    @Tag(
-//            name = "dish",
-//            description = "APIs for dish."
-//    )
-//    public static final class UpdateDishController extends AbstractController {
-//
-//        private final com.exe.whateat.application.dish.UpdateDish.UpdateDishService service;
-//
-//        @Operation(
-//                summary = "Update dish API. Returns the new information of dish. API for Restaurant",
-//                requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-//                        description = "Information of the food.",
-//                        content = @Content(schema = @Schema(implementation = com.exe.whateat.application.dish.UpdateDish.UpdateDishRequest.class))
-//                )
-//        )
-//        @ApiResponse(
-//                description = "Successful update. Returns new information of the dish.",
-//                responseCode = "200",
-//                content = @Content(schema = @Schema(implementation = DishResponse.class))
-//        )
-//        @ApiResponse(
-//                description = "Failed updating of the dish.",
-//                responseCode = "400s/500s",
-//                content = @Content(schema = @Schema(implementation = WhatEatErrorResponse.class))
-//        )
-//        @PatchMapping("/dishes/{id}")
-//        public ResponseEntity<Object> updateDish(@PathVariable Tsid id, @RequestBody com.exe.whateat.application.dish.UpdateDish.UpdateDishRequest request) {
-//            final DishResponse response = service.update(id, request);
-//            return ResponseEntity.ok(response);
-//        }
-//    }
-//
-//    @Service
-//    @Transactional(rollbackOn = Exception.class)
-//    @AllArgsConstructor
-//    public static class UpdateDishService {
-//
-//        private final FoodRepository foodRepository;
-//        private final DishRepository dishRepository;
-//        private final FirebaseImageService firebaseImageService;
-//        private final DishMapper dishMapper;
-//
-//        public DishResponse update(Tsid id, com.exe.whateat.application.dish.UpdateDish.UpdateDishRequest request) {
-//            var dishId = WhatEatId.builder().id(id).build();
-//            var foodId = WhatEatId.builder().id(request.getFoodId()).build();
-//            var dish = dishRepository.findById(dishId);
-//            if (dish.isEmpty()) {
-//                throw WhatEatException.builder()
-//                        .code(WhatEatErrorCode.WEB_0015)
-//                        .reason("dish", "Món ăn không tồn tại")
-//                        .build();
-//            }
-//            if (StringUtils.isNotBlank(request.getName())) {
-//                verifyDishAndSetName(request, dish.get());
-//            }
-//            if (StringUtils.isNotBlank(request.getDescription())) {
-//                dish.get().setDescription(request.getDescription());
-//            }
-//            if (request.price != null) {
-//                dish.get().setPrice(request.getPrice());
-//            }
-//            if (request.foodId != null) {
-//                dish.get().setFood(foodRepository.getReferenceById(foodId));
-//            }
-//            FirebaseImageResponse firebaseImageResponse = null;
-//            try {
-//                if (StringUtils.isNotBlank(request.getImage())) {
-//                    firebaseImageResponse = firebaseImageService.uploadBase64Image(request.getImage());
-//                    dish.get().setImage(firebaseImageResponse.url());
-//                }
-//                return dishMapper.convertToDto(dishRepository.saveAndFlush(dish.get()));
-//            } catch (Exception e) {
-//                // Image is created. Time to delete!
-//                if (firebaseImageResponse != null) {
-//                    firebaseImageService.deleteImage(firebaseImageResponse.id(), FirebaseImageService.DeleteType.ID);
-//                }
-//                if (e instanceof WhatEatException whatEatException) {
-//                    throw whatEatException;
-//                }
-//                throw WhatEatException.builder()
-//                        .code(WhatEatErrorCode.WES_0001)
-//                        .reason("food", "Lỗi trong việc tạo món ăn. Vui lòng thử lại hoặc báo admin.")
-//                        .build();
-//            }
-//        }
-//
-//        private void verifyDishAndSetName(com.exe.whateat.application.dish.UpdateDish.UpdateDishRequest request, Dish dish) {
-//            if (foodRepository.existsByNameIgnoreCase(request.getName())) {
-//                throw WhatEatException.builder()
-//                        .code(WhatEatErrorCode.WEB_0004)
-//                        .reason("name", "Tên của món ăn đã tồn tại.")
-//                        .build();
-//            }
-//            dish.setName(request.getName());
-//        }
-//    }
+package com.exe.whateat.application.post;
+
+import com.exe.whateat.application.common.AbstractController;
+import com.exe.whateat.application.exception.WhatEatErrorCode;
+import com.exe.whateat.application.exception.WhatEatException;
+import com.exe.whateat.application.image.FirebaseImageResponse;
+import com.exe.whateat.application.image.FirebaseImageService;
+import com.exe.whateat.application.post.mapper.PostMapper;
+import com.exe.whateat.application.post.response.PostResponse;
+import com.exe.whateat.entity.common.WhatEatId;
+import com.exe.whateat.entity.post.PostImage;
+import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
+import com.exe.whateat.infrastructure.repository.PostImageRepository;
+import com.exe.whateat.infrastructure.repository.PostRepository;
+import com.exe.whateat.infrastructure.security.WhatEatSecurityHelper;
+import io.github.x4ala1c.tsid.Tsid;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
+import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class UpdatePost {
+
+    @Getter
+    @Setter
+    public static class UpdatePostImageRequest {
+
+        private Tsid imageId;
+        private String image;
+        private String caption;
+    }
+
+    @Getter
+    @Setter
+    public static class UpdatePostRequest {
+
+        private String content;
+        private List<UpdatePostImageRequest> images;
+    }
+
+    @RestController
+    @AllArgsConstructor
+    @Tag(
+            name = "posts",
+            description = "APIs for posts."
+    )
+    public static final class CreateFoodTagController extends AbstractController {
+
+        private UpdatePostService service;
+
+        @PatchMapping("/posts/{id}")
+        @Operation(
+                summary = "Create post API. Returns the new information of post",
+                requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                        description = "Information of the post.",
+                        content = @Content(schema = @Schema(implementation = UpdatePostRequest.class))
+                )
+        )
+        @ApiResponse(
+                description = "Successful creation. Returns new information of the post.",
+                responseCode = "200",
+                content = @Content(schema = @Schema(implementation = PostResponse.class))
+        )
+        @ApiResponse(
+                description = "Failed creation of the post.",
+                responseCode = "400s/500s",
+                content = @Content(schema = @Schema(implementation = WhatEatErrorResponse.class))
+        )
+        public ResponseEntity<Object> updatePost(@RequestBody @Valid UpdatePostRequest updatePostRequest, @PathVariable Tsid id) {
+            var response = service.updatePost(updatePostRequest, id);
+            return ResponseEntity.ok(response);
+        }
+    }
+
+    @Service
+    @AllArgsConstructor
+    @Transactional(rollbackOn = Exception.class)
+    public static class UpdatePostService {
+
+        private final PostRepository postRepository;
+        private final PostImageRepository postImageRepository;
+        private final FirebaseImageService firebaseImageService;
+        private final PostMapper postMapper;
+        private EntityManager entityManager;
+        private WhatEatSecurityHelper securityHelper;
+
+        public PostResponse updatePost(UpdatePostRequest request, Tsid postId) {
+            var user = securityHelper.getCurrentLoggedInAccount();
+            EntityTransaction transaction = entityManager.getTransaction();
+            var post = postRepository.getPostById(WhatEatId.builder().id(postId).build())
+                    .orElseThrow(() -> WhatEatException
+                            .builder()
+                            .code(WhatEatErrorCode.WES_0001)
+                            .reason("post", "Lỗi gửi Id tìm post")
+                            .build());
+            try {
+                //set image
+                List<PostImage> postImages = new ArrayList<>();
+                if (request.images.size() > 3)
+                    throw WhatEatException.builder()
+                            .code(WhatEatErrorCode.WES_0001)
+                            .reason("post_image", "Số lượng ảnh không được vượt quá 3")
+                            .build();
+                if (request.images != null) {
+                    for (var postImageBase64 : request.images) {
+                        if (postImageBase64 != null && postImageBase64.imageId == null)
+                            throw WhatEatException.builder()
+                                    .code(WhatEatErrorCode.WES_0001)
+                                    .reason("post_image", "không có image id")
+                                    .build();
+                        if (postImageBase64.image != null) {
+                            var postImage = postImageRepository.findById(WhatEatId.builder().id(postImageBase64.imageId).build())
+                                    .orElseThrow(() -> WhatEatException.builder()
+                                            .code(WhatEatErrorCode.WES_0001)
+                                            .reason("post image", "post image sai Id")
+                                            .build());
+                            if (postImageBase64.caption != null) {
+                                postImage.setCaption(postImageBase64.caption);
+                            }
+                            if (postImageBase64.image != null) {
+                                FirebaseImageResponse firebaseImageResponse = null;
+                                try {
+                                    firebaseImageResponse = firebaseImageService.uploadBase64Image(postImageBase64.image);
+                                    postImage.setImage(firebaseImageResponse.url());
+                                    postImages.add(postImage);
+                                } catch (Exception e) {
+                                    // Image is created. Time to delete!
+                                    if (firebaseImageResponse != null) {
+                                        firebaseImageService.deleteImage(firebaseImageResponse.id(), FirebaseImageService.DeleteType.ID);
+                                    }
+                                    if (e instanceof WhatEatException whatEatException) {
+                                        throw whatEatException;
+                                    }
+                                    throw WhatEatException.builder()
+                                            .code(WhatEatErrorCode.WES_0001)
+                                            .reason("post", "Lỗi trong việc tạo post image.")
+                                            .build();
+                                }
+                            }
+                        }
+                    }
+                }
+                // content
+                if (request.content != null)
+                    post.setContent(request.content);
+
+                var postImageUpdated = postImageRepository.saveAll(postImages);
+                post.setPostImages(postImageUpdated);
+                return postMapper.convertToDto(postRepository.saveAndFlush(post));
+            }
+            catch (Exception e) {
+                if (transaction.isActive())
+                    transaction.rollback();
+                throw WhatEatException.builder()
+                        .code(WhatEatErrorCode.WES_0001)
+                        .reason("post", "Lỗi trong việc sửa post.")
+                        .build();
+            }
+        }
+    }
+}

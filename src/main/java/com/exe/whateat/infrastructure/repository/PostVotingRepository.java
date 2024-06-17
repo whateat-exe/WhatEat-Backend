@@ -5,6 +5,8 @@ import com.exe.whateat.entity.post.PostVoting;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.Optional;
+
 public interface PostVotingRepository extends JpaRepository<PostVoting, WhatEatId> {
 
     @Query(
@@ -13,5 +15,5 @@ public interface PostVotingRepository extends JpaRepository<PostVoting, WhatEatI
                         WHERE pv.account.id = ?1 AND pv.post.id = ?2
                     """
     )
-    PostVoting postVotingAlreadyExists(WhatEatId accountId, WhatEatId postId);
+    Optional<PostVoting> postVotingAlreadyExists(WhatEatId accountId, WhatEatId postId);
 }

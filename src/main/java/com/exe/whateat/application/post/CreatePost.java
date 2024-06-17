@@ -14,6 +14,7 @@ import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
 import com.exe.whateat.infrastructure.repository.AccountRepository;
 import com.exe.whateat.infrastructure.repository.PostImageRepository;
 import com.exe.whateat.infrastructure.repository.PostRepository;
+import com.exe.whateat.infrastructure.security.WhatEatSecurityHelper;
 import io.github.x4ala1c.tsid.Tsid;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -45,6 +46,17 @@ public class CreatePost {
 
     @Getter
     @Setter
+    public static class CreatePostImageRequest {
+
+        @NotNull(message = "Image is required ")
+        private String image;
+
+        @NotNull(message = "Caption is required ")
+        private String caption;
+    }
+
+    @Getter
+    @Setter
     public static class CreatePostRequest {
 
         @NotNull(message = "The content must not be null")
@@ -52,12 +64,7 @@ public class CreatePost {
 
         @NotNull(message = "Image is required ")
         @Size(min=1, max=3, message = "The number of image is between 1 and 3")
-        private List<String> images;
-
-        private String caption;
-
-        @NotNull(message = "account is required")
-        private Tsid accountId;
+        private List<CreatePostImageRequest> images;
     }
 
     @RestController
@@ -101,20 +108,20 @@ public class CreatePost {
 
         private final PostRepository postRepository;
         private final PostImageRepository postImageRepository;
-        private final AccountRepository accountRepository;
         private final FirebaseImageService firebaseImageService;
         private final PostMapper postMapper;
         private EntityManager entityManager;
+        private WhatEatSecurityHelper securityHelper;
 
         public PostResponse createPost(CreatePostRequest request) {
-            final WhatEatId accountId = new WhatEatId(request.accountId);
+            var user = securityHelper.getCurrentLoggedInAccount();
             EntityTransaction transaction = entityManager.getTransaction();
             try {
                 Post post = Post
                         .builder()
                         .id(WhatEatId.generate())
                         .content(request.content)
-                        .account(accountRepository.getReferenceById(accountId))
+                        .account(user.get())
                         .build();
                 var postCreated = postRepository.save(post);
                 List<PostImage> postImages = new ArrayList<>();
@@ -122,14 +129,12 @@ public class CreatePost {
                     PostImage postImage = PostImage
                             .builder()
                             .id(WhatEatId.generate())
+                            .caption(postImageBase64.caption)
                             .post(postCreated)
                             .build();
-                    if(request.caption != null) {
-                        postImage.setCaption(request.caption);
-                    }
                     FirebaseImageResponse firebaseImageResponse = null;
                     try {
-                        firebaseImageResponse = firebaseImageService.uploadBase64Image(postImageBase64);
+                        firebaseImageResponse = firebaseImageService.uploadBase64Image(postImageBase64.image);
                         postImage.setImage(firebaseImageResponse.url());
                         postImages.add(postImage);
                     } catch (Exception e) {

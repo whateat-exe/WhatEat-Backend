@@ -14,6 +14,7 @@ import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
 import com.exe.whateat.infrastructure.repository.AccountRepository;
 import com.exe.whateat.infrastructure.repository.PostRepository;
 import com.exe.whateat.infrastructure.repository.PostVotingRepository;
+import com.exe.whateat.infrastructure.security.WhatEatSecurityHelper;
 import io.github.x4ala1c.tsid.Tsid;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -40,9 +41,6 @@ public class CreatePostVoting {
 
         @NotNull(message = "Loại của voting phải có.")
         private PostVotingType type;
-
-        @NotNull(message = "Id của người vote phải có")
-        private Tsid accountId;
 
         @NotNull(message = "post id phải có")
         private Tsid postId;
@@ -90,12 +88,12 @@ public class CreatePostVoting {
         private final PostVotingRepository postVotingRepository;
         private final PostVotingMapper postVotingMapper;
         private final PostRepository postRepository;
-        private final AccountRepository accountRepository;
+        private final WhatEatSecurityHelper securityHelper;
 
         public PostVotingResponse createPostVoting(CreatePostVotingRequest request) {
-            final WhatEatId accountId = new WhatEatId(request.accountId);
+            var user = securityHelper.getCurrentLoggedInAccount();
             final WhatEatId postId = new WhatEatId(request.postId);
-            var postVotingExist = postVotingRepository.postVotingAlreadyExists(accountId, postId);
+            var postVotingExist = postVotingRepository.postVotingAlreadyExists(user.get().getId(), postId);
             if (postVotingExist != null) {
                throw WhatEatException
                        .builder()
@@ -106,7 +104,7 @@ public class CreatePostVoting {
             PostVoting postVoting = PostVoting
                     .builder()
                     .post(postRepository.getReferenceById(postId))
-                    .account(accountRepository.getReferenceById(accountId))
+                    .account(user.get())
                     .type(request.type)
                     .build();
             return postVotingMapper.convertToDto(postVotingRepository.saveAndFlush(postVoting));
