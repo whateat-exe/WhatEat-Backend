@@ -49,7 +49,7 @@ public class Post extends AbstractAuditableEntity {
     /**
      * Should be paginated.
      */
-    @OneToMany(mappedBy = "post")
+    @OneToMany(mappedBy = "post", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<PostComment> postComments;
 
     @Override

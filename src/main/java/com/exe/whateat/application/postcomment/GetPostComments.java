@@ -67,7 +67,7 @@ public class GetPostComments {
                 responseCode = "400s/500s",
                 content = @Content(schema = @Schema(implementation = WhatEatErrorResponse.class))
         )
-        @GetMapping("/post/{id}/comments")
+        @GetMapping("/posts/{id}/comments")
         public ResponseEntity<Object> getDishes(@Valid GetPostCommentsRequest getPostCommentsRequest, @PathVariable Tsid id) {
             var response = service.getPostComments(getPostCommentsRequest, id);
             return ResponseEntity.ok(response);

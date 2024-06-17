@@ -24,6 +24,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,10 +32,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Instant;
+
 public class CreatePostComment {
 
     @Data
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static final class CreatePostCommentRequest {
 
         @NotNull(message = "Nội dung tạo comment cần có.")
@@ -94,6 +99,8 @@ public class CreatePostComment {
                         .content(request.content)
                         .account(user.get())
                         .post(postRepository.getReferenceById(postId))
+                        .createdAt(Instant.now())
+                        .lastModified(Instant.now())
                         .build();
                 return postCommentMapper.convertToDto(postCommentRepository.save(postComment));
             }

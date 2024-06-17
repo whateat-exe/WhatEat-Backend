@@ -38,6 +38,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -70,14 +71,14 @@ public class CreatePost {
     @RestController
     @AllArgsConstructor
     @Tag(
-            name = "posts",
+            name = "post",
             description = "APIs for posts."
     )
     public static final class CreateFoodTagController extends AbstractController {
 
         private CreatePostService  service;
 
-        @PostMapping("/posts")
+        @PostMapping("/post")
         @Operation(
                 summary = "Create post API. Returns the new information of post",
                 requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
@@ -115,13 +116,13 @@ public class CreatePost {
 
         public PostResponse createPost(CreatePostRequest request) {
             var user = securityHelper.getCurrentLoggedInAccount();
-            EntityTransaction transaction = entityManager.getTransaction();
-            try {
                 Post post = Post
                         .builder()
                         .id(WhatEatId.generate())
                         .content(request.content)
                         .account(user.get())
+                        .createdAt(Instant.now())
+                        .lastModified(Instant.now())
                         .build();
                 var postCreated = postRepository.save(post);
                 List<PostImage> postImages = new ArrayList<>();
@@ -154,15 +155,6 @@ public class CreatePost {
                 var postImageCreated = postImageRepository.saveAll(postImages);
                 postCreated.setPostImages(postImageCreated);
                 return postMapper.convertToDto(postRepository.saveAndFlush(postCreated));
-            }
-            catch (Exception e) {
-                if (transaction.isActive())
-                    transaction.rollback();
-                throw WhatEatException.builder()
-                        .code(WhatEatErrorCode.WES_0001)
-                        .reason("post", "Lỗi trong việc tạo post.")
-                        .build();
-            }
         }
     }
 }

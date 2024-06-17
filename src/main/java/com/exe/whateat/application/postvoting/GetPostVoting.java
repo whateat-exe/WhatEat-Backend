@@ -40,12 +40,12 @@ public class GetPostVoting {
 
         private final GetPostVotingService service;
 
-        @GetMapping("/posts/{id}/post_voting")
+        @GetMapping("/posts/{id}/post-voting")
         @Operation(
-                summary = "Get post voting."
+                summary = "Get post voting. An api for get whether user voted."
         )
         @ApiResponse(
-                description = "Successful creation. Returns number of voting for each",
+                description = "Successful return voting of user has voted.",
                 responseCode = "200",
                 content = @Content(schema = @Schema(implementation = PostVotingResponse.class))
         )
@@ -72,7 +72,7 @@ public class GetPostVoting {
             final WhatEatId postId = new WhatEatId(id);
             var user = securityHelper.getCurrentLoggedInAccount();
             if (user.isPresent()) {
-                var postVoting = postVotingRepository.postVotingAlreadyExists(postId, user.get().getId());
+                var postVoting = postVotingRepository.postVotingAlreadyExists(user.get().getId(), postId);
                 if(postVoting.isPresent()) {
                     return postVotingMapper.convertToDto(postVoting.get());
                 }

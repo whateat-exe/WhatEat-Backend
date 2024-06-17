@@ -30,11 +30,15 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Instant;
+
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class UpdatePostComment {
 
     @Data
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static final class UpdatePostCommentRequest {
 
         @NotNull(message = "Nội dung thay đổi cần có.")
@@ -69,8 +73,8 @@ public class UpdatePostComment {
                 responseCode = "400s/500s",
                 content = @Content(schema = @Schema(implementation = WhatEatErrorResponse.class))
         )
-        public ResponseEntity<Object> updatePostComment(@RequestBody @Valid UpdatePostCommentRequest request, @PathVariable Tsid id) {
-            final PostCommentResponse response = service.updatePostComment(request, id);
+        public ResponseEntity<Object> updatePostComment(@RequestBody @Valid UpdatePostCommentRequest request, @PathVariable Tsid commentId) {
+            final PostCommentResponse response = service.updatePostComment(request, commentId);
             return ResponseEntity.ok(response);
         }
     }
@@ -88,6 +92,7 @@ public class UpdatePostComment {
             var postCommentExist = postCommentRepository.findById(postCommentId);
             if (postCommentExist.isPresent()) {
                 postCommentExist.get().setContent(request.content);
+                postCommentExist.get().setLastModified(Instant.now());
                 return postCommentMapper.convertToDto(postCommentRepository.saveAndFlush(postCommentExist.get()));
             }
             throw WhatEatException

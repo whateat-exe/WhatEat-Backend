@@ -56,7 +56,7 @@ public class CreatePostVoting {
 
         private final CreatePostVotingService service;
 
-        @PostMapping("/posts/post_voting")
+        @PostMapping("/posts/post-voting")
         @Operation(
                 summary = "Create post voting.",
                 requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
@@ -67,7 +67,7 @@ public class CreatePostVoting {
         @ApiResponse(
                 description = "Successful creation. Returns number of voting for each",
                 responseCode = "200",
-                content = @Content(schema = @Schema(implementation = FoodResponse.class))
+                content = @Content(schema = @Schema(implementation = PostVotingResponse.class))
         )
         @ApiResponse(
                 description = "Failed creation of the post voting.",
@@ -94,7 +94,7 @@ public class CreatePostVoting {
             var user = securityHelper.getCurrentLoggedInAccount();
             final WhatEatId postId = new WhatEatId(request.postId);
             var postVotingExist = postVotingRepository.postVotingAlreadyExists(user.get().getId(), postId);
-            if (postVotingExist != null) {
+            if (postVotingExist.isPresent()) {
                throw WhatEatException
                        .builder()
                        .code(WhatEatErrorCode.WES_0001)
@@ -103,6 +103,7 @@ public class CreatePostVoting {
             }
             PostVoting postVoting = PostVoting
                     .builder()
+                    .id(WhatEatId.generate())
                     .post(postRepository.getReferenceById(postId))
                     .account(user.get())
                     .type(request.type)

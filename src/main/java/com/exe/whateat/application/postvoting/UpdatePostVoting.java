@@ -3,15 +3,11 @@ package com.exe.whateat.application.postvoting;
 import com.exe.whateat.application.common.AbstractController;
 import com.exe.whateat.application.exception.WhatEatErrorCode;
 import com.exe.whateat.application.exception.WhatEatException;
-import com.exe.whateat.application.food.response.FoodResponse;
 import com.exe.whateat.application.postvoting.mapper.PostVotingMapper;
 import com.exe.whateat.application.postvoting.response.PostVotingResponse;
 import com.exe.whateat.entity.common.PostVotingType;
 import com.exe.whateat.entity.common.WhatEatId;
-import com.exe.whateat.entity.post.PostVoting;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
-import com.exe.whateat.infrastructure.repository.AccountRepository;
-import com.exe.whateat.infrastructure.repository.PostRepository;
 import com.exe.whateat.infrastructure.repository.PostVotingRepository;
 import io.github.x4ala1c.tsid.Tsid;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,6 +21,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,6 +33,8 @@ public class UpdatePostVoting {
 
     @Data
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static final class UpdatePostVotingRequest {
 
         @NotNull(message = "Loại của voting phải có.")
@@ -52,7 +51,7 @@ public class UpdatePostVoting {
 
         private final UpdatePostVotingService service;
 
-        @PutMapping("/posts/post_voting/{id}")
+        @PutMapping("/posts/post-voting/{id}")
         @Operation(
                 summary = "Create post voting.",
                 requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
