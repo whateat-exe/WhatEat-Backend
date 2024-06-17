@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ReviewRepository extends JpaRepository<Rating, WhatEatId> {
 
-    boolean existsByDish_IdAndAccount_Id(WhatEatId id, WhatEatId id1);
+    boolean existsByDishIdAndAccountId(WhatEatId id, WhatEatId id1);
 
 }

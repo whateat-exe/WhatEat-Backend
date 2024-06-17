@@ -39,9 +39,6 @@ public class Rating extends AbstractAuditableEntity {
     @Column(name = "stars", nullable = false)
     private Integer stars;
 
-//    @Column(name = "title", nullable = false)
-//    private String title;
-
     @Column(name = "feedback", nullable = false, length = 1000)
     private String feedback;
 

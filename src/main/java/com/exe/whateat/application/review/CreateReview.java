@@ -99,7 +99,7 @@ public final class CreateReview {
         public ReviewResponse createReview(CreateReviewRequest request, Tsid id) {
             var userId = WhatEatId.builder().id(request.getUserId()).build();
             var dishId = WhatEatId.builder().id(id).build();
-            if (reviewRepository.existsByDish_IdAndAccount_Id(dishId, userId)) {
+            if (reviewRepository.existsByDishIdAndAccountId(dishId, userId)) {
                 throw WhatEatException.builder()
                         .code(WhatEatErrorCode.WEB_0017)
                         .reason("name", "Bạn đã tạo đánh giá trước đó cho món này")
