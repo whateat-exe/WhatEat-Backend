@@ -106,7 +106,7 @@ public class RandomServiceImpl implements RandomService {
                 .limit(maxCount)
                 .fetchCount();
         final int count = (int) (maxCount - recentRandomHistoryCount);
-        final long timeLeft = count > 0
+        final long timeLeft = count == 0
                 ? 0
                 : calculateTimeLeft(currentTimestamp, recentStartOfCooldown.getId().asTsid());
         return RandomResponse.builder()
