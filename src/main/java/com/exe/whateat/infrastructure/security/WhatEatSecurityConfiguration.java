@@ -159,8 +159,8 @@ public class WhatEatSecurityConfiguration {
 
     @SuppressWarnings("java:S1075")
     private void handlePostVotingApi(HttpSecurity http) throws Exception {
-        final String postVotingPath = "/posts/post-voting/**";
-        final String postVotingIdPath = "/posts/post-voting/{id}";
+        final String postVotingPath = "/posts/post-votings/**";
+        final String postVotingIdPath = "/posts/post-votings/{id}";
         http.authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.POST, resolvePath(postVotingPath))
                         .hasAnyAuthority(AccountRole.USER.name()))
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.PUT, resolvePath(postVotingIdPath))

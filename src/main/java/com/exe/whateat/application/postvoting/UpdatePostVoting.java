@@ -51,7 +51,7 @@ public class UpdatePostVoting {
 
         private final UpdatePostVotingService service;
 
-        @PutMapping("/posts/post-voting/{id}")
+        @PutMapping("/posts/post-votings/{id}")
         @Operation(
                 summary = "Create post voting.",
                 requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(

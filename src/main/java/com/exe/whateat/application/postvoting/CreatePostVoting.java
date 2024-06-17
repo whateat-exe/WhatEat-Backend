@@ -56,7 +56,7 @@ public class CreatePostVoting {
 
         private final CreatePostVotingService service;
 
-        @PostMapping("/posts/post-voting")
+        @PostMapping("/posts/post-votings")
         @Operation(
                 summary = "Create post voting.",
                 requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(

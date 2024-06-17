@@ -32,7 +32,7 @@ public class DeletePostVoting {
 
         private final DeletePostVotingService service;
 
-        @DeleteMapping("/posts/post-voting/{id}")
+        @DeleteMapping("/posts/post-votings/{id}")
         @Operation(
                 summary = "Delete post voting."
         )
