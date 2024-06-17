@@ -25,8 +25,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Optional;
-
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class DeleteReview {
 
@@ -37,13 +35,13 @@ public final class DeleteReview {
 
         private final DeleteReviewService service;
 
-        @DeleteMapping("/dishes/{dishId}/reviews/{reviewId}")
+        @DeleteMapping("/reviews/{reviewId}")
         @Operation(
                 summary = "Delete review API."
         )
         @ApiResponse(description = "Successful deleted.", responseCode = "200", content = @Content(schema = @Schema(implementation = FoodResponse.class)))
         @ApiResponse(description = "Failed deleting.", responseCode = "400s/500s", content = @Content(schema = @Schema(implementation = WhatEatErrorResponse.class)))
-        public ResponseEntity<Object> deleteReview(@PathVariable Tsid reviewId, @PathVariable Tsid dishId) {
+        public ResponseEntity<Object> deleteReview(@PathVariable Tsid reviewId) {
             service.delete(reviewId);
             return ResponseEntity.noContent().build();
         }
@@ -58,7 +56,11 @@ public final class DeleteReview {
         private final WhatEatSecurityHelper securityHelper;
 
         public void delete(Tsid id) {
-            Optional<Account> acc = securityHelper.getCurrentLoggedInAccount();
+            final Account acc = securityHelper.getCurrentLoggedInAccount()
+                    .orElseThrow(() -> WhatEatException.builder()
+                            .code(WhatEatErrorCode.WEA_0013)
+                            .reason("account", "Không xác định được tài khoản đang thực hiện hành động này.")
+                            .build());
 
             var review = reviewRepository.findById(new WhatEatId(id))
                     .orElseThrow(() -> WhatEatException
@@ -67,7 +69,7 @@ public final class DeleteReview {
                             .reason("id", "Đánh giá không tồn tại.")
                             .build());
 
-            if (!review.getAccount().getEmail().equals(acc.get().getEmail())) {
+            if (!review.getAccount().getEmail().equals(acc.getEmail())) {
                 throw WhatEatException.builder().code(WhatEatErrorCode.WEA_0002).reason("name", "Bạn không có quyền thực hiện").build();
             }
 

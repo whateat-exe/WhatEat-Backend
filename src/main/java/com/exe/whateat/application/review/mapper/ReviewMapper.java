@@ -1,4 +1,5 @@
 package com.exe.whateat.application.review.mapper;
+
 import com.exe.whateat.application.common.WhatEatMapper;
 import com.exe.whateat.application.dish.mapper.DishMapper;
 import com.exe.whateat.application.review.response.ReviewResponse;

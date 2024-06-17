@@ -36,6 +36,8 @@ public enum WhatEatErrorCode {
     WEB_0015("Món ăn không tồn tại.", HttpStatus.BAD_REQUEST),
     WEB_0016("Đánh giá không tồn tại.", HttpStatus.BAD_REQUEST),
     WEB_0017("Bạn đã tạo đánh giá trước đó cho món này.", HttpStatus.BAD_REQUEST),
+    WEB_0018("Số lượng bộ lọc vượt quá cho phép.", HttpStatus.BAD_REQUEST),
+    WEB_0019("Trùng bộ lọc.", HttpStatus.BAD_REQUEST),
     WEV_0000("Invalid request", HttpStatus.BAD_REQUEST),
     WEV_0001("Invalid email address", HttpStatus.BAD_REQUEST),
     WEV_0002("Invalid password", HttpStatus.BAD_REQUEST),

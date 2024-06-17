@@ -19,7 +19,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -31,15 +30,15 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class GetReviews {
 
-    @Data
-    private static final class GetReviewsRequest extends PaginationRequest {
+    @NoArgsConstructor
+    public static final class GetReviewsRequest extends PaginationRequest {
 
     }
 
     @RestController
     @AllArgsConstructor
     @Tag(name = "review", description = "API for reviews")
-     public static class GetReviewsController extends AbstractController {
+    public static class GetReviewsController extends AbstractController {
 
         private GetReviewsService getReviewsService;
 
