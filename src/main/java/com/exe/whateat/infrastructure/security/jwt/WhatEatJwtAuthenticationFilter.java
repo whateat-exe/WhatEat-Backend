@@ -11,8 +11,9 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -28,7 +29,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Component
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class WhatEatJwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final class AccountNotActiveException extends RuntimeException {
@@ -44,6 +45,9 @@ public class WhatEatJwtAuthenticationFilter extends OncePerRequestFilter {
     private final WhatEatJwtHelper jwtHelper;
     private final UserDetailsService userDetailsService;
     private final ObjectMapper objectMapper;
+
+    @Value("${whateat.api.path}")
+    private String api;
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
@@ -62,15 +66,21 @@ public class WhatEatJwtAuthenticationFilter extends OncePerRequestFilter {
             }
             filterChain.doFilter(request, response);
         } catch (JWTVerificationException e) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setContentType(CONTENT_TYPE);
-            response.setCharacterEncoding("UTF-8");
-            PrintWriter writer = response.getWriter();
-            writer.write(objectMapper.writeValueAsString(WhatEatErrorResponse.builder()
-                    .code(WhatEatErrorCode.WEA_0003)
-                    .reason("token", e.getMessage())
-                    .build()));
-            writer.flush();
+            final String message = e.getMessage();
+            if (StringUtils.containsIgnoreCase(message, "expire")
+                    && requestPathIsInWhitelist(request.getRequestURI())) {
+                filterChain.doFilter(request, response);
+            } else {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.setContentType(CONTENT_TYPE);
+                response.setCharacterEncoding("UTF-8");
+                PrintWriter writer = response.getWriter();
+                writer.write(objectMapper.writeValueAsString(WhatEatErrorResponse.builder()
+                        .code(WhatEatErrorCode.WEA_0003)
+                        .reason("token", e.getMessage())
+                        .build()));
+                writer.flush();
+            }
         } catch (UsernameNotFoundException e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType(CONTENT_TYPE);
@@ -91,6 +101,10 @@ public class WhatEatJwtAuthenticationFilter extends OncePerRequestFilter {
                     .build()));
             writer.flush();
         }
+    }
+
+    private boolean requestPathIsInWhitelist(String requestPath) {
+        return StringUtils.containsIgnoreCase(requestPath, api + "/auth");
     }
 
     private DecodedJWT extractToken(String authorizationHeader) {

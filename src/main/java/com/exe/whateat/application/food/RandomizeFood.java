@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -63,8 +64,9 @@ public final class RandomizeFood {
     }
 
     @Service
+    @Transactional
     @AllArgsConstructor
-    public static final class RandomizeFoodService {
+    public static class RandomizeFoodService {
 
         private static final Random RANDOM = new SecureRandom();
 
