@@ -101,8 +101,7 @@ public final class GetUsers {
                     .limit(request.getLimit())
                     .offset(request.getOffset());
             final List<Account> accounts = accountJPAQuery.fetch();
-//            final long total = accountRepository.count();
-            final long total = accounts.size();
+            final long total = accountRepository.count();
             final UsersResponse response = new UsersResponse(accounts.stream().map(accountDTOMapper::convertToDto).toList(), total);
             response.setPage(request.getPage());
             response.setLimit(request.getLimit());
