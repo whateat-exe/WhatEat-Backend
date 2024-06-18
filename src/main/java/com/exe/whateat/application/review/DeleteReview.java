@@ -35,14 +35,22 @@ public final class DeleteReview {
 
         private final DeleteReviewService service;
 
-        @DeleteMapping("/reviews/{reviewId}")
+        @DeleteMapping("/reviews/{id}")
         @Operation(
                 summary = "Delete review API."
         )
-        @ApiResponse(description = "Successful deleted.", responseCode = "200", content = @Content(schema = @Schema(implementation = FoodResponse.class)))
-        @ApiResponse(description = "Failed deleting.", responseCode = "400s/500s", content = @Content(schema = @Schema(implementation = WhatEatErrorResponse.class)))
-        public ResponseEntity<Object> deleteReview(@PathVariable Tsid reviewId) {
-            service.delete(reviewId);
+        @ApiResponse(
+                description = "Successful deleted.",
+                responseCode = "200",
+                content = @Content(schema = @Schema(implementation = FoodResponse.class))
+        )
+        @ApiResponse(
+                description = "Failed deleting.",
+                responseCode = "400s/500s",
+                content = @Content(schema = @Schema(implementation = WhatEatErrorResponse.class))
+        )
+        public ResponseEntity<Object> deleteReview(@PathVariable Tsid id) {
+            service.delete(id);
             return ResponseEntity.noContent().build();
         }
     }

@@ -6,12 +6,14 @@ import com.exe.whateat.application.exception.WhatEatErrorCode;
 import com.exe.whateat.application.exception.WhatEatException;
 import com.exe.whateat.application.review.mapper.ReviewMapper;
 import com.exe.whateat.application.review.response.ReviewResponse;
+import com.exe.whateat.entity.account.Account;
 import com.exe.whateat.entity.common.WhatEatId;
 import com.exe.whateat.entity.random.Rating;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
 import com.exe.whateat.infrastructure.repository.AccountRepository;
 import com.exe.whateat.infrastructure.repository.DishRepository;
 import com.exe.whateat.infrastructure.repository.ReviewRepository;
+import com.exe.whateat.infrastructure.security.WhatEatSecurityHelper;
 import io.github.x4ala1c.tsid.Tsid;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -27,6 +29,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Range;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -47,10 +50,9 @@ public final class CreateReview {
         private String feedback;
 
         @NotNull(message = "Số lượng sao bắt buộc phải có.")
+        @Range(min = 1, max = 5, message = "Số lượng sao từ 1 tới 5")
         private Integer stars;
 
-        @NotNull(message = "userId là bắt buộc")
-        private Tsid userId;
     }
 
     @RestController
@@ -96,9 +98,16 @@ public final class CreateReview {
         private final ReviewRepository reviewRepository;
         private final AccountRepository userRepository;
         private final ReviewMapper reviewMapper;
+        private final WhatEatSecurityHelper securityHelper;
 
         public ReviewResponse createReview(CreateReviewRequest request, Tsid id) {
-            var userId = WhatEatId.builder().id(request.getUserId()).build();
+            final Account acc = securityHelper.getCurrentLoggedInAccount()
+                    .orElseThrow(() -> WhatEatException.builder()
+                            .code(WhatEatErrorCode.WEA_0013)
+                            .reason("account", "Không xác định được tài khoản đang thực hiện hành động này.")
+                            .build());
+
+            var userId = acc.getId();
             var dishId = WhatEatId.builder().id(id).build();
             if (reviewRepository.existsByDishIdAndAccountId(dishId, userId)) {
                 throw WhatEatException.builder()
