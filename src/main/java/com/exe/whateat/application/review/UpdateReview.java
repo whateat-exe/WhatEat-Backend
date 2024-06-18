@@ -53,9 +53,23 @@ public final class UpdateReview {
         private final UpdateReviewService service;
 
         @PatchMapping("/reviews/{id}")
-        @Operation(summary = "Update review API.", requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Information of the review.", content = @Content(schema = @Schema(implementation = UpdateReviewRequest.class))))
-        @ApiResponse(description = "Successful update.", responseCode = "200", content = @Content(schema = @Schema(implementation = FoodResponse.class)))
-        @ApiResponse(description = "Failed update.", responseCode = "400s/500s", content = @Content(schema = @Schema(implementation = WhatEatErrorResponse.class)))
+        @Operation(
+                summary = "Update review API.",
+                requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                        description = "Information of the review.",
+                        content = @Content(schema = @Schema(implementation = UpdateReviewRequest.class))
+                )
+        )
+        @ApiResponse(
+                description = "Successful update.",
+                responseCode = "200",
+                content = @Content(schema = @Schema(implementation = FoodResponse.class))
+        )
+        @ApiResponse(
+                description = "Failed update.",
+                responseCode = "400s/500s",
+                content = @Content(schema = @Schema(implementation = WhatEatErrorResponse.class))
+        )
         public ResponseEntity<Object> update(@PathVariable Tsid id, @RequestBody UpdateReviewRequest request) {
             final ReviewResponse response = service.update(id, request);
             return ResponseEntity.ok(response);
