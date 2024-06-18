@@ -17,7 +17,7 @@ public final class RandomResponse {
 
     @JsonIgnore
     public boolean notAllowedToRandomize() {
-        return (countLeft == 0);
+        return (countLeft <= 0 && timeLeft > 0);
     }
 
     @JsonIgnore
