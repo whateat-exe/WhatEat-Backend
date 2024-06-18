@@ -52,12 +52,12 @@ public final class UpdateReview {
 
         private final UpdateReviewService service;
 
-        @PatchMapping("/reviews/{reviewId}")
+        @PatchMapping("/reviews/{id}")
         @Operation(summary = "Update review API.", requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Information of the review.", content = @Content(schema = @Schema(implementation = UpdateReviewRequest.class))))
         @ApiResponse(description = "Successful update.", responseCode = "200", content = @Content(schema = @Schema(implementation = FoodResponse.class)))
         @ApiResponse(description = "Failed update.", responseCode = "400s/500s", content = @Content(schema = @Schema(implementation = WhatEatErrorResponse.class)))
-        public ResponseEntity<Object> update(@PathVariable Tsid reviewId, @RequestBody UpdateReviewRequest request) {
-            final ReviewResponse response = service.update(reviewId, request);
+        public ResponseEntity<Object> update(@PathVariable Tsid id, @RequestBody UpdateReviewRequest request) {
+            final ReviewResponse response = service.update(id, request);
             return ResponseEntity.ok(response);
         }
     }
@@ -80,6 +80,10 @@ public final class UpdateReview {
 
             var reviewId = WhatEatId.builder().id(id).build();
             var review = reviewRepository.findById(reviewId);
+
+            if (request.stars < 0 || request.stars > 5) {
+                throw WhatEatException.builder().code(WhatEatErrorCode.WEV_0000).reason("stars", "Số lượng sao từ 1 tới 5").build();
+            }
 
             if (review.isEmpty()) {
                 throw WhatEatException.builder().code(WhatEatErrorCode.WEB_0016).reason("name", "Đánh giá không tồn tại.").build();
