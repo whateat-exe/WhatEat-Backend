@@ -20,6 +20,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -70,6 +71,7 @@ public final class ViewRandomHistory {
 
     @Service
     @AllArgsConstructor
+    @Transactional(rollbackOn = Exception.class)
     public static final class ViewRandomHistoryService {
 
         private final EntityManager entityManager;
