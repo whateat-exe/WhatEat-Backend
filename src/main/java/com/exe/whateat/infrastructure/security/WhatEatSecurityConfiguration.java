@@ -57,6 +57,7 @@ public class WhatEatSecurityConfiguration {
         handleRandomApi(http);
         handleFoodTagApi(http);
         handlePersonalProfileApi(http);
+        handleReviewApi(http);
         if (environment.acceptsProfiles(Profiles.of("dev"))) {
             http.authorizeHttpRequests(c -> c.requestMatchers(resolvePath("/test/**")).permitAll());
         }
@@ -156,6 +157,21 @@ public class WhatEatSecurityConfiguration {
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.DELETE, resolvePath(path))
                         .hasAuthority(AccountRole.USER.name()))
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.DELETE, resolvePath(path + "/all"))
+                        .hasAuthority(AccountRole.USER.name()));
+    }
+
+    private void handleReviewApi(HttpSecurity http) throws Exception {
+        final String dishReviewPath = "/dishes/{id}/reviews";
+        final String reviewPath = "/reviews";
+        http.authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath(dishReviewPath))
+                        .hasAuthority(AccountRole.USER.name()))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.POST, resolvePath(dishReviewPath))
+                        .hasAuthority(AccountRole.USER.name()))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.DELETE, resolvePath(reviewPath))
+                        .hasAuthority(AccountRole.USER.name()))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.PATCH, resolvePath(reviewPath))
+                        .hasAuthority(AccountRole.USER.name()))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath(reviewPath))
                         .hasAuthority(AccountRole.USER.name()));
     }
 
