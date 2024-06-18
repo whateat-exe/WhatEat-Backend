@@ -72,7 +72,7 @@ public final class ViewRandomHistory {
     @Service
     @AllArgsConstructor
     @Transactional(rollbackOn = Exception.class)
-    public static final class ViewRandomHistoryService {
+    public static class ViewRandomHistoryService {
 
         private final EntityManager entityManager;
         private final CriteriaBuilderFactory criteriaBuilderFactory;
