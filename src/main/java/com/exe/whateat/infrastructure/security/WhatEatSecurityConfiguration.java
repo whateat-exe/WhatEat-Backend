@@ -164,8 +164,7 @@ public class WhatEatSecurityConfiguration {
         final String dishReviewPath = "/dishes/{id}/reviews";
         final String reviewPath = "/reviews/**";
         http.authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath(dishReviewPath))
-                        .hasAnyAuthority(
-                                AccountRole.USER.name(), AccountRole.RESTAURANT.name(), AccountRole.MANAGER.name(), AccountRole.ADMIN.name()))
+                        .authenticated())
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.POST, resolvePath(dishReviewPath))
                         .hasAuthority(AccountRole.USER.name()))
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.DELETE, resolvePath(reviewPath))
@@ -173,8 +172,7 @@ public class WhatEatSecurityConfiguration {
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.PATCH, resolvePath(reviewPath))
                         .hasAuthority(AccountRole.USER.name()))
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath(reviewPath))
-                        .hasAnyAuthority(
-                                AccountRole.USER.name(), AccountRole.RESTAURANT.name(), AccountRole.MANAGER.name(), AccountRole.ADMIN.name()));
+                        .authenticated());
     }
 
     private String resolvePath(String path) {
