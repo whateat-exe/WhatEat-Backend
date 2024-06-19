@@ -167,7 +167,7 @@ public class WhatEatSecurityConfiguration {
                         .hasAnyAuthority(AccountRole.USER.name()))
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.DELETE, resolvePath(postVotingIdPath))
                         .hasAnyAuthority(AccountRole.USER.name(), AccountRole.MANAGER.name(), AccountRole.ADMIN.name()))
-                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath("/posts/{id}/post-voting"))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath("/posts/{id}/post-votings"))
                         .hasAnyAuthority(AccountRole.USER.name()));
     }
 

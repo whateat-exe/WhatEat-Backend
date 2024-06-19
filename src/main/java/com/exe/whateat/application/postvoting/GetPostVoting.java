@@ -21,6 +21,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -36,11 +37,11 @@ public class GetPostVoting {
             name = "post_voting",
             description = "APIs for post voting."
     )
-    public static final class GetFoodController extends AbstractController {
+    public static final class GetPostVotingController extends AbstractController {
 
         private final GetPostVotingService service;
 
-        @GetMapping("/posts/{id}/post-voting")
+        @GetMapping("/posts/{id}/post-votings")
         @Operation(
                 summary = "Get post voting. An api for get whether user voted."
         )
@@ -62,7 +63,8 @@ public class GetPostVoting {
 
     @Service
     @AllArgsConstructor
-    public static final class GetPostVotingService {
+    @Transactional(rollbackOn = Exception.class)
+    public static class GetPostVotingService {
 
         private PostVotingRepository postVotingRepository;
         private PostVotingMapper postVotingMapper;

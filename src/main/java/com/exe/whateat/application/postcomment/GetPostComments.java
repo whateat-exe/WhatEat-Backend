@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -76,6 +77,7 @@ public class GetPostComments {
 
     @Service
     @AllArgsConstructor
+    @Transactional(rollbackOn = Exception.class)
     public static class GetPostCommentsService {
 
         private EntityManager entityManager;

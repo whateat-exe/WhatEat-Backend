@@ -11,18 +11,15 @@ import com.exe.whateat.entity.common.WhatEatId;
 import com.exe.whateat.entity.post.Post;
 import com.exe.whateat.entity.post.PostImage;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
-import com.exe.whateat.infrastructure.repository.AccountRepository;
 import com.exe.whateat.infrastructure.repository.PostImageRepository;
 import com.exe.whateat.infrastructure.repository.PostRepository;
 import com.exe.whateat.infrastructure.security.WhatEatSecurityHelper;
-import io.github.x4ala1c.tsid.Tsid;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityTransaction;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -78,7 +75,7 @@ public class CreatePost {
 
         private CreatePostService  service;
 
-        @PostMapping("/post")
+        @PostMapping("/posts")
         @Operation(
                 summary = "Create post API. Returns the new information of post",
                 requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
@@ -111,7 +108,6 @@ public class CreatePost {
         private final PostImageRepository postImageRepository;
         private final FirebaseImageService firebaseImageService;
         private final PostMapper postMapper;
-        private EntityManager entityManager;
         private WhatEatSecurityHelper securityHelper;
 
         public PostResponse createPost(CreatePostRequest request) {
@@ -154,7 +150,7 @@ public class CreatePost {
                 }
                 var postImageCreated = postImageRepository.saveAll(postImages);
                 postCreated.setPostImages(postImageCreated);
-                return postMapper.convertToDto(postRepository.saveAndFlush(postCreated));
+                return postMapper.convertToDto(postRepository.save(postCreated));
         }
     }
 }

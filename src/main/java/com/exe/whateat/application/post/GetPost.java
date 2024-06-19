@@ -30,6 +30,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -43,7 +44,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-
 public final class GetPost {
 
     @RestController
@@ -52,7 +52,7 @@ public final class GetPost {
             name = "post",
             description = "APIs for post."
     )
-    public static final class GetFoodController extends AbstractController {
+    public static final class GetPostController extends AbstractController {
 
         private final GetPostService service;
 
@@ -63,7 +63,7 @@ public final class GetPost {
         @ApiResponse(
                 description = "Successful. Returns the post.",
                 responseCode = "200",
-                content = @Content(schema = @Schema(implementation = FoodResponse.class))
+                content = @Content(schema = @Schema(implementation = PostResponse.class))
         )
         @ApiResponse(
                 description = "Failed getting of the post.",
@@ -78,7 +78,8 @@ public final class GetPost {
 
     @Service
     @AllArgsConstructor
-    public static final class GetPostService {
+    @Transactional(rollbackOn = Exception.class)
+    public static class GetPostService {
 
         private final PostMapper postMapper;
         private final EntityManager entityManager;

@@ -52,7 +52,7 @@ public class CreatePostComment {
             name = "post_comment",
             description = "APIs for post comment."
     )
-    public static final class UpdatePostVotingController extends AbstractController {
+    public static final class UpdatePostCommentController extends AbstractController {
 
         private final CreatePostCommentService service;
 

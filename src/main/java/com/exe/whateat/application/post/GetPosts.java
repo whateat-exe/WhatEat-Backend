@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -82,12 +83,12 @@ public final class GetPosts {
 
     @Service
     @AllArgsConstructor
+    @Transactional(rollbackOn = Exception.class)
     public static class GetPostsService {
 
         private final EntityManager entityManager;
         private final CriteriaBuilderFactory criteriaBuilderFactory;
         private final PostMapper postMapper;
-        private final PostVotingRepository postVotingRepository;
 
         public PostsResponse getPosts(GetPostsRequest getPostsRequest) {
             final QPost qPost = QPost.post;

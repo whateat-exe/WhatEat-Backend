@@ -121,12 +121,13 @@ public final class UpdatePost {
                     .select(qPost)
                     .from(qPost)
                     .leftJoin(qPost.postImages).fetchJoin()
+//                    .leftJoin(qPost.postVoting).fetchJoin()
                     .where(predicates)
                     .fetch();
             // can not fetch 2 bags
-            for (Post post : posts) {
-                Hibernate.initialize(post.getPostVoting());
-            }
+//            for (Post post : posts) {
+//                Hibernate.initialize(post.getPostVoting());
+//            }
             var post = posts.get(0);
             if(!(user.get().getId().asTsid().equals(post.getAccount().getId().asTsid())))
                 throw WhatEatException.builder()
@@ -135,12 +136,12 @@ public final class UpdatePost {
                         .build();
             //set image
             List<PostImage> postImages = new ArrayList<>();
-            if (request.images.size() > 3)
-                throw WhatEatException.builder()
-                        .code(WhatEatErrorCode.WES_0001)
-                        .reason("post_image", "Số lượng ảnh không được vượt quá 3")
-                        .build();
             if (request.images != null) {
+                if (request.images.size() > 3)
+                    throw WhatEatException.builder()
+                            .code(WhatEatErrorCode.WES_0001)
+                            .reason("post_image", "Số lượng ảnh không được vượt quá 3")
+                            .build();
                 for (var postImageBase64 : request.images) {
                     if (postImageBase64 != null && postImageBase64.imageId == null)
                         throw WhatEatException.builder()
@@ -178,14 +179,15 @@ public final class UpdatePost {
                         }
                     }
                 }
+                var postImageUpdated = postImageRepository.saveAll(postImages);
+                post.getPostImages().clear();
+                if (postImageUpdated != null) {
+                    post.getPostImages().addAll(postImageUpdated);
+                }
             }
             // content
             if (request.content != null)
                 post.setContent(request.content);
-
-            var postImageUpdated = postImageRepository.saveAll(postImages);
-            post.getPostImages().clear();
-            post.getPostImages().addAll(postImageUpdated);
             post.setLastModified(Instant.now());
             return postMapper.convertToDto(postRepository.saveAndFlush(post));
         }
