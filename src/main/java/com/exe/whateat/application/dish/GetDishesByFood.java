@@ -6,11 +6,14 @@ import com.exe.whateat.application.common.AbstractController;
 import com.exe.whateat.application.common.request.PaginationRequest;
 import com.exe.whateat.application.dish.mapper.DishMapper;
 import com.exe.whateat.application.dish.response.DishesResponse;
+import com.exe.whateat.application.exception.WhatEatErrorCode;
+import com.exe.whateat.application.exception.WhatEatException;
 import com.exe.whateat.entity.common.WhatEatId;
 import com.exe.whateat.entity.food.Dish;
 import com.exe.whateat.entity.food.FoodTag;
 import com.exe.whateat.entity.food.QDish;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
+import com.exe.whateat.infrastructure.repository.FoodRepository;
 import io.github.x4ala1c.tsid.Tsid;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -76,10 +79,19 @@ public final class GetDishesByFood {
 
         private DishMapper dishMapper;
         private EntityManager entityManager;
+        private FoodRepository foodRepository;
         private final CriteriaBuilderFactory criteriaBuilderFactory;
 
         public DishesResponse get(GetDishesByFoodRequest request, Tsid tsid) {
             final WhatEatId WhatEatFoodId = WhatEatId.builder().id(tsid).build();
+
+            if (!foodRepository.existsById(WhatEatFoodId)) {
+                throw  WhatEatException.builder()
+                            .code(WhatEatErrorCode.WEB_0005)
+                            .reason("food", String.format("Món ăn với ID '%s' không tồn tại.", tsid))
+                            .build();
+            }
+
             final QDish qDish = QDish.dish;
             BlazeJPAQuery<Dish> query = new BlazeJPAQuery<>(entityManager, criteriaBuilderFactory);
             final List<Dish> dishes = query
