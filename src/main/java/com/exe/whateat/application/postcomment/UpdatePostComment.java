@@ -57,7 +57,7 @@ public class UpdatePostComment {
 
         @PutMapping("/posts/comments/{commentId}")
         @Operation(
-                summary = "Create post comment.",
+                summary = "Update post comment.",
                 requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                         description = "Information of the post comment.",
                         content = @Content(schema = @Schema(implementation = UpdatePostCommentRequest.class))

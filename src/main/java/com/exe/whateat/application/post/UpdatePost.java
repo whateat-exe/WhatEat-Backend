@@ -32,7 +32,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.Hibernate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -121,13 +120,8 @@ public final class UpdatePost {
                     .select(qPost)
                     .from(qPost)
                     .leftJoin(qPost.postImages).fetchJoin()
-//                    .leftJoin(qPost.postVoting).fetchJoin()
                     .where(predicates)
                     .fetch();
-            // can not fetch 2 bags
-//            for (Post post : posts) {
-//                Hibernate.initialize(post.getPostVoting());
-//            }
             var post = posts.get(0);
             if(!(user.get().getId().asTsid().equals(post.getAccount().getId().asTsid())))
                 throw WhatEatException.builder()
