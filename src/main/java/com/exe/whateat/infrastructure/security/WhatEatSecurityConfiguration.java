@@ -58,6 +58,9 @@ public class WhatEatSecurityConfiguration {
         handleFoodTagApi(http);
         handlePersonalProfileApi(http);
         handleReviewApi(http);
+        handlePostCommentApi(http);
+        handlePostVotingApi(http);
+        handlePostApi(http);
         if (environment.acceptsProfiles(Profiles.of("dev"))) {
             http.authorizeHttpRequests(c -> c.requestMatchers(resolvePath("/test/**")).permitAll());
         }
@@ -139,6 +142,48 @@ public class WhatEatSecurityConfiguration {
     }
 
     @SuppressWarnings("java:S1075")
+    private void handlePostApi(HttpSecurity http) throws Exception {
+        final String postPath = "/posts/**";
+        final String postIdPath = "/posts/{id}";
+        http.authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.POST, resolvePath("/posts"))
+                        .hasAnyAuthority(AccountRole.USER.name(), AccountRole.RESTAURANT.name()))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.PATCH, resolvePath(postIdPath))
+                        .hasAnyAuthority(AccountRole.USER.name(), AccountRole.RESTAURANT.name()))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.DELETE, resolvePath(postIdPath))
+                        .hasAnyAuthority(AccountRole.USER.name(), AccountRole.MANAGER.name(), AccountRole.RESTAURANT.name(), AccountRole.ADMIN.name()))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath(postIdPath))
+                        .hasAnyAuthority(AccountRole.USER.name(), AccountRole.MANAGER.name(), AccountRole.RESTAURANT.name(), AccountRole.ADMIN.name()))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath(postPath))
+                        .permitAll());
+    }
+
+    @SuppressWarnings("java:S1075")
+    private void handlePostVotingApi(HttpSecurity http) throws Exception {
+        final String postVotingPath = "/posts/post-votings/**";
+        final String postVotingIdPath = "/posts/post-votings/{id}";
+        http.authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.POST, resolvePath(postVotingPath))
+                        .hasAnyAuthority(AccountRole.USER.name()))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.PUT, resolvePath(postVotingIdPath))
+                        .hasAnyAuthority(AccountRole.USER.name()))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.DELETE, resolvePath(postVotingIdPath))
+                        .hasAnyAuthority(AccountRole.USER.name(), AccountRole.MANAGER.name(), AccountRole.ADMIN.name()))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath("/posts/{id}/post-votings"))
+                        .hasAnyAuthority(AccountRole.USER.name()));
+    }
+
+    @SuppressWarnings("java:S1075")
+    private void handlePostCommentApi(HttpSecurity http) throws Exception {
+        http.authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.POST, resolvePath("/posts/{id}/comments"))
+                        .hasAnyAuthority(AccountRole.USER.name(), AccountRole.RESTAURANT.name()))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.PUT, resolvePath("/posts/comments/{commentId}"))
+                        .hasAnyAuthority(AccountRole.USER.name(), AccountRole.RESTAURANT.name()))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.DELETE, resolvePath("/posts/comments/{commentId}"))
+                        .hasAnyAuthority(AccountRole.USER.name(), AccountRole.MANAGER.name(), AccountRole.ADMIN.name(), AccountRole.RESTAURANT.name()))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath("/posts/{id}/comments"))
+                        .permitAll());
+    }
+
+    @SuppressWarnings("java:S1075")
     private void handleRandomApi(HttpSecurity http) throws Exception {
         final String path = "/foods/random";
         http.authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath(path + "/history"))
@@ -162,9 +207,9 @@ public class WhatEatSecurityConfiguration {
 
     private void handleReviewApi(HttpSecurity http) throws Exception {
         final String dishReviewPath = "/dishes/{id}/reviews";
-        final String reviewPath = "/reviews";
+        final String reviewPath = "/reviews/**";
         http.authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath(dishReviewPath))
-                        .hasAuthority(AccountRole.USER.name()))
+                        .authenticated())
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.POST, resolvePath(dishReviewPath))
                         .hasAuthority(AccountRole.USER.name()))
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.DELETE, resolvePath(reviewPath))
@@ -172,7 +217,7 @@ public class WhatEatSecurityConfiguration {
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.PATCH, resolvePath(reviewPath))
                         .hasAuthority(AccountRole.USER.name()))
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath(reviewPath))
-                        .hasAuthority(AccountRole.USER.name()));
+                        .authenticated());
     }
 
     private String resolvePath(String path) {

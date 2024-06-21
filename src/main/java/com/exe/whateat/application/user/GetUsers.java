@@ -1,5 +1,7 @@
 package com.exe.whateat.application.user;
 
+import com.blazebit.persistence.CriteriaBuilderFactory;
+import com.blazebit.persistence.querydsl.BlazeJPAQuery;
 import com.exe.whateat.application.common.AbstractController;
 import com.exe.whateat.application.common.request.PaginationRequest;
 import com.exe.whateat.application.user.mapper.AccountDTOMapper;
@@ -18,6 +20,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -76,11 +79,13 @@ public final class GetUsers {
 
     @Service
     @AllArgsConstructor
+    @Transactional
     public static class GetUsersService {
 
         private final AccountRepository accountRepository;
         private final AccountDTOMapper accountDTOMapper;
         private final EntityManager entityManager;
+        private final CriteriaBuilderFactory criteriaBuilderFactory;
 
         public UsersResponse getAllUser(GetUsersRequest request) {
             final QAccount qAccount = QAccount.account;
@@ -101,7 +106,11 @@ public final class GetUsers {
                     .limit(request.getLimit())
                     .offset(request.getOffset());
             final List<Account> accounts = accountJPAQuery.fetch();
-            final long total = accountRepository.count();
+            final BlazeJPAQuery<Account> countQuery = new BlazeJPAQuery<>(entityManager, criteriaBuilderFactory)
+                    .select(qAccount)
+                    .from(qAccount)
+                    .where(predicates);
+            final long total = countQuery.fetchCount();
             final UsersResponse response = new UsersResponse(accounts.stream().map(accountDTOMapper::convertToDto).toList(), total);
             response.setPage(request.getPage());
             response.setLimit(request.getLimit());
