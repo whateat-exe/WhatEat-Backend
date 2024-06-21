@@ -22,11 +22,12 @@ public class PostMapper implements WhatEatMapper<Post, PostResponse> {
         }
         return PostResponse.builder()
                 .id(post.getId().asTsid())
-                .accountId(post.getAccount().getId().asTsid())
+                .accountName(post.getAccount().getFullName())
                 .content(post.getContent())
                 .postImages(post.getPostImages().stream().map(postImageMapper::convertToDto).toList())
                 .numberOfUp(numberOfVotingUp)
                 .numberOfDown(numberOfVotingDown)
+                .createdAt(post.getCreatedAt())
                 .build();
     }
 
@@ -37,7 +38,7 @@ public class PostMapper implements WhatEatMapper<Post, PostResponse> {
         }
         return PostResponse.builder()
                 .id(post.getId().asTsid())
-                .accountId(post.getAccount().getId().asTsid())
+                .accountName(post.getAccount().getFullName())
                 .content(post.getContent())
                 .postImages(post.getPostImages().stream().map(postImageMapper::convertToDto).toList())
                 .build();

@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.Instant;
 import java.util.List;
 
 @Getter
@@ -15,7 +16,7 @@ public class PostResponse {
 
     private Tsid id;
     private String content;
-    private Tsid accountId;
+    private String accountName;
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private List<PostImageResponse> postImages;
@@ -25,4 +26,12 @@ public class PostResponse {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Integer numberOfDown;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Integer totalComments;
+    private Instant createdAt;
+    private boolean isModified;
+    private boolean isVoted;
+    private Long totalVote;
+    private Long totalComment;
 }
