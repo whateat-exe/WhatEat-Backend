@@ -2,8 +2,11 @@ package com.exe.whateat.entity.post;
 
 import com.exe.whateat.entity.account.Account;
 import com.exe.whateat.entity.common.AbstractEntity;
+import com.exe.whateat.entity.common.PostVotingType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -23,8 +26,9 @@ import lombok.experimental.SuperBuilder;
 @Table(name = "post_voting")
 public class PostVoting extends AbstractEntity {
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
-    private String type;
+    private PostVotingType type;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", columnDefinition = AbstractEntity.ID_COLUMN)
