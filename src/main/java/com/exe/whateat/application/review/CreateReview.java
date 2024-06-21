@@ -122,6 +122,7 @@ public final class CreateReview {
                     .account(userRepository.getReferenceById(userId))
                     .dish(dishRepository.getReferenceById(dishId))
                     .createdAt(Instant.now())
+                    .lastModified(Instant.now())
                     .build();
             return reviewMapper.convertToDto(reviewRepository.saveAndFlush(review));
         }
