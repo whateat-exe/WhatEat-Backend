@@ -12,9 +12,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class DishMapper implements WhatEatMapper<Dish, DishResponse> {
 
-    private FoodMapper foodMapper;
-    private RestaurantMapper restaurantMapper;
-
     @Override
     public DishResponse convertToDto(Dish dish) {
         if (dish == null) {
@@ -27,8 +24,8 @@ public class DishMapper implements WhatEatMapper<Dish, DishResponse> {
                 .image(dish.getImage())
                 .price(dish.getPrice())
                 .description(dish.getDescription())
-                .foodResponse(foodMapper.convertToDto(dish.getFood()))
-                .restaurantResponse(restaurantMapper.convertToDto(dish.getRestaurant()))
+                .foodId(dish.getFood().getId().asTsid())
+                .restaurantId(dish.getId().asTsid())
                 .build();
     }
 }
