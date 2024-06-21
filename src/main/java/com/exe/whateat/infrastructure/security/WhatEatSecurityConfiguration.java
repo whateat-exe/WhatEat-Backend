@@ -207,9 +207,9 @@ public class WhatEatSecurityConfiguration {
 
     private void handleReviewApi(HttpSecurity http) throws Exception {
         final String dishReviewPath = "/dishes/{id}/reviews";
-        final String reviewPath = "/reviews";
+        final String reviewPath = "/reviews/**";
         http.authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath(dishReviewPath))
-                        .hasAuthority(AccountRole.USER.name()))
+                        .authenticated())
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.POST, resolvePath(dishReviewPath))
                         .hasAuthority(AccountRole.USER.name()))
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.DELETE, resolvePath(reviewPath))
@@ -217,7 +217,7 @@ public class WhatEatSecurityConfiguration {
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.PATCH, resolvePath(reviewPath))
                         .hasAuthority(AccountRole.USER.name()))
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath(reviewPath))
-                        .hasAuthority(AccountRole.USER.name()));
+                        .authenticated());
     }
 
     private String resolvePath(String path) {
