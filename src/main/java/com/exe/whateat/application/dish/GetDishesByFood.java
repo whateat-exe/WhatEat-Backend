@@ -4,7 +4,7 @@ import com.blazebit.persistence.CriteriaBuilderFactory;
 import com.blazebit.persistence.querydsl.BlazeJPAQuery;
 import com.exe.whateat.application.common.AbstractController;
 import com.exe.whateat.application.common.request.PaginationRequest;
-import com.exe.whateat.application.dish.entity.DishFilter;
+import com.exe.whateat.application.dish.request.DishFilter;
 import com.exe.whateat.application.dish.mapper.DishMapper;
 import com.exe.whateat.application.dish.response.DishesResponse;
 import com.exe.whateat.application.exception.WhatEatErrorCode;
