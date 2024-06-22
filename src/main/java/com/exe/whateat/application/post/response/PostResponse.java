@@ -1,14 +1,12 @@
 package com.exe.whateat.application.post.response;
 
 import com.exe.whateat.application.postvoting.response.PostVotingResponse;
-import com.exe.whateat.entity.common.PostVotingType;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.github.x4ala1c.tsid.Tsid;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.Instant;
 import java.util.List;
 
 @Getter
@@ -31,7 +29,7 @@ public class PostResponse {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Integer totalComments;
-    private Instant createdAt;
+    private String createdAt;
     private boolean isModified;
     private boolean isVoted;
     private PostVotingResponse postVoting;

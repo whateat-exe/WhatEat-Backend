@@ -4,6 +4,7 @@ import com.exe.whateat.application.common.WhatEatMapper;
 import com.exe.whateat.application.post.response.PostResponse;
 import com.exe.whateat.application.user.mapper.AccountDTOMapper;
 import com.exe.whateat.entity.post.Post;
+import com.exe.whateat.infrastructure.format.InstantConverter;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import org.springframework.stereotype.Component;
@@ -27,7 +28,7 @@ public class PostMapper implements WhatEatMapper<Post, PostResponse> {
                 .postImages(post.getPostImages().stream().map(postImageMapper::convertToDto).toList())
                 .numberOfUp(numberOfVotingUp)
                 .numberOfDown(numberOfVotingDown)
-                .createdAt(post.getCreatedAt())
+                .createdAt(InstantConverter.convertInstantFormat(post.getCreatedAt()))
                 .build();
     }
 
