@@ -60,8 +60,10 @@ public class DeletePostVoting {
 
         public void deletePostVoting(Tsid id) {
             var postVoting = postVotingRepository.findById(WhatEatId.builder().id(id).build());
-            if (postVoting.isPresent())
+            if (postVoting.isPresent()) {
                 postVotingRepository.delete(postVoting.get());
+                return;
+            }
             throw WhatEatException
                     .builder()
                     .code(WhatEatErrorCode.WES_0001)

@@ -8,6 +8,7 @@ import com.exe.whateat.application.post.mapper.PostImageMapper;
 import com.exe.whateat.application.post.mapper.PostMapper;
 import com.exe.whateat.application.post.response.PostResponse;
 import com.exe.whateat.application.post.response.PostsResponse;
+import com.exe.whateat.application.postvoting.mapper.PostVotingMapper;
 import com.exe.whateat.entity.common.PostVotingType;
 import com.exe.whateat.entity.post.Post;
 import com.exe.whateat.entity.post.QPost;
@@ -90,6 +91,7 @@ public final class GetPosts {
         private final PostImageMapper postImageMapper;
         private final WhatEatSecurityHelper securityHelper;
         private final PostVotingRepository postVotingRepository;
+        private final PostVotingMapper postVotingMapper;
 
         public PostsResponse getPosts(GetPostsRequest getPostsRequest) {
             final QPost qPost = QPost.post;
@@ -152,6 +154,7 @@ public final class GetPosts {
             var postVoting = postVotingRepository.postVotingAlreadyExists(user.get().getId(), post.getId());
             if(postVoting.isPresent()) {
                 postResponse.setVoted(true);
+                postResponse.setPostVoting(postVotingMapper.convertToDto(postVoting.get()));
             }
             else {
                 postResponse.setVoted(false);

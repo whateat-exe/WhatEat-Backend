@@ -5,6 +5,7 @@ import com.blazebit.persistence.querydsl.BlazeJPAQuery;
 import com.exe.whateat.application.common.AbstractController;
 import com.exe.whateat.application.post.mapper.PostMapper;
 import com.exe.whateat.application.post.response.PostResponse;
+import com.exe.whateat.application.postvoting.mapper.PostVotingMapper;
 import com.exe.whateat.entity.common.PostVotingType;
 import com.exe.whateat.entity.common.WhatEatId;
 import com.exe.whateat.entity.post.Post;
@@ -79,6 +80,7 @@ public final class GetPost {
         private final CriteriaBuilderFactory criteriaBuilderFactory;
         private final WhatEatSecurityHelper securityHelper;
         private final PostVotingRepository postVotingRepository;
+        private final PostVotingMapper postVotingMapper;
 
         public PostResponse getPost(Tsid id) {
             final WhatEatId whatEatId = new WhatEatId(id);
@@ -125,6 +127,7 @@ public final class GetPost {
             var postVoting = postVotingRepository.postVotingAlreadyExists(user.get().getId(), post.getId());
             if(postVoting.isPresent()) {
                 postResponse.setVoted(true);
+                postResponse.setPostVoting(postVotingMapper.convertToDto(postVoting.get()));
             }
             else {
                 postResponse.setVoted(false);

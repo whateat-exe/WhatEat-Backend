@@ -1,5 +1,7 @@
 package com.exe.whateat.application.post.response;
 
+import com.exe.whateat.application.postvoting.response.PostVotingResponse;
+import com.exe.whateat.entity.common.PostVotingType;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.github.x4ala1c.tsid.Tsid;
 import lombok.Builder;
@@ -32,6 +34,7 @@ public class PostResponse {
     private Instant createdAt;
     private boolean isModified;
     private boolean isVoted;
+    private PostVotingResponse postVoting;
     private Long totalVote;
     private Long totalComment;
 }
