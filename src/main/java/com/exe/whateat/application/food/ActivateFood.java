@@ -37,7 +37,7 @@ public final class ActivateFood {
 
         private final ActivateFoodService service;
 
-        @PostMapping("/foods/{id}/active")
+        @PostMapping("/foods/{id}/activate")
         @Operation(
                 summary = "Activate food API. ADMIN/MANAGER only."
         )
