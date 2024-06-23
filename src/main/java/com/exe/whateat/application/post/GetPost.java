@@ -3,6 +3,8 @@ package com.exe.whateat.application.post;
 import com.blazebit.persistence.CriteriaBuilderFactory;
 import com.blazebit.persistence.querydsl.BlazeJPAQuery;
 import com.exe.whateat.application.common.AbstractController;
+import com.exe.whateat.application.exception.WhatEatErrorCode;
+import com.exe.whateat.application.exception.WhatEatException;
 import com.exe.whateat.application.post.mapper.PostMapper;
 import com.exe.whateat.application.post.response.PostResponse;
 import com.exe.whateat.application.postvoting.mapper.PostVotingMapper;
@@ -124,6 +126,11 @@ public final class GetPost {
 
         private void setPostResponse (PostResponse postResponse, Post post) {
             var user = securityHelper.getCurrentLoggedInAccount();
+            if (!user.isPresent())
+                throw WhatEatException.builder()
+                        .code(WhatEatErrorCode.WES_0001)
+                        .reason("account", "chưa xác thực")
+                        .build();
             var postVoting = postVotingRepository.postVotingAlreadyExists(user.get().getId(), post.getId());
             if(postVoting.isPresent()) {
                 postResponse.setVoted(true);
