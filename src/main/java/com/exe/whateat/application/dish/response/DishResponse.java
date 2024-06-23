@@ -18,7 +18,7 @@ public class DishResponse {
     private String status;
     private Money price;
     private Double avgReview;
-    private Double numOfReview;
+    private Long numOfReview;
     private Tsid restaurantId;
     private Tsid foodId;
 }
