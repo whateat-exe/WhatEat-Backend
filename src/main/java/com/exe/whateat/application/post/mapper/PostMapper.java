@@ -28,7 +28,7 @@ public class PostMapper implements WhatEatMapper<Post, PostResponse> {
                 .postImages(post.getPostImages().stream().map(postImageMapper::convertToDto).toList())
                 .numberOfUp(numberOfVotingUp)
                 .numberOfDown(numberOfVotingDown)
-                .createdAt(InstantConverter.convertInstantFormat(post.getCreatedAt()))
+                .createdAt(post.getCreatedAt())
                 .build();
     }
 

@@ -128,16 +128,8 @@ public final class GetPost {
             if(postVoting.isPresent()) {
                 postResponse.setVoted(true);
                 postResponse.setPostVoting(postVotingMapper.convertToDto(postVoting.get()));
-            }
-            else {
+            } else {
                 postResponse.setVoted(false);
-            }
-
-            if (post.getVersion() > 0) {
-                postResponse.setModified(true);
-            }
-            else {
-                postResponse.setModified(false);
             }
         }
     }

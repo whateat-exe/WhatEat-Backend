@@ -60,15 +60,14 @@ public class DeletePostVoting {
 
         public void deletePostVoting(Tsid id) {
             var postVoting = postVotingRepository.findById(WhatEatId.builder().id(id).build());
-            if (postVoting.isPresent()) {
-                postVotingRepository.delete(postVoting.get());
-                return;
+            if (!postVoting.isPresent()) {
+                throw WhatEatException
+                        .builder()
+                        .code(WhatEatErrorCode.WES_0001)
+                        .reason("postvoting", "Không tìm thấy post voting")
+                        .build();
             }
-            throw WhatEatException
-                    .builder()
-                    .code(WhatEatErrorCode.WES_0001)
-                    .reason("postvoting", "Không tìm thấy post voting")
-                    .build();
+            postVotingRepository.delete(postVoting.get());
         }
     }
 }

@@ -1,6 +1,5 @@
 package com.exe.whateat.application.postcomment.response;
 
-import com.exe.whateat.application.user.response.UserResponse;
 import io.github.x4ala1c.tsid.Tsid;
 import lombok.Builder;
 import lombok.Getter;
