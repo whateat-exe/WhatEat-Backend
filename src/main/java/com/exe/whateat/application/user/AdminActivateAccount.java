@@ -1,5 +1,6 @@
 package com.exe.whateat.application.user;
 
+import com.exe.whateat.application.account.verification.AccountVerificationService;
 import com.exe.whateat.application.common.AbstractController;
 import com.exe.whateat.application.exception.WhatEatErrorCode;
 import com.exe.whateat.application.exception.WhatEatException;
@@ -62,6 +63,7 @@ public class AdminActivateAccount {
     public static class UserActivateAccountService {
 
         private final AccountRepository accountRepository;
+        private final AccountVerificationService accountVerificationService;
 
         public void activateAccount(Tsid id) {
             Optional<Account> account = accountRepository.findById(WhatEatId.builder().id(id).build());
@@ -70,6 +72,7 @@ public class AdminActivateAccount {
 
                     account.get().setStatus(ActiveStatus.ACTIVE);
                     accountRepository.save(account.get());
+                    accountVerificationService.sendActivatingAccountEmail(account.get());
                     return;
                 } else if (account.get().getStatus().equals(ActiveStatus.PENDING)) {
                     throw WhatEatException

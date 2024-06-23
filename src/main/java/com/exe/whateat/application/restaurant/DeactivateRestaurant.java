@@ -1,5 +1,6 @@
 package com.exe.whateat.application.restaurant;
 
+import com.exe.whateat.application.account.verification.AccountVerificationService;
 import com.exe.whateat.application.common.AbstractController;
 import com.exe.whateat.application.exception.WhatEatErrorCode;
 import com.exe.whateat.application.exception.WhatEatException;
@@ -62,6 +63,7 @@ public final class DeactivateRestaurant {
     public static class DeactivateRestaurantService {
 
         private final RestaurantRepository restaurantRepository;
+        private final AccountVerificationService accountVerificationService;
 
         public void deactivate(Tsid id) {
             final WhatEatId whatEatId = new WhatEatId(id);
@@ -78,6 +80,7 @@ public final class DeactivateRestaurant {
             }
             restaurant.getAccount().setStatus(ActiveStatus.INACTIVE);
             restaurantRepository.save(restaurant);
+            accountVerificationService.sendDeactivatingAccountEmail(restaurant.getAccount());
         }
     }
 }

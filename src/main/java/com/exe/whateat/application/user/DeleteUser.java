@@ -1,5 +1,6 @@
 package com.exe.whateat.application.user;
 
+import com.exe.whateat.application.account.verification.AccountVerificationService;
 import com.exe.whateat.application.common.AbstractController;
 import com.exe.whateat.application.exception.WhatEatErrorCode;
 import com.exe.whateat.application.exception.WhatEatException;
@@ -82,6 +83,7 @@ public final class DeleteUser {
     public static class DeleteUserService {
 
         private final AccountRepository accountRepository;
+        private final AccountVerificationService accountVerificationService;
 
         public void deleteUser(String id) {
 
@@ -94,6 +96,7 @@ public final class DeleteUser {
 
                     account.get().setStatus(ActiveStatus.INACTIVE);
                     accountRepository.save(account.get());
+                    accountVerificationService.sendDeactivatingAccountEmail(account.get());
                     return;
                 }
                 throw WhatEatException

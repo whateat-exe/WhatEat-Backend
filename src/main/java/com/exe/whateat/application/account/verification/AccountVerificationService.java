@@ -28,4 +28,8 @@ public interface AccountVerificationService {
      * @param account The Account.
      */
     void sendVerificationCode(Account account);
+    void sendRegisterRestaurantEmail(Account account);
+    void sendActivatingAccountEmail(Account account);
+
+    void sendDeactivatingAccountEmail(Account account);
 }

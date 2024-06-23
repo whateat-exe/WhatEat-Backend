@@ -48,6 +48,84 @@ public class AccountVerificationServiceImpl implements AccountVerificationServic
             </html>
             """;
 
+    private static final String EMAIL_TITLE_VERIFICATION_SUCCESS = "Xác thực tài khoản WhatEat thành công";
+    private static final String EMAIL_BODY_VERIFICATION_SUCCESS = """
+                <html>
+                <body>
+                    <p>Chào mừng bạn đến với WhatEat!</p>
+                    <br />
+                    <p>Hãy lướt qua lại một vài thông tin cơ bản nhé:</p>
+                    <ul>
+                        <li>ID: %s</li>
+                        <li>Email: %s</li>
+                        <li>Tên đầy đủ: %s</li>
+                        <li>Số điện thoại: %s</li>
+                    </ul>
+                    <br />
+                    <p>Bạn đã xác thực tài khoản thành công!</p>
+                    <br />
+                    <p>Cảm ơn các bạn đã tải và sử dụng ứng dụng WhatEat!</p>
+                </body>
+            </html>
+            """;
+
+    private static final String EMAIL_TITLE_ACTIVATION =  "Thông báo WhatEat";
+    private static final String EMAIL_BODY_ACTIVATION = """
+                <html>
+                <body>
+                    <p>Một vài thông tin cơ bản:</p>
+                    <ul>
+                        <li>ID: %s</li>
+                        <li>Email: %s</li>
+                        <li>Tên đầy đủ: %s</li>
+                        <li>Số điện thoại: %s</li>
+                    </ul>
+                    <br />
+                    <p>Tài khoản của bạn đã được kích hoạt.</p>
+                    <br />
+                    <p>Cảm ơn các bạn đã tải và sử dụng ứng dụng WhatEat!</p>
+                </body>
+            </html>
+            """;
+
+    private static final String EMAIL_BODY_DEACTIVATION = """
+                <html>
+                <body>
+                    <p>Một vài thông tin cơ bản:</p>
+                    <ul>
+                        <li>ID: %s</li>
+                        <li>Email: %s</li>
+                        <li>Tên đầy đủ: %s</li>
+                        <li>Số điện thoại: %s</li>
+                    </ul>
+                    <br />
+                    <p>Tài khoản của bạn đã bị vô hiệu hoá.</p>
+                    <br />
+                    <p>Cảm ơn các bạn đã tải và sử dụng ứng dụng WhatEat!</p>
+                </body>
+            </html>
+            """;
+
+    private static final String EMAIL_BODY_REGISTER_RESTAURANT = """
+                <html>
+                <body>
+                    <p>Chào mừng bạn đến với WhatEat!</p>
+                    <br />
+                    <p>Hãy lướt qua lại một vài thông tin cơ bản nhé:</p>
+                    <ul>
+                        <li>ID: %s</li>
+                        <li>Email: %s</li>
+                        <li>Tên đầy đủ: %s</li>
+                        <li>Số điện thoại: %s</li>
+                    </ul>
+                    <br />
+                    <p>Tài khoản của bạn đang trong trạng thái pending, vui lòng chờ Admin duyệt.</p>
+                    <br />
+                    <p>Cảm ơn các bạn đã tải và sử dụng ứng dụng WhatEat!</p>
+                </body>
+            </html>
+            """;
+
     private static final long VERIFICATION_DURATION = 15L * 60;
 
     private final AccountVerifyRepository accountVerifyRepository;
@@ -91,6 +169,10 @@ public class AccountVerificationServiceImpl implements AccountVerificationServic
         accountVerifyRepository.updateTheCodeToBeVerified(account.getId(), verificationCode);
         account.setStatus(ActiveStatus.ACTIVE);
         accountRepository.save(account);
+
+         final String emailBody = String.format(EMAIL_BODY_VERIFICATION_SUCCESS, account.getId(), account.getEmail(), account.getFullName(),
+                account.getPhoneNumber());
+         whatEatEmailService.sendMail(account.getEmail(), emailBody, String.format(EMAIL_TITLE_VERIFICATION_SUCCESS));
     }
 
     @Override
@@ -114,6 +196,30 @@ public class AccountVerificationServiceImpl implements AccountVerificationServic
         final String emailBody = String.format(EMAIL_BODY, account.getId(), account.getEmail(), account.getFullName(),
                 account.getPhoneNumber(), code);
         whatEatEmailService.sendMail(account.getEmail(), emailBody, String.format(EMAIL_TITLE, account.getEmail()));
+    }
+
+    @Override
+    public void sendActivatingAccountEmail(Account account) {
+        validateAccount(account);
+        final String emailBody = String.format(EMAIL_BODY_ACTIVATION, account.getId(), account.getEmail(), account.getFullName(),
+                account.getPhoneNumber());
+        whatEatEmailService.sendMail(account.getEmail(), emailBody, String.format(EMAIL_TITLE_ACTIVATION));
+    }
+
+    @Override
+    public void sendDeactivatingAccountEmail(Account account) {
+        validateAccount(account);
+        final String emailBody = String.format(EMAIL_BODY_DEACTIVATION, account.getId(), account.getEmail(), account.getFullName(),
+                account.getPhoneNumber());
+        whatEatEmailService.sendMail(account.getEmail(), emailBody, String.format(EMAIL_TITLE_ACTIVATION));
+    }
+
+    @Override
+    public void sendRegisterRestaurantEmail(Account account) {
+        validateAccount(account);
+        final String emailBody = String.format(EMAIL_BODY_REGISTER_RESTAURANT, account.getId(), account.getEmail(), account.getFullName(),
+                account.getPhoneNumber());
+        whatEatEmailService.sendMail(account.getEmail(), emailBody, String.format(EMAIL_TITLE_ACTIVATION));
     }
 
     private static void validateAccount(Account account) {
