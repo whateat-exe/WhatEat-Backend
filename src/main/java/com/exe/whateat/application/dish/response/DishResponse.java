@@ -19,6 +19,6 @@ public class DishResponse {
     private String image;
     private String status;
     private Money price;
-    private RestaurantResponse restaurantResponse;
-    private FoodResponse foodResponse;
+    private Tsid restaurantId;
+    private Tsid foodId;
 }
