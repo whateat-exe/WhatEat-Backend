@@ -20,7 +20,7 @@ public enum WhatEatErrorCode {
 
     WEB_0000("Dummy business error code", HttpStatus.BAD_REQUEST),
     WEB_0001("Restaurant name or email already exists", HttpStatus.BAD_REQUEST),
-    WEB_0002("Restaurant not found", HttpStatus.BAD_REQUEST),
+    WEB_0002("Nhà hàng không tồn tại", HttpStatus.BAD_REQUEST),
     WEB_0003("Invalid restaurant status", HttpStatus.BAD_REQUEST),
     WEB_0004("Tên của món ăn đã bị trùng", HttpStatus.BAD_REQUEST),
     WEB_0005("Món ăn không tìm thấy", HttpStatus.BAD_REQUEST),
