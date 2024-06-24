@@ -125,13 +125,12 @@ public final class GetPost {
         }
 
         private void setPostResponse (PostResponse postResponse, Post post) {
-            var user = securityHelper.getCurrentLoggedInAccount();
-            if (user.isEmpty())
-                throw WhatEatException.builder()
-                        .code(WhatEatErrorCode.WES_0001)
-                        .reason("account", "chưa xác thực")
-                        .build();
-            var postVoting = postVotingRepository.postVotingAlreadyExists(user.get().getId(), post.getId());
+            var user = securityHelper.getCurrentLoggedInAccount()
+                    .orElseThrow(() -> WhatEatException.builder()
+                            .code(WhatEatErrorCode.WES_0001)
+                            .reason("account", "account chưa xác thực")
+                            .build());
+            var postVoting = postVotingRepository.postVotingAlreadyExists(user.getId(), post.getId());
             if(postVoting.isPresent()) {
                 postResponse.setVoted(true);
                 postResponse.setPostVoting(postVotingMapper.convertToDto(postVoting.get()));

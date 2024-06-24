@@ -62,15 +62,14 @@ public class DeletePostVoting {
         private final PostVotingRepository postVotingRepository;
 
         public void deletePostVoting(Tsid id) {
-            var postVoting = postVotingRepository.findById(WhatEatId.builder().id(id).build());
-            if (postVoting.isEmpty()) {
-                throw WhatEatException
-                        .builder()
-                        .code(WhatEatErrorCode.WES_0001)
-                        .reason("postvoting", "Không tìm thấy post voting")
-                        .build();
-            }
-            postVotingRepository.delete(postVoting.get());
+            WhatEatId whatEatId = new WhatEatId(id);
+            var postVoting = postVotingRepository.findById(whatEatId)
+                    .orElseThrow(() -> WhatEatException
+                            .builder()
+                            .code(WhatEatErrorCode.WES_0001)
+                            .reason("postvoting", "Không tìm thấy post voting")
+                            .build());
+            postVotingRepository.delete(postVoting);
         }
     }
 }
