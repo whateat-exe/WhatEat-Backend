@@ -1,5 +1,6 @@
 package com.exe.whateat.application.user;
 
+import com.exe.whateat.application.account.verification.AccountVerificationService;
 import com.exe.whateat.application.common.AbstractController;
 import com.exe.whateat.application.exception.WhatEatErrorCode;
 import com.exe.whateat.application.exception.WhatEatException;
@@ -22,8 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Optional;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class AdminActivateAccount {
@@ -62,33 +61,30 @@ public class AdminActivateAccount {
     public static class UserActivateAccountService {
 
         private final AccountRepository accountRepository;
+        private final AccountVerificationService accountVerificationService;
 
         public void activateAccount(Tsid id) {
-            Optional<Account> account = accountRepository.findById(WhatEatId.builder().id(id).build());
-            if (account.isPresent()) {
-                if (account.get().getStatus().equals(ActiveStatus.INACTIVE)) {
-
-                    account.get().setStatus(ActiveStatus.ACTIVE);
-                    accountRepository.save(account.get());
-                    return;
-                } else if (account.get().getStatus().equals(ActiveStatus.PENDING)) {
-                    throw WhatEatException
-                            .builder()
+            Account account = accountRepository.findById(WhatEatId.builder().id(id).build())
+                    .orElseThrow(() -> WhatEatException.builder()
                             .code(WhatEatErrorCode.WEA_0007)
-                            .reason("user", "không thể kích hoạt tài khoản chưa được verify")
-                            .build();
-                }
-                throw WhatEatException
-                        .builder()
+                            .reason("server", "Không thể tìm thấy tài khoản này")
+                            .build());
+
+            if (account.getStatus().equals(ActiveStatus.INACTIVE)) {
+                account.setStatus(ActiveStatus.ACTIVE);
+                accountRepository.save(account);
+                accountVerificationService.sendActivatingAccountEmail(account);
+            } else if (account.getStatus().equals(ActiveStatus.PENDING)) {
+                throw WhatEatException.builder()
+                        .code(WhatEatErrorCode.WEA_0007)
+                        .reason("user", "không thể kích hoạt tài khoản chưa được verify")
+                        .build();
+            } else {
+                throw WhatEatException.builder()
                         .code(WhatEatErrorCode.WEA_0007)
                         .reason("user", "Không thể kích hoạt tài khoản đang được kích hoạt")
                         .build();
             }
-            throw WhatEatException
-                    .builder()
-                    .code(WhatEatErrorCode.WEA_0007)
-                    .reason("server", "Không thể tìm thấy tài khoản này")
-                    .build();
         }
     }
 }

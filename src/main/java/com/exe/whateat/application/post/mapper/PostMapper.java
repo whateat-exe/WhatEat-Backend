@@ -16,7 +16,7 @@ public class PostMapper implements WhatEatMapper<Post, PostResponse> {
     private AccountDTOMapper accountDTOMapper;
     private PostImageMapper postImageMapper;
 
-    public PostResponse convertToDtoWithVoting(Post post,  int numberOfVotingUp, int numberOfVotingDown) {
+    public PostResponse convertToDtoWithVoting(Post post, int numberOfVotingUp, int numberOfVotingDown) {
         if (post == null) {
             return null;
         }

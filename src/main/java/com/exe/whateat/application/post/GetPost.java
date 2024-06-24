@@ -3,23 +3,14 @@ package com.exe.whateat.application.post;
 import com.blazebit.persistence.CriteriaBuilderFactory;
 import com.blazebit.persistence.querydsl.BlazeJPAQuery;
 import com.exe.whateat.application.common.AbstractController;
-import com.exe.whateat.application.common.WhatEatMapper;
-import com.exe.whateat.application.exception.WhatEatErrorCode;
-import com.exe.whateat.application.exception.WhatEatException;
-import com.exe.whateat.application.food.GetFood;
-import com.exe.whateat.application.food.response.FoodResponse;
 import com.exe.whateat.application.post.mapper.PostMapper;
 import com.exe.whateat.application.post.response.PostResponse;
-import com.exe.whateat.entity.common.ActiveStatus;
 import com.exe.whateat.entity.common.PostVotingType;
 import com.exe.whateat.entity.common.WhatEatId;
-import com.exe.whateat.entity.food.Food;
 import com.exe.whateat.entity.post.Post;
 import com.exe.whateat.entity.post.QPost;
 import com.exe.whateat.entity.post.QPostVoting;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
-import com.exe.whateat.infrastructure.repository.FoodRepository;
-import com.exe.whateat.infrastructure.security.WhatEatSecurityHelper;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;
@@ -41,7 +32,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class GetPost {

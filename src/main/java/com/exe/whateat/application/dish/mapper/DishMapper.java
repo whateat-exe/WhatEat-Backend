@@ -34,6 +34,6 @@ public class DishMapper implements WhatEatMapper<Dish, DishResponse> {
     }
 
     private Double formatAvg(Double avg) {
-        return avg != null ?  Math.round(avg * 10) / 10.0 : null;
+        return avg != null ? Math.round(avg * 10) / 10.0 : null;
     }
 }

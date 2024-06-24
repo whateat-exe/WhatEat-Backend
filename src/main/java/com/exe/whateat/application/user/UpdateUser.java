@@ -100,62 +100,60 @@ public class UpdateUser {
         public UserResponse updateUser(UpdateUserRequest updateUserRequest, String id) {
 
             WhatEatId whatEatId = WhatEatId.builder().id(Tsid.fromString(id)).build();
-            Optional<Account> accountExisting = accountRepository.findById(whatEatId);
-            if (accountExisting.isPresent()) {
-                if (StringUtils.isNotBlank(updateUserRequest.getEmail())) {
-                    if (WhatEatRegex.checkPattern(WhatEatRegex.EMAIL_PATTERN, updateUserRequest.email))
-                        accountExisting.get().setEmail(updateUserRequest.email);
-                    else
-                        throw WhatEatException
-                                .builder()
-                                .code(WhatEatErrorCode.WEV_0001)
-                                .reason("email", "Invalid email address")
-                                .build();
-                }
+            Account account = accountRepository.findById(whatEatId)
+                    .orElseThrow(() -> WhatEatException.builder()
+                            .code(WhatEatErrorCode.WEA_0007)
+                            .reason("server", "Fault in internal server")
+                            .build());
 
-                if (StringUtils.isNotBlank(updateUserRequest.getPhoneNumber())) {
-                    if (WhatEatRegex.checkPattern(WhatEatRegex.PHONE_PATTERN, updateUserRequest.phoneNumber))
-                        accountExisting.get().setPhoneNumber(updateUserRequest.getPhoneNumber());
-                    else
-                        throw WhatEatException
-                                .builder()
-                                .code(WhatEatErrorCode.WEV_0001)
-                                .reason("email", "Invalid email address")
-                                .build();
-                }
-
-                if (StringUtils.isNotBlank(updateUserRequest.getFullName())) {
-                    accountExisting.get().setFullName(updateUserRequest.getFullName());
-                }
-
-                FirebaseImageResponse firebaseImageResponse = null;
-                try {
-                    if (StringUtils.isNotBlank(updateUserRequest.getImage())) {
-                        firebaseImageResponse = firebaseImageService.uploadBase64Image(updateUserRequest.getImage());
-                        accountExisting.get().setImage(firebaseImageResponse.url());
-                    }
-                } catch (Exception e) {
-                    // Image is created. Time to delete!
-                    if (firebaseImageResponse != null) {
-                        firebaseImageService.deleteImage(firebaseImageResponse.id(), FirebaseImageService.DeleteType.ID);
-                    }
-                    if (e instanceof WhatEatException whatEatException) {
-                        throw whatEatException;
-                    }
+            if (StringUtils.isNotBlank(updateUserRequest.getEmail())) {
+                if (WhatEatRegex.checkPattern(WhatEatRegex.EMAIL_PATTERN, updateUserRequest.getEmail())) {
+                    account.setEmail(updateUserRequest.getEmail());
+                } else {
                     throw WhatEatException.builder()
-                            .code(WhatEatErrorCode.WES_0001)
-                            .reason("accouunt", "Lỗi trong việc update account")
+                            .code(WhatEatErrorCode.WEV_0001)
+                            .reason("email", "Invalid email address")
                             .build();
                 }
-
-                Account accountUpdated = accountRepository.save(accountExisting.get());
-                return accountDTOMapper.convertToDto(accountUpdated);
             }
-            throw WhatEatException
-                    .builder()
-                    .code(WhatEatErrorCode.WEA_0007)
-                    .reason("server", "Fault in internal server")
-                    .build();
+
+            if (StringUtils.isNotBlank(updateUserRequest.getPhoneNumber())) {
+                if (WhatEatRegex.checkPattern(WhatEatRegex.PHONE_PATTERN, updateUserRequest.getPhoneNumber())) {
+                    account.setPhoneNumber(updateUserRequest.getPhoneNumber());
+                } else {
+                    throw WhatEatException.builder()
+                            .code(WhatEatErrorCode.WEV_0001)
+                            .reason("phone", "Invalid phone number")
+                            .build();
+                }
+            }
+
+            if (StringUtils.isNotBlank(updateUserRequest.getFullName())) {
+                account.setFullName(updateUserRequest.getFullName());
+            }
+
+            FirebaseImageResponse firebaseImageResponse = null;
+            try {
+                if (StringUtils.isNotBlank(updateUserRequest.getImage())) {
+                    firebaseImageResponse = firebaseImageService.uploadBase64Image(updateUserRequest.getImage());
+                    account.setImage(firebaseImageResponse.url());
+                }
+            } catch (Exception e) {
+                // Image is created. Time to delete!
+                if (firebaseImageResponse != null) {
+                    firebaseImageService.deleteImage(firebaseImageResponse.id(), FirebaseImageService.DeleteType.ID);
+                }
+                if (e instanceof WhatEatException whatEatException) {
+                    throw whatEatException;
+                }
+                throw WhatEatException.builder()
+                        .code(WhatEatErrorCode.WES_0001)
+                        .reason("account", "Lỗi trong việc update account")
+                        .build();
+            }
+
+            Account accountUpdated = accountRepository.save(account);
+            return accountDTOMapper.convertToDto(accountUpdated);
         }
     }
 
