@@ -19,7 +19,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -61,7 +60,7 @@ public class CreatePost {
         private String content;
 
         @NotNull(message = "Image is required ")
-        @Size(min=1, max=3, message = "The number of image is between 1 and 3")
+        @Size(min = 1, max = 3, message = "The number of image is between 1 and 3")
         private List<CreatePostImageRequest> images;
     }
 
@@ -73,7 +72,7 @@ public class CreatePost {
     )
     public static final class CreateFoodTagController extends AbstractController {
 
-        private CreatePostService  service;
+        private CreatePostService service;
 
         @PostMapping("/posts")
         @Operation(
@@ -112,45 +111,45 @@ public class CreatePost {
 
         public PostResponse createPost(CreatePostRequest request) {
             var user = securityHelper.getCurrentLoggedInAccount();
-                Post post = Post
+            Post post = Post
+                    .builder()
+                    .id(WhatEatId.generate())
+                    .content(request.content)
+                    .account(user.get())
+                    .createdAt(Instant.now())
+                    .lastModified(Instant.now())
+                    .build();
+            var postCreated = postRepository.save(post);
+            List<PostImage> postImages = new ArrayList<>();
+            for (var postImageBase64 : request.images) {
+                PostImage postImage = PostImage
                         .builder()
                         .id(WhatEatId.generate())
-                        .content(request.content)
-                        .account(user.get())
-                        .createdAt(Instant.now())
-                        .lastModified(Instant.now())
+                        .caption(postImageBase64.caption)
+                        .post(postCreated)
                         .build();
-                var postCreated = postRepository.save(post);
-                List<PostImage> postImages = new ArrayList<>();
-                for (var postImageBase64 : request.images) {
-                    PostImage postImage = PostImage
-                            .builder()
-                            .id(WhatEatId.generate())
-                            .caption(postImageBase64.caption)
-                            .post(postCreated)
-                            .build();
-                    FirebaseImageResponse firebaseImageResponse = null;
-                    try {
-                        firebaseImageResponse = firebaseImageService.uploadBase64Image(postImageBase64.image);
-                        postImage.setImage(firebaseImageResponse.url());
-                        postImages.add(postImage);
-                    } catch (Exception e) {
-                        // Image is created. Time to delete!
-                        if (firebaseImageResponse != null) {
-                            firebaseImageService.deleteImage(firebaseImageResponse.id(), FirebaseImageService.DeleteType.ID);
-                        }
-                        if (e instanceof WhatEatException whatEatException) {
-                            throw whatEatException;
-                        }
-                        throw WhatEatException.builder()
-                                .code(WhatEatErrorCode.WES_0001)
-                                .reason("post", "Lỗi trong việc tạo post image.")
-                                .build();
+                FirebaseImageResponse firebaseImageResponse = null;
+                try {
+                    firebaseImageResponse = firebaseImageService.uploadBase64Image(postImageBase64.image);
+                    postImage.setImage(firebaseImageResponse.url());
+                    postImages.add(postImage);
+                } catch (Exception e) {
+                    // Image is created. Time to delete!
+                    if (firebaseImageResponse != null) {
+                        firebaseImageService.deleteImage(firebaseImageResponse.id(), FirebaseImageService.DeleteType.ID);
                     }
+                    if (e instanceof WhatEatException whatEatException) {
+                        throw whatEatException;
+                    }
+                    throw WhatEatException.builder()
+                            .code(WhatEatErrorCode.WES_0001)
+                            .reason("post", "Lỗi trong việc tạo post image.")
+                            .build();
                 }
-                var postImageCreated = postImageRepository.saveAll(postImages);
-                postCreated.setPostImages(postImageCreated);
-                return postMapper.convertToDto(postRepository.save(postCreated));
+            }
+            var postImageCreated = postImageRepository.saveAll(postImages);
+            postCreated.setPostImages(postImageCreated);
+            return postMapper.convertToDto(postRepository.save(postCreated));
         }
     }
 }

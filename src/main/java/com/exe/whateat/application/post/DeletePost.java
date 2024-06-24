@@ -1,14 +1,8 @@
 package com.exe.whateat.application.post;
 
 import com.exe.whateat.application.common.AbstractController;
-import com.exe.whateat.application.exception.WhatEatErrorCode;
-import com.exe.whateat.application.exception.WhatEatException;
-import com.exe.whateat.entity.common.ActiveStatus;
 import com.exe.whateat.entity.common.WhatEatId;
-import com.exe.whateat.entity.food.Food;
-import com.exe.whateat.entity.post.Post;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
-import com.exe.whateat.infrastructure.repository.FoodRepository;
 import com.exe.whateat.infrastructure.repository.PostRepository;
 import io.github.x4ala1c.tsid.Tsid;
 import io.swagger.v3.oas.annotations.Operation;

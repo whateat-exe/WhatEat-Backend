@@ -3,15 +3,12 @@ package com.exe.whateat.application.postvoting;
 import com.exe.whateat.application.common.AbstractController;
 import com.exe.whateat.application.exception.WhatEatErrorCode;
 import com.exe.whateat.application.exception.WhatEatException;
-import com.exe.whateat.application.food.response.FoodResponse;
-import com.exe.whateat.application.post.mapper.PostMapper;
 import com.exe.whateat.application.postvoting.mapper.PostVotingMapper;
 import com.exe.whateat.application.postvoting.response.PostVotingResponse;
 import com.exe.whateat.entity.common.PostVotingType;
 import com.exe.whateat.entity.common.WhatEatId;
 import com.exe.whateat.entity.post.PostVoting;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
-import com.exe.whateat.infrastructure.repository.AccountRepository;
 import com.exe.whateat.infrastructure.repository.PostRepository;
 import com.exe.whateat.infrastructure.repository.PostVotingRepository;
 import com.exe.whateat.infrastructure.security.WhatEatSecurityHelper;
@@ -95,11 +92,11 @@ public class CreatePostVoting {
             final WhatEatId postId = new WhatEatId(request.postId);
             var postVotingExist = postVotingRepository.postVotingAlreadyExists(user.get().getId(), postId);
             if (postVotingExist.isPresent()) {
-               throw WhatEatException
-                       .builder()
-                       .code(WhatEatErrorCode.WES_0001)
-                       .reason("postvoting", "post voting này đã vote")
-                       .build();
+                throw WhatEatException
+                        .builder()
+                        .code(WhatEatErrorCode.WES_0001)
+                        .reason("postvoting", "post voting này đã vote")
+                        .build();
             }
             PostVoting postVoting = PostVoting
                     .builder()

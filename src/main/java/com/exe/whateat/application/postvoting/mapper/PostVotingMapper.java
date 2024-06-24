@@ -6,7 +6,7 @@ import com.exe.whateat.entity.post.PostVoting;
 import org.springframework.stereotype.Component;
 
 @Component
-public class PostVotingMapper  implements WhatEatMapper<PostVoting, PostVotingResponse> {
+public class PostVotingMapper implements WhatEatMapper<PostVoting, PostVotingResponse> {
     @Override
     public PostVotingResponse convertToDto(PostVoting postVoting) {
         if (postVoting == null) {

@@ -100,10 +100,10 @@ public final class GetDishByRestaurant {
             BooleanExpression predicates = qDish.isNotNull();
 
             if (!restaurantRepository.existsById(whatEatRestaurantId)) {
-                throw  WhatEatException.builder()
-                            .code(WhatEatErrorCode.WEB_0002)
-                            .reason("food", String.format("Nhà hàng với ID '%s' không tồn tại.", tsid))
-                            .build();
+                throw WhatEatException.builder()
+                        .code(WhatEatErrorCode.WEB_0002)
+                        .reason("food", String.format("Nhà hàng với ID '%s' không tồn tại.", tsid))
+                        .build();
             }
 
             predicates = predicates.and(qDish.restaurant.id.eq(whatEatRestaurantId));
