@@ -1,5 +1,6 @@
 package com.exe.whateat.application.restaurant;
 
+import com.exe.whateat.application.account.verification.AccountVerificationService;
 import com.exe.whateat.application.common.AbstractController;
 import com.exe.whateat.application.common.WhatEatMapper;
 import com.exe.whateat.application.exception.WhatEatErrorCode;
@@ -123,6 +124,7 @@ public final class CreateRestaurant {
         private final RestaurantRequestRepository restaurantRequestRepository;
         private final PasswordEncoder passwordEncoder;
         private final WhatEatMapper<Restaurant, RestaurantResponse> mapper;
+        private final AccountVerificationService accountVerificationService;
 
         public RestaurantResponse create(CreateRestaurantRequest request) {
             if (restaurantRepository.existsByNameAndAccountEmail(request.getName(), request.getEmail())) {
@@ -163,6 +165,7 @@ public final class CreateRestaurant {
                         .createdAt(Instant.now())
                         .build();
                 restaurantRequestRepository.saveAndFlush(restaurantRequest);
+                accountVerificationService.sendRegisterRestaurantEmail(restaurant.getAccount());
                 return mapper.convertToDto(restaurant);
             } catch (Exception e) {
                 // Image is created. Time to delete!
