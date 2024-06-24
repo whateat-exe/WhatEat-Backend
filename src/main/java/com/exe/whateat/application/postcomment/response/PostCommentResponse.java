@@ -5,12 +5,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.Serial;
-
 @Builder
 @Getter
 @Setter
-public class PostCommentResponse  {
+public class PostCommentResponse {
     private Tsid id;
     private String content;
 }

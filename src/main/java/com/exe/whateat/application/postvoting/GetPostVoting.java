@@ -1,18 +1,12 @@
 package com.exe.whateat.application.postvoting;
 
 import com.exe.whateat.application.common.AbstractController;
-import com.exe.whateat.application.common.WhatEatMapper;
 import com.exe.whateat.application.exception.WhatEatErrorCode;
 import com.exe.whateat.application.exception.WhatEatException;
-import com.exe.whateat.application.food.GetFood;
-import com.exe.whateat.application.food.response.FoodResponse;
 import com.exe.whateat.application.postvoting.mapper.PostVotingMapper;
 import com.exe.whateat.application.postvoting.response.PostVotingResponse;
-import com.exe.whateat.entity.common.ActiveStatus;
 import com.exe.whateat.entity.common.WhatEatId;
-import com.exe.whateat.entity.food.Food;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
-import com.exe.whateat.infrastructure.repository.FoodRepository;
 import com.exe.whateat.infrastructure.repository.PostVotingRepository;
 import com.exe.whateat.infrastructure.security.WhatEatSecurityHelper;
 import io.github.x4ala1c.tsid.Tsid;
@@ -75,7 +69,7 @@ public class GetPostVoting {
             var user = securityHelper.getCurrentLoggedInAccount();
             if (user.isPresent()) {
                 var postVoting = postVotingRepository.postVotingAlreadyExists(user.get().getId(), postId);
-                if(postVoting.isPresent()) {
+                if (postVoting.isPresent()) {
                     return postVotingMapper.convertToDto(postVoting.get());
                 }
                 return null;

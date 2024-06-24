@@ -4,8 +4,8 @@ import com.blazebit.persistence.CriteriaBuilderFactory;
 import com.blazebit.persistence.querydsl.BlazeJPAQuery;
 import com.exe.whateat.application.common.AbstractController;
 import com.exe.whateat.application.common.request.PaginationRequest;
-import com.exe.whateat.application.dish.request.DishFilter;
 import com.exe.whateat.application.dish.mapper.DishMapper;
+import com.exe.whateat.application.dish.request.DishFilter;
 import com.exe.whateat.application.dish.response.DishesResponse;
 import com.exe.whateat.application.exception.WhatEatErrorCode;
 import com.exe.whateat.application.exception.WhatEatException;
@@ -115,10 +115,10 @@ public final class GetDishesByFood {
             final WhatEatId WhatEatFoodId = WhatEatId.builder().id(tsid).build();
 
             if (!foodRepository.existsById(WhatEatFoodId)) {
-                throw  WhatEatException.builder()
-                            .code(WhatEatErrorCode.WEB_0005)
-                            .reason("food", String.format("Món ăn với ID '%s' không tồn tại.", tsid))
-                            .build();
+                throw WhatEatException.builder()
+                        .code(WhatEatErrorCode.WEB_0005)
+                        .reason("food", String.format("Món ăn với ID '%s' không tồn tại.", tsid))
+                        .build();
             }
 
             predicates = predicates.and(qDish.food.id.eq(WhatEatFoodId));
@@ -127,7 +127,7 @@ public final class GetDishesByFood {
             List<Dish> dishes;
 
             if (DishFilter.REVIEW.equals(request.getAsc()) || DishFilter.REVIEW.equals(request.getDesc())) {
-                 query.select(qDish)
+                query.select(qDish)
                         .from(qDish)
                         .leftJoin(qDish.ratings, qRating)
                         .having(predicates)

@@ -1,5 +1,6 @@
 package com.exe.whateat.application.user;
 
+import com.exe.whateat.application.account.verification.AccountVerificationService;
 import com.exe.whateat.application.common.AbstractController;
 import com.exe.whateat.application.exception.WhatEatErrorCode;
 import com.exe.whateat.application.exception.WhatEatException;
@@ -82,31 +83,28 @@ public final class DeleteUser {
     public static class DeleteUserService {
 
         private final AccountRepository accountRepository;
+        private final AccountVerificationService accountVerificationService;
 
         public void deleteUser(String id) {
-
             Tsid tsid = Tsid.fromString(id);
             WhatEatId whatEatId = WhatEatId.builder().id(tsid).build();
-            Optional<Account> account = accountRepository.findById(whatEatId);
+            Account account = accountRepository.findById(whatEatId)
+                    .orElseThrow(() -> WhatEatException.builder()
+                            .code(WhatEatErrorCode.WEA_0007)
+                            .reason("server", "can not find account by that user")
+                            .build());
 
-            if (account.isPresent()) {
-                if (account.get().getStatus().equals(ActiveStatus.ACTIVE)) {
-
-                    account.get().setStatus(ActiveStatus.INACTIVE);
-                    accountRepository.save(account.get());
-                    return;
-                }
-                throw WhatEatException
-                        .builder()
+            if (account.getStatus().equals(ActiveStatus.ACTIVE)) {
+                account.setStatus(ActiveStatus.INACTIVE);
+                accountRepository.save(account);
+                accountVerificationService.sendDeactivatingAccountEmail(account);
+            } else {
+                throw WhatEatException.builder()
                         .code(WhatEatErrorCode.WEA_0007)
                         .reason("server", "Can not disable an inactive account")
                         .build();
             }
-            throw WhatEatException
-                    .builder()
-                    .code(WhatEatErrorCode.WEA_0007)
-                    .reason("server", "can not find account by that user")
-                    .build();
         }
+
     }
 }

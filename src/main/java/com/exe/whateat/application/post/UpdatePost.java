@@ -123,7 +123,7 @@ public final class UpdatePost {
                     .where(predicates)
                     .fetch();
             var post = posts.get(0);
-            if(!(user.get().getId().asTsid().equals(post.getAccount().getId().asTsid())))
+            if (!(user.get().getId().asTsid().equals(post.getAccount().getId().asTsid())))
                 throw WhatEatException.builder()
                         .code(WhatEatErrorCode.WES_0001)
                         .reason("user", "Không đúng user để có thể sửa bài post")

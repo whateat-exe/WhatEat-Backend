@@ -56,7 +56,7 @@ public class CreatePostComment {
 
         private final CreatePostCommentService service;
 
-        @PostMapping ("/posts/{id}/comments")
+        @PostMapping("/posts/{id}/comments")
         @Operation(
                 summary = "Create post comment.",
                 requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
@@ -93,7 +93,7 @@ public class CreatePostComment {
         public PostCommentResponse createPostComment(CreatePostCommentRequest request, Tsid id) {
             final WhatEatId postId = new WhatEatId(id);
             var user = securityHelper.getCurrentLoggedInAccount();
-            if(user.isPresent()) {
+            if (user.isPresent()) {
                 PostComment postComment = PostComment.builder()
                         .id(WhatEatId.generate())
                         .content(request.content)
