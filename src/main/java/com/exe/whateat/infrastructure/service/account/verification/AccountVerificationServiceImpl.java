@@ -69,7 +69,7 @@ public class AccountVerificationServiceImpl implements AccountVerificationServic
             </html>
             """;
 
-    private static final String EMAIL_TITLE_ACTIVATION =  "Thông báo WhatEat";
+    private static final String EMAIL_TITLE_ACTIVATION = "Thông báo WhatEat";
     private static final String EMAIL_BODY_ACTIVATION = """
                 <html>
                 <body>
@@ -170,9 +170,9 @@ public class AccountVerificationServiceImpl implements AccountVerificationServic
         account.setStatus(ActiveStatus.ACTIVE);
         accountRepository.save(account);
 
-         final String emailBody = String.format(EMAIL_BODY_VERIFICATION_SUCCESS, account.getId(), account.getEmail(), account.getFullName(),
+        final String emailBody = String.format(EMAIL_BODY_VERIFICATION_SUCCESS, account.getId(), account.getEmail(), account.getFullName(),
                 account.getPhoneNumber());
-         whatEatEmailService.sendMail(account.getEmail(), emailBody, String.format(EMAIL_TITLE_VERIFICATION_SUCCESS));
+        whatEatEmailService.sendMail(account.getEmail(), emailBody, String.format(EMAIL_TITLE_VERIFICATION_SUCCESS));
     }
 
     @Override

@@ -1,7 +1,6 @@
 package com.exe.whateat.application.post.response;
 
 import com.exe.whateat.application.common.response.PaginationResponse;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 

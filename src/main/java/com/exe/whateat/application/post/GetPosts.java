@@ -4,20 +4,15 @@ import com.blazebit.persistence.CriteriaBuilderFactory;
 import com.blazebit.persistence.querydsl.BlazeJPAQuery;
 import com.exe.whateat.application.common.AbstractController;
 import com.exe.whateat.application.common.request.PaginationRequest;
-import com.exe.whateat.application.dish.response.DishResponse;
 import com.exe.whateat.application.post.mapper.PostMapper;
 import com.exe.whateat.application.post.response.PostResponse;
 import com.exe.whateat.application.post.response.PostsResponse;
 import com.exe.whateat.entity.common.PostVotingType;
-import com.exe.whateat.entity.food.Dish;
-import com.exe.whateat.entity.food.FoodTag;
 import com.exe.whateat.entity.post.Post;
 import com.exe.whateat.entity.post.QPost;
 import com.exe.whateat.entity.post.QPostVoting;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
-import com.exe.whateat.infrastructure.repository.PostVotingRepository;
 import com.querydsl.core.Tuple;
-import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -26,20 +21,17 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.apache.commons.lang3.StringUtils;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -104,7 +96,7 @@ public final class GetPosts {
                                     .from(qPostVoting)
                                     .where(qPostVoting.post.eq(qPost)
                                             .and(qPostVoting.type.eq(PostVotingType.DOWN)))
-                            )
+                    )
                     .from(qPost)
                     .leftJoin(qPost.postImages).fetchJoin()
                     .leftJoin(qPost.account).fetchJoin()
