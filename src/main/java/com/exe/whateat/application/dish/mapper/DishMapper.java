@@ -2,9 +2,8 @@ package com.exe.whateat.application.dish.mapper;
 
 import com.exe.whateat.application.common.WhatEatMapper;
 import com.exe.whateat.application.dish.response.DishResponse;
-import com.exe.whateat.application.food.mapper.FoodMapper;
-import com.exe.whateat.application.restaurant.mapper.RestaurantMapper;
 import com.exe.whateat.entity.food.Dish;
+import com.exe.whateat.infrastructure.repository.DishRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -12,14 +11,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class DishMapper implements WhatEatMapper<Dish, DishResponse> {
 
-    private FoodMapper foodMapper;
-    private RestaurantMapper restaurantMapper;
+    DishRepository dishRepository;
 
     @Override
     public DishResponse convertToDto(Dish dish) {
         if (dish == null) {
             return null;
         }
+
         return DishResponse.builder()
                 .id(dish.getId().asTsid())
                 .name(dish.getName())
@@ -27,8 +26,14 @@ public class DishMapper implements WhatEatMapper<Dish, DishResponse> {
                 .image(dish.getImage())
                 .price(dish.getPrice())
                 .description(dish.getDescription())
-                .foodResponse(foodMapper.convertToDto(dish.getFood()))
-                .restaurantResponse(restaurantMapper.convertToDto(dish.getRestaurant()))
+                .foodId(dish.getFood().getId().asTsid())
+                .restaurantId(dish.getRestaurant().getId().asTsid())
+                .avgReview(formatAvg(dishRepository.findAverageRatingByDishId(dish.getId())))
+                .numOfReview(dishRepository.countRatingsByDishId(dish.getId()))
                 .build();
+    }
+
+    private double formatAvg(Double avg) {
+        return Math.round(avg * 10) / 10.0;
     }
 }
