@@ -63,7 +63,7 @@ public class DeletePostVoting {
 
         public void deletePostVoting(Tsid id) {
             var postVoting = postVotingRepository.findById(WhatEatId.builder().id(id).build());
-            if (!postVoting.isEmpty()) {
+            if (postVoting.isEmpty()) {
                 throw WhatEatException
                         .builder()
                         .code(WhatEatErrorCode.WES_0001)
