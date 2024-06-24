@@ -126,7 +126,7 @@ public final class GetPost {
 
         private void setPostResponse (PostResponse postResponse, Post post) {
             var user = securityHelper.getCurrentLoggedInAccount();
-            if (!user.isPresent())
+            if (!user.isEmpty())
                 throw WhatEatException.builder()
                         .code(WhatEatErrorCode.WES_0001)
                         .reason("account", "chưa xác thực")
