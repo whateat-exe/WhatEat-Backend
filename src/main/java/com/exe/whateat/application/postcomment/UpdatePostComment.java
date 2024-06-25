@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -41,7 +42,7 @@ public class UpdatePostComment {
     @AllArgsConstructor
     public static final class UpdatePostCommentRequest {
 
-        @NotNull(message = "Nội dung thay đổi cần có.")
+        @NotBlank(message = "Nội dung thay đổi cần có.")
         private String content;
     }
 

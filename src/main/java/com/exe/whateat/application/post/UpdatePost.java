@@ -173,11 +173,7 @@ public final class UpdatePost {
                         }
                     }
                 }
-                var postImageUpdated = postImageRepository.saveAll(postImages);
-                post.getPostImages().clear();
-                if (postImageUpdated != null) {
-                    post.getPostImages().addAll(postImageUpdated);
-                }
+                postImageRepository.saveAll(postImages);
             }
             // content
             if (request.content != null)

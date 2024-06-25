@@ -13,13 +13,16 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DeletePostVoting {
 
     @RestController
@@ -59,14 +62,14 @@ public class DeletePostVoting {
         private final PostVotingRepository postVotingRepository;
 
         public void deletePostVoting(Tsid id) {
-            var postVoting = postVotingRepository.findById(WhatEatId.builder().id(id).build());
-            if (postVoting.isPresent())
-                postVotingRepository.delete(postVoting.get());
-            throw WhatEatException
-                    .builder()
-                    .code(WhatEatErrorCode.WES_0001)
-                    .reason("postvoting", "Không tìm thấy post voting")
-                    .build();
+            WhatEatId whatEatId = new WhatEatId(id);
+            var postVoting = postVotingRepository.findById(whatEatId)
+                    .orElseThrow(() -> WhatEatException
+                            .builder()
+                            .code(WhatEatErrorCode.WES_0001)
+                            .reason("postvoting", "Không tìm thấy post voting")
+                            .build());
+            postVotingRepository.delete(postVoting);
         }
     }
 }
