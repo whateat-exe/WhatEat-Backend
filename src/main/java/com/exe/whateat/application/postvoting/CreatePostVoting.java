@@ -21,15 +21,18 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CreatePostVoting {
 
     @Data
@@ -89,6 +92,11 @@ public class CreatePostVoting {
 
         public PostVotingResponse createPostVoting(CreatePostVotingRequest request) {
             var user = securityHelper.getCurrentLoggedInAccount();
+            if (!user.isPresent())
+                throw WhatEatException.builder()
+                        .code(WhatEatErrorCode.WES_0001)
+                        .reason("account", "chưa xác thực")
+                        .build();
             final WhatEatId postId = new WhatEatId(request.postId);
             var postVotingExist = postVotingRepository.postVotingAlreadyExists(user.get().getId(), postId);
             if (postVotingExist.isPresent()) {

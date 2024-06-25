@@ -149,7 +149,8 @@ public class CreatePost {
             }
             var postImageCreated = postImageRepository.saveAll(postImages);
             postCreated.setPostImages(postImageCreated);
-            return postMapper.convertToDto(postRepository.save(postCreated));
+            var response = postMapper.convertToDto(postRepository.save(postCreated));
+            return response;
         }
     }
 }

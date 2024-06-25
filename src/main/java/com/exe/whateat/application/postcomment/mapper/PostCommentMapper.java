@@ -14,6 +14,11 @@ public class PostCommentMapper implements WhatEatMapper<PostComment, PostComment
         }
         return PostCommentResponse.builder()
                 .id(postComment.getId().asTsid())
+                .accountId(postComment.getAccount().getId().asTsid())
+                .fullName(postComment.getAccount().getFullName())
+                .createdAt(postComment.getCreatedAt())
+                .imageUrl(postComment.getAccount().getImage())
+                .isModified(postComment.getVersion() > 0 ? true : false)
                 .content(postComment.getContent())
                 .build();
     }
