@@ -58,7 +58,7 @@ public final class GetSummaryOfReviewsByDish {
         private final DishRepository dishRepository;
 
         public SummaryResponse get(Tsid tsid) {
-            final WhatEatId whatEatDishId = WhatEatId.builder().id(tsid).build();
+            final WhatEatId whatEatDishId = new WhatEatId(tsid);
 
             if (!dishRepository.existsById(whatEatDishId)) {
                 throw WhatEatException.builder().code(WhatEatErrorCode.WEB_0015).reason("name", "Món ăn không tồn tại.").build();
