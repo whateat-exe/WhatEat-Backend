@@ -41,6 +41,7 @@ public class PostMapper implements WhatEatMapper<Post, PostResponse> {
                 .accountName(post.getAccount().getFullName())
                 .content(post.getContent())
                 .postImages(post.getPostImages().stream().map(postImageMapper::convertToDto).toList())
+                .createdAt(post.getCreatedAt())
                 .build();
     }
 }

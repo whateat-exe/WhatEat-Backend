@@ -23,10 +23,9 @@ public class PostResponse {
     private List<PostImageResponse> postImages;
     private Integer numberOfUp;
     private Integer numberOfDown;
-    private Integer totalComments;
     private Instant createdAt;
     private boolean isVoted;
     private PostVotingResponse postVoting;
-    private Long totalVote;
-    private Long totalComment;
+    private Long totalVotes;
+    private Long totalComments;
 }

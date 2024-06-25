@@ -12,6 +12,7 @@ import com.exe.whateat.application.post.response.PostResponse;
 import com.exe.whateat.application.post.response.PostsResponse;
 import com.exe.whateat.application.postvoting.mapper.PostVotingMapper;
 import com.exe.whateat.entity.common.PostVotingType;
+import com.exe.whateat.entity.common.WhatEatId;
 import com.exe.whateat.entity.post.Post;
 import com.exe.whateat.entity.post.QPost;
 import com.exe.whateat.entity.post.QPostComment;
@@ -21,6 +22,7 @@ import com.exe.whateat.infrastructure.repository.PostVotingRepository;
 import com.exe.whateat.infrastructure.security.WhatEatSecurityHelper;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.JPAExpressions;
+import io.github.x4ala1c.tsid.Tsid;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -115,8 +117,9 @@ public final class GetPosts {
                                     .where(qPostComment.post.eq(qPost)
                             ))
                     .from(qPost)
-                    .leftJoin(qPost.postImages).fetchJoin()
+                    .leftJoin(qPost.postImages)
                     .leftJoin(qPost.account).fetchJoin()
+                    .distinct()
                     .limit(getPostsRequest.getLimit())
                     .offset(getPostsRequest.getOffset())
                     .fetch();
@@ -142,8 +145,8 @@ public final class GetPosts {
 
                 var postResponse = postMapper.convertToDtoWithVoting(post, numberOfUp.intValue(), numberOfDown.intValue());
                 setPostResponse(postResponse, post);
-                postResponse.setTotalComment(totalComments);
-                postResponse.setTotalVote(totalVotes);
+                postResponse.setTotalComments(totalComments);
+                postResponse.setTotalVotes(totalVotes);
                 postResponses.add(postResponse);
             }
             PostsResponse response = new PostsResponse(postResponses, count);

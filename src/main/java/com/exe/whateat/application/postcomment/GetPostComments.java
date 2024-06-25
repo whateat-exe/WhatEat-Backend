@@ -84,7 +84,8 @@ public class GetPostComments {
             final QPostComment qPostComment = QPostComment.postComment;
             BlazeJPAQuery<Dish> query = new BlazeJPAQuery<>(entityManager, criteriaBuilderFactory);
             BooleanExpression predicates = qPostComment.isNotNull();
-            predicates = predicates.and(qPostComment.post.id.eq(WhatEatId.builder().id(postId).build()));
+            WhatEatId whatEatId = new WhatEatId(postId);
+            predicates = predicates.and(qPostComment.post.id.eq(whatEatId));
             final List<PostComment> postComments = query
                     .select(qPostComment)
                     .from(qPostComment)
@@ -95,6 +96,7 @@ public class GetPostComments {
             final long count = new BlazeJPAQuery<PostComment>(entityManager, criteriaBuilderFactory)
                     .select(qPostComment)
                     .from(qPostComment)
+                    .where(predicates)
                     .fetchCount();
             final PostCommentsResponse response = new PostCommentsResponse(postComments.stream().map(postCommentMapper::convertToDto).toList(), count);
             response.setLimit(request.getLimit());

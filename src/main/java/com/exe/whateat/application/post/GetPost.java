@@ -119,8 +119,8 @@ public final class GetPost {
             Long totalVotes = numberOfUp + numberOfDown;
             var postResponse =  postMapper.convertToDtoWithVoting(post, numberOfUp.intValue(), numberOfDown.intValue());
             setPostResponse(postResponse, post);
-            postResponse.setTotalComment(totalComments);
-            postResponse.setTotalVote(totalVotes);
+            postResponse.setTotalComments(totalComments);
+            postResponse.setTotalVotes(totalVotes);
             return postResponse;
         }
 
