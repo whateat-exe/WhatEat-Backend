@@ -1,5 +1,7 @@
 package com.exe.whateat.application.dish.response;
 
+import com.exe.whateat.application.food.response.FoodResponse;
+import com.exe.whateat.application.restaurant.response.RestaurantResponse;
 import com.exe.whateat.entity.common.Money;
 import io.github.x4ala1c.tsid.Tsid;
 import lombok.Builder;
@@ -19,6 +21,6 @@ public class DishResponse {
     private Money price;
     private Double avgReview;
     private Long numOfReview;
-    private Tsid restaurantId;
-    private Tsid foodId;
+    private RestaurantResponse restaurant;
+    private FoodResponse food;
 }

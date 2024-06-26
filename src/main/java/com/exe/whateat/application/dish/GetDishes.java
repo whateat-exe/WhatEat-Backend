@@ -19,8 +19,9 @@ import jakarta.persistence.EntityManager;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,8 +32,10 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class GetDishes {
 
-    @Data
-    private static final class GetDishesRequest extends PaginationRequest {
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    public static final class GetDishesRequest extends PaginationRequest {
 
     }
 
