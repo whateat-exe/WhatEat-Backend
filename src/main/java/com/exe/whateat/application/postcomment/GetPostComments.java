@@ -21,8 +21,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class GetPostComments {
 
     @Data
@@ -81,7 +84,8 @@ public class GetPostComments {
             final QPostComment qPostComment = QPostComment.postComment;
             BlazeJPAQuery<Dish> query = new BlazeJPAQuery<>(entityManager, criteriaBuilderFactory);
             BooleanExpression predicates = qPostComment.isNotNull();
-            predicates = predicates.and(qPostComment.post.id.eq(WhatEatId.builder().id(postId).build()));
+            WhatEatId whatEatId = new WhatEatId(postId);
+            predicates = predicates.and(qPostComment.post.id.eq(whatEatId));
             final List<PostComment> postComments = query
                     .select(qPostComment)
                     .from(qPostComment)
@@ -92,6 +96,7 @@ public class GetPostComments {
             final long count = new BlazeJPAQuery<PostComment>(entityManager, criteriaBuilderFactory)
                     .select(qPostComment)
                     .from(qPostComment)
+                    .where(predicates)
                     .fetchCount();
             final PostCommentsResponse response = new PostCommentsResponse(postComments.stream().map(postCommentMapper::convertToDto).toList(), count);
             response.setLimit(request.getLimit());
