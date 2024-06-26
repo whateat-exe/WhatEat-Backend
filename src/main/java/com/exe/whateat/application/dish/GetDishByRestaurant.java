@@ -28,8 +28,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityManager;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
@@ -43,14 +44,15 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class GetDishByRestaurant {
 
-    @Data
-    private static final class GetDishesByRestaurantRequest extends PaginationRequest {
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    public static final class GetDishesByRestaurantRequest extends PaginationRequest {
 
         private String name;
         private DishFilter asc;
         private DishFilter desc;
         private ActiveStatus status;
-
     }
 
     @RestController

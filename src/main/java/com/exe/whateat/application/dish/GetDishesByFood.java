@@ -28,8 +28,9 @@ import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
@@ -43,8 +44,10 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class GetDishesByFood {
 
-    @Data
-    private static final class GetDishesByFoodRequest extends PaginationRequest {
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    public static final class GetDishesByFoodRequest extends PaginationRequest {
 
         private String name;
         private DishFilter asc;
@@ -92,6 +95,7 @@ public final class GetDishesByFood {
         private FoodRepository foodRepository;
         private final CriteriaBuilderFactory criteriaBuilderFactory;
 
+        @SuppressWarnings("Duplicates")
         public DishesResponse get(GetDishesByFoodRequest request, Tsid tsid) {
             final QDish qDish = QDish.dish;
             final QRating qRating = QRating.rating;
