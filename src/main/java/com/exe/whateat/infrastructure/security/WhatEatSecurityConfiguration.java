@@ -61,6 +61,7 @@ public class WhatEatSecurityConfiguration {
         handlePostCommentApi(http);
         handlePostVotingApi(http);
         handlePostApi(http);
+        handleDishApi(http);
         if (environment.acceptsProfiles(Profiles.of("dev"))) {
             http.authorizeHttpRequests(c -> c.requestMatchers(resolvePath("/test/**")).permitAll());
         }
@@ -218,6 +219,23 @@ public class WhatEatSecurityConfiguration {
                         .hasAuthority(AccountRole.USER.name()))
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath(reviewPath))
                         .authenticated());
+    }
+
+    private void handleDishApi(HttpSecurity http) throws Exception {
+        final String dishPath = "/dishes/{id}";
+        final String dishesPath = "/dishes";
+        http.authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath(dishPath))
+                        .authenticated())
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath(dishesPath))
+                        .authenticated())
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.POST, resolvePath(dishPath + "/activate"))
+                        .hasAnyAuthority(AccountRole.RESTAURANT.name(), AccountRole.MANAGER.name(), AccountRole.ADMIN.name()))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.DELETE, resolvePath(dishPath))
+                        .hasAnyAuthority(AccountRole.RESTAURANT.name(), AccountRole.MANAGER.name(), AccountRole.ADMIN.name()))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.POST, resolvePath(dishesPath))
+                        .hasAnyAuthority(AccountRole.RESTAURANT.name()))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.PATCH, resolvePath(dishPath))
+                        .hasAnyAuthority(AccountRole.RESTAURANT.name()));
     }
 
     private String resolvePath(String path) {
