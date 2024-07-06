@@ -1,8 +1,7 @@
 package com.exe.whateat.entity.subscription;
 
-public enum SubscriptionType {
+public enum RestaurantSubscriptionType {
 
-    BRONZE,
     SILVER,
     GOLD,
     DIAMOND

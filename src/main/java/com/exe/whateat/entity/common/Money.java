@@ -13,9 +13,9 @@ import java.util.Objects;
 @NoArgsConstructor
 @Embeddable
 @SuppressWarnings("unused")
-public final class Money {
+public class Money {
 
-    @Column(name = "price", nullable = false, precision = 19)
+    @Column(name = "price", nullable = false, precision = 19, scale = 3)
     private BigDecimal amount;
 
     private Money(BigDecimal amount) {

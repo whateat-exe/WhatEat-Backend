@@ -103,7 +103,7 @@ public final class GetReviewsByDish {
             JPAQuery<Rating> query = new JPAQuery<>(entityManager);
             List<Rating> reviews;
 
-             if (ReviewFilter.STAR.equals(request.getAsc()) || ReviewFilter.STAR.equals(request.getDesc())) {
+            if (ReviewFilter.STAR.equals(request.getAsc()) || ReviewFilter.STAR.equals(request.getDesc())) {
                 query.select(qReview)
                         .from(qReview)
                         .where(predicates);
@@ -114,9 +114,9 @@ public final class GetReviewsByDish {
                     query.orderBy(qReview.stars.desc());
                 }
             } else if (ReviewFilter.TIME.equals(request.getAsc()) || ReviewFilter.TIME.equals(request.getDesc())) {
-                 query.select(qReview)
-                         .from(qReview)
-                         .where(predicates);
+                query.select(qReview)
+                        .from(qReview)
+                        .where(predicates);
 
                 if (ReviewFilter.TIME.equals(request.getAsc())) {
                     query.orderBy(qReview.lastModified.asc());
@@ -134,7 +134,7 @@ public final class GetReviewsByDish {
                     .offset(request.getOffset())
                     .fetch();
 
-             final long count = new BlazeJPAQuery<Rating>(entityManager, criteriaBuilderFactory)
+            final long count = new BlazeJPAQuery<Rating>(entityManager, criteriaBuilderFactory)
                     .select(qReview)
                     .from(qReview)
                     .where(predicates)

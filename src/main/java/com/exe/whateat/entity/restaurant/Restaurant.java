@@ -4,7 +4,6 @@ import com.exe.whateat.entity.account.Account;
 import com.exe.whateat.entity.common.AbstractEntity;
 import com.exe.whateat.entity.food.Dish;
 import com.exe.whateat.entity.request.RestaurantRequest;
-import com.exe.whateat.entity.subscription.RestaurantSubscription;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -50,9 +49,6 @@ public class Restaurant extends AbstractEntity {
 
     @OneToMany(mappedBy = "restaurant")
     private List<RestaurantRequest> restaurantRequests;
-
-    @OneToMany(mappedBy = "restaurant")
-    private List<RestaurantSubscription> restaurantSubscriptions;
 
     @Override
     public boolean equals(Object o) {
