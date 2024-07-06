@@ -2,8 +2,8 @@ package com.exe.whateat.entity.subscription;
 
 public enum SubscriptionStatus {
 
+    PENDING,
     ACTIVE,
-    INACTIVE,
-    PENDING_PAYMENT,
-    PAYMENT_CANCELLED
+    CANCELLED,
+    EXPIRED
 }
