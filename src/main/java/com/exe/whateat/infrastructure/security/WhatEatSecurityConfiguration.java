@@ -49,7 +49,9 @@ public class WhatEatSecurityConfiguration {
                 .exceptionHandling(c -> c.accessDeniedHandler(accessDeniedHandler))
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath("/docs/**")).permitAll())
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.POST, resolvePath("/auth/**")).permitAll())
-                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, "/error").permitAll());
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, "/error").permitAll())
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, "/images/**", "/css/**", "/html/**")
+                        .permitAll());
         handleAccountApi(http);
         handleRestaurantApi(http);
         handleFoodApi(http);
@@ -62,6 +64,7 @@ public class WhatEatSecurityConfiguration {
         handlePostVotingApi(http);
         handlePostApi(http);
         handleDishApi(http);
+        handleSubscriptionApi(http);
         if (environment.acceptsProfiles(Profiles.of("dev"))) {
             http.authorizeHttpRequests(c -> c.requestMatchers(resolvePath("/test/**")).permitAll());
         }
@@ -236,6 +239,18 @@ public class WhatEatSecurityConfiguration {
                         .hasAnyAuthority(AccountRole.RESTAURANT.name()))
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.PATCH, resolvePath(dishPath))
                         .hasAnyAuthority(AccountRole.RESTAURANT.name()));
+    }
+
+    private void handleSubscriptionApi(HttpSecurity http) throws Exception {
+        final String subscriptionPath = "/subscriptions";
+        http.authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.POST, resolvePath(subscriptionPath + "/restaurants"))
+                        .hasAuthority(AccountRole.RESTAURANT.name()))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.POST, resolvePath(subscriptionPath + "/webhook"))
+                        .permitAll())
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath(subscriptionPath + "/payos"))
+                        .permitAll())
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.POST, resolvePath(subscriptionPath + "/users"))
+                        .hasAuthority(AccountRole.USER.name()));
     }
 
     private String resolvePath(String path) {
