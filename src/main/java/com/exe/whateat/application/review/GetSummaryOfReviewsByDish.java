@@ -67,11 +67,11 @@ public final class GetSummaryOfReviewsByDish {
             return SummaryResponse.builder()
                     .avgReview(formatAvg(dishRepository.findAverageRatingByDishId(whatEatDishId)))
                     .numOfReview(dishRepository.countRatingsByDishId(whatEatDishId))
-                    .numOfFiveStar(dishRepository.countRatingsByDishIdAndStars(whatEatDishId,5))
-                    .numOfFourStar(dishRepository.countRatingsByDishIdAndStars(whatEatDishId,4))
-                    .numOfThreeStar(dishRepository.countRatingsByDishIdAndStars(whatEatDishId,3))
-                    .numOfTwoStar(dishRepository.countRatingsByDishIdAndStars(whatEatDishId,2))
-                    .numOfOneStar(dishRepository.countRatingsByDishIdAndStars(whatEatDishId,1))
+                    .numOfFiveStar(dishRepository.countRatingsByDishIdAndStars(whatEatDishId, 5))
+                    .numOfFourStar(dishRepository.countRatingsByDishIdAndStars(whatEatDishId, 4))
+                    .numOfThreeStar(dishRepository.countRatingsByDishIdAndStars(whatEatDishId, 3))
+                    .numOfTwoStar(dishRepository.countRatingsByDishIdAndStars(whatEatDishId, 2))
+                    .numOfOneStar(dishRepository.countRatingsByDishIdAndStars(whatEatDishId, 1))
                     .build();
         }
 

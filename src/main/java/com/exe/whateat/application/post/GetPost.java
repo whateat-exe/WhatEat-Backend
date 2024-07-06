@@ -117,21 +117,21 @@ public final class GetPost {
             Long numberOfDown = tuple.get(2, Long.class);
             Long totalComments = tuple.get(3, Long.class);
             Long totalVotes = numberOfUp + numberOfDown;
-            var postResponse =  postMapper.convertToDtoWithVoting(post, numberOfUp.intValue(), numberOfDown.intValue());
+            var postResponse = postMapper.convertToDtoWithVoting(post, numberOfUp.intValue(), numberOfDown.intValue());
             setPostResponse(postResponse, post);
             postResponse.setTotalComments(totalComments);
             postResponse.setTotalVotes(totalVotes);
             return postResponse;
         }
 
-        private void setPostResponse (PostResponse postResponse, Post post) {
+        private void setPostResponse(PostResponse postResponse, Post post) {
             var user = securityHelper.getCurrentLoggedInAccount()
                     .orElseThrow(() -> WhatEatException.builder()
                             .code(WhatEatErrorCode.WES_0001)
                             .reason("account", "account chưa xác thực")
                             .build());
             var postVoting = postVotingRepository.postVotingAlreadyExists(user.getId(), post.getId());
-            if(postVoting.isPresent()) {
+            if (postVoting.isPresent()) {
                 postResponse.setVoted(true);
                 postResponse.setPostVoting(postVotingMapper.convertToDto(postVoting.get()));
             } else {
