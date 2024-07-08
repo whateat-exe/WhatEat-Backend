@@ -23,6 +23,15 @@ public interface FoodRepository extends JpaRepository<Food, WhatEatId> {
     @Query(
             value = """
                     SELECT f.* FROM food f
+                    ORDER BY random() LIMIT 10
+                    """,
+            nativeQuery = true
+    )
+    List<Food> freeRandom();
+
+    @Query(
+            value = """
+                    SELECT f.* FROM food f
                     INNER JOIN food_tag ft
                         ON f.id = ft.food_id
                     WHERE ft.tag_id IN (
@@ -40,5 +49,5 @@ public interface FoodRepository extends JpaRepository<Food, WhatEatId> {
                     """,
             nativeQuery = true
     )
-    List<Food> random(Long accountId);
+    List<Food> subscribedRandom(Long accountId);
 }

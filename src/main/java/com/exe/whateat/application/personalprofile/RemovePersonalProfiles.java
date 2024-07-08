@@ -7,6 +7,7 @@ import com.exe.whateat.entity.account.Account;
 import com.exe.whateat.entity.common.WhatEatId;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
 import com.exe.whateat.infrastructure.repository.PersonalProfileRepository;
+import com.exe.whateat.infrastructure.repository.UserSubscriptionTrackerRepository;
 import com.exe.whateat.infrastructure.security.WhatEatSecurityHelper;
 import io.github.x4ala1c.tsid.Tsid;
 import io.swagger.v3.oas.annotations.Operation;
@@ -79,6 +80,7 @@ public final class RemovePersonalProfiles {
 
         private final PersonalProfileRepository personalProfileRepository;
         private final WhatEatSecurityHelper securityHelper;
+        private final UserSubscriptionTrackerRepository userSubscriptionTrackerRepository;
 
         public void remove(RemovePersonalProfilesRequest request) {
             final Account account = securityHelper.getCurrentLoggedInAccount()
@@ -86,6 +88,12 @@ public final class RemovePersonalProfiles {
                             .code(WhatEatErrorCode.WEA_0013)
                             .reason("account", "Không xác định được tài khoản đang thực hiện hành động này.")
                             .build());
+            if (!userSubscriptionTrackerRepository.userIsUnderActiveSubscription(account.getId())) {
+                throw WhatEatException.builder()
+                        .code(WhatEatErrorCode.WEB_0021)
+                        .reason("subscription", "Bạn cần nạp VIP để xài nha.")
+                        .build();
+            }
             final Set<Tsid> personalProfileIds = Objects.requireNonNullElse(request.getIds(), new HashSet<>());
             personalProfileRepository.deleteAllByAccountIdAndIdIn(account.getId(), personalProfileIds.stream()
                     .map(WhatEatId::new).toList());
