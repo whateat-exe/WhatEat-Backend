@@ -11,6 +11,7 @@ import com.exe.whateat.entity.profile.PersonalProfile;
 import com.exe.whateat.entity.profile.ProfileType;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
 import com.exe.whateat.infrastructure.repository.PersonalProfileRepository;
+import com.exe.whateat.infrastructure.repository.UserSubscriptionTrackerRepository;
 import com.exe.whateat.infrastructure.security.WhatEatSecurityHelper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -70,6 +71,7 @@ public final class GetPersonalProfiles {
         private final PersonalProfileRepository personalProfileRepository;
         private final WhatEatSecurityHelper securityHelper;
         private final WhatEatMapper<PersonalProfile, PersonalProfileResponse> mapper;
+        private final UserSubscriptionTrackerRepository userSubscriptionTrackerRepository;
 
         public PersonalProfilesResponse get() {
             final Account account = securityHelper.getCurrentLoggedInAccount()
@@ -77,6 +79,12 @@ public final class GetPersonalProfiles {
                             .code(WhatEatErrorCode.WEA_0013)
                             .reason("account", "Không xác định được tài khoản đang thực hiện hành động này.")
                             .build());
+            if (!userSubscriptionTrackerRepository.userIsUnderActiveSubscription(account.getId())) {
+                throw WhatEatException.builder()
+                        .code(WhatEatErrorCode.WEB_0021)
+                        .reason("subscription", "Bạn cần nạp VIP để xài nha.")
+                        .build();
+            }
             final List<PersonalProfile> personalProfiles = personalProfileRepository.findByAccountId(account.getId());
             return PersonalProfilesResponse.builder()
                     .allergy(personalProfiles.stream()
