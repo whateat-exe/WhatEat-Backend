@@ -27,5 +27,27 @@ public interface FoodRepository extends JpaRepository<Food, WhatEatId> {
                     """,
             nativeQuery = true
     )
-    List<Food> random();
+    List<Food> freeRandom();
+
+    @Query(
+            value = """
+                    SELECT f.* FROM food f
+                    INNER JOIN food_tag ft
+                        ON f.id = ft.food_id
+                    WHERE ft.tag_id IN (
+                        SELECT pp.tag_id FROM personal_profile pp
+                        WHERE pp.account_id = ?1 AND pp.type = 'LIKE'
+                    )
+                    GROUP BY f.id
+                    HAVING count(DISTINCT ft.tag_id) = (
+                        SELECT COUNT(DISTINCT pp2.tag_id)
+                        FROM personal_profile pp2
+                        WHERE pp2.account_id = ?1 AND pp2.type = 'LIKE'
+                    )
+                    ORDER BY random()
+                    LIMIT 10
+                    """,
+            nativeQuery = true
+    )
+    List<Food> subscribedRandom(Long accountId);
 }
