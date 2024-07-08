@@ -21,6 +21,7 @@ import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -65,7 +66,7 @@ public final class RandomizeFood {
 
     @Service
     @Transactional
-    @AllArgsConstructor
+    @RequiredArgsConstructor
     public static class RandomizeFoodService {
 
         private static final Random RANDOM = new SecureRandom();
@@ -88,7 +89,7 @@ public final class RandomizeFood {
                         .reason("cooldown", "Số lượng ngẫu nhiên đã đạt tới giới hạn.")
                         .build();
             }
-            final List<Food> foods = foodRepository.random();
+            final List<Food> foods = foodRepository.random(account.getId().asTsid().asLong());
             if (foods.isEmpty()) {
                 throw WhatEatException.builder()
                         .code(WhatEatErrorCode.WEB_0013)
