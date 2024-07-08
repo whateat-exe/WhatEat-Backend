@@ -11,6 +11,7 @@ import com.exe.whateat.entity.account.Account;
 import com.exe.whateat.entity.food.Food;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
 import com.exe.whateat.infrastructure.repository.FoodRepository;
+import com.exe.whateat.infrastructure.repository.UserSubscriptionTrackerRepository;
 import com.exe.whateat.infrastructure.security.WhatEatSecurityHelper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -75,6 +76,7 @@ public final class RandomizeFood {
         private final WhatEatMapper<Food, FoodResponse> mapper;
         private final RandomService randomService;
         private final WhatEatSecurityHelper securityHelper;
+        private final UserSubscriptionTrackerRepository userSubscriptionTrackerRepository;
 
         public FoodResponse random() {
             final Account account = securityHelper.getCurrentLoggedInAccount()
@@ -89,11 +91,16 @@ public final class RandomizeFood {
                         .reason("cooldown", "Số lượng ngẫu nhiên đã đạt tới giới hạn.")
                         .build();
             }
-            final List<Food> foods = foodRepository.random(account.getId().asTsid().asLong());
+            final List<Food> foods;
+            if (userSubscriptionTrackerRepository.userIsUnderActiveSubscription(account.getId())) {
+                foods = foodRepository.subscribedRandom(account.getId().asTsid().asLong());
+            } else {
+                foods = foodRepository.freeRandom();
+            }
             if (foods.isEmpty()) {
                 throw WhatEatException.builder()
                         .code(WhatEatErrorCode.WEB_0013)
-                        .reason("food", "Món ăn không lấy ngẫu nhiên được.")
+                        .reason("food", "Bạn quá khó tính. Giảm filter xuống đê.")
                         .build();
             }
             final int position = RANDOM.nextInt(foods.size());

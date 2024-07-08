@@ -16,6 +16,7 @@ import com.exe.whateat.entity.profile.QPersonalProfile;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
 import com.exe.whateat.infrastructure.repository.PersonalProfileRepository;
 import com.exe.whateat.infrastructure.repository.TagRepository;
+import com.exe.whateat.infrastructure.repository.UserSubscriptionTrackerRepository;
 import com.exe.whateat.infrastructure.security.WhatEatSecurityHelper;
 import io.github.x4ala1c.tsid.Tsid;
 import io.swagger.v3.oas.annotations.Operation;
@@ -104,6 +105,7 @@ public final class AddPersonalProfile {
         private final TagRepository tagRepository;
         private final WhatEatSecurityHelper securityHelper;
         private final WhatEatMapper<PersonalProfile, PersonalProfileResponse> mapper;
+        private final UserSubscriptionTrackerRepository userSubscriptionTrackerRepository;
 
         @PersistenceContext
         private EntityManager entityManager;
@@ -114,15 +116,21 @@ public final class AddPersonalProfile {
         private int profilesMaxCount;
 
         public PersonalProfilesResponse add(AddPersonalProfileRequest request) {
-            final Set<Tsid> like = Objects.requireNonNullElse(request.getLike(), Set.of());
-            final Set<Tsid> dislike = Objects.requireNonNullElse(request.getDislike(), Set.of());
-            final Set<Tsid> allergy = Objects.requireNonNullElse(request.getAllergy(), Set.of());
-            final int count = like.size() + dislike.size() + allergy.size();
             final Account account = securityHelper.getCurrentLoggedInAccount()
                     .orElseThrow(() -> WhatEatException.builder()
                             .code(WhatEatErrorCode.WEA_0013)
                             .reason("account", "Không xác định được tài khoản đang thực hiện hành động này.")
                             .build());
+            if (!userSubscriptionTrackerRepository.userIsUnderActiveSubscription(account.getId())) {
+                throw WhatEatException.builder()
+                        .code(WhatEatErrorCode.WEB_0021)
+                        .reason("subscription", "Bạn cần nạp VIP để xài nha.")
+                        .build();
+            }
+            final Set<Tsid> like = Objects.requireNonNullElse(request.getLike(), Set.of());
+            final Set<Tsid> dislike = Objects.requireNonNullElse(request.getDislike(), Set.of());
+            final Set<Tsid> allergy = Objects.requireNonNullElse(request.getAllergy(), Set.of());
+            final int count = like.size() + dislike.size() + allergy.size();
             final QPersonalProfile qPersonalProfile = QPersonalProfile.personalProfile;
             final long currentTotalCount = new BlazeJPAQuery<>(entityManager, criteriaBuilderFactory)
                     .select(qPersonalProfile)
