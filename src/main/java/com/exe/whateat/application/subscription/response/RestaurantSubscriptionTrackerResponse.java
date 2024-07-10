@@ -26,5 +26,6 @@ public class RestaurantSubscriptionTrackerResponse {
     private BigDecimal amount;
     private Instant validityStart;
     private Instant validityEnd;
+    private String paidDate;
     private SubscriptionStatus subscriptionStatus;
 }

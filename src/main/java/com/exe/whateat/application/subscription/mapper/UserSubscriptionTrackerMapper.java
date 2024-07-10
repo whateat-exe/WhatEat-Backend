@@ -8,6 +8,12 @@ import com.exe.whateat.entity.subscription.UserSubscriptionTracker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
+
 @Component
 @RequiredArgsConstructor
 public class UserSubscriptionTrackerMapper implements WhatEatMapper<UserSubscriptionTracker, UserSubscriptionTrackerResponse> {
@@ -27,7 +33,16 @@ public class UserSubscriptionTrackerMapper implements WhatEatMapper<UserSubscrip
                 .validityEnd(userSubscriptionTracker.getValidityEnd())
                 .amount(userSubscriptionTracker.getAmount().getAmount())
                 .provider(userSubscriptionTracker.getProvider())
+                .paidDate(convertToDate(userSubscriptionTracker.getValidityStart()))
                 .subscription(mapper.convertToDto(userSubscriptionTracker.getSubscription()))
                 .build();
+    }
+
+    private String convertToDate(Instant epochInstant) {
+        if (epochInstant == null) return null;
+        LocalDateTime dateTime = LocalDateTime.ofInstant(epochInstant, ZoneOffset.UTC);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy - EEEE", new Locale("vi", "VN"));
+        String formattedDate = dateTime.format(formatter);
+        return formattedDate;
     }
 }
