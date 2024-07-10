@@ -1,0 +1,27 @@
+package com.exe.whateat.application.restaurant_request.mapper;
+
+import com.exe.whateat.application.common.WhatEatMapper;
+import com.exe.whateat.application.restaurant.mapper.RestaurantMapper;
+import com.exe.whateat.application.restaurant_request.response.RequestResponse;
+import com.exe.whateat.entity.request.RestaurantRequest;
+import lombok.AllArgsConstructor;
+
+@AllArgsConstructor
+public class RequestMapper implements WhatEatMapper<RestaurantRequest, RequestResponse> {
+
+    private RestaurantMapper restaurantMapper;
+
+    @Override
+    public RequestResponse convertToDto(RestaurantRequest restaurantRequest) {
+        if (restaurantRequest == null) {
+            return null;
+        }
+        final RequestResponse.RequestResponseBuilder builder = RequestResponse.builder()
+                .tsid(restaurantRequest.getId().asTsid())
+                .content(restaurantRequest.getContent())
+                .title(restaurantRequest.getTitle())
+                .createdAt(restaurantRequest.getCreatedAt())
+                .restaurant(restaurantMapper.convertToDto(restaurantRequest.getRestaurant()));
+        return builder.build();
+    }
+}
