@@ -93,6 +93,7 @@ public class PayOSSubscriptionService implements SubscriptionService {
                     .subscriptionStatus(SubscriptionStatus.PENDING)
                     .subscription(subscription)
                     .restaurant(restaurant)
+                    .expirationTime(Instant.now().plus(10, ChronoUnit.MINUTES))
                     .build();
             restaurantSubscriptionTrackerRepository.save(tracker);
         } catch (Exception e) {
@@ -128,6 +129,7 @@ public class PayOSSubscriptionService implements SubscriptionService {
                     .subscriptionStatus(SubscriptionStatus.PENDING)
                     .subscription(subscription)
                     .user(account)
+                    .expirationTime(Instant.now().plus(10, ChronoUnit.MINUTES))
                     .build();
             userSubscriptionTrackerRepository.save(tracker);
         } catch (Exception e) {
