@@ -147,7 +147,7 @@ public final class GetSubscriptionHistory {
 
             final UserSubscriptionTrackersResponse response = new UserSubscriptionTrackersResponse(trackers.stream()
                     .map(userMapper::convertToDto)
-                    .toList(), count);
+                    .toList(), count, count);
 
             response.setLimit(request.getLimit());
             response.setPage(request.getPage());
@@ -189,7 +189,7 @@ public final class GetSubscriptionHistory {
 
             final RestaurantSubscriptionTrackersResponse response = new RestaurantSubscriptionTrackersResponse(trackers.stream()
                     .map(restaurantMapper::convertToDto)
-                    .toList(), count);
+                    .toList(), count, count);
 
             response.setLimit(request.getLimit());
             response.setPage(request.getPage());
