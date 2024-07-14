@@ -64,6 +64,9 @@ public class UserSubscriptionTracker extends AbstractEntity {
     @Column(name = "validity_end")
     private Instant validityEnd;
 
+    @Column(name = "expiration_time")
+    private Instant expirationTime;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "subscription_status")
     private SubscriptionStatus subscriptionStatus;
