@@ -7,6 +7,7 @@ import com.exe.whateat.application.food.response.FoodResponse;
 import com.exe.whateat.application.food.response.FoodsResponse;
 import com.exe.whateat.application.restaurant_request.mapper.RequestMapper;
 import com.exe.whateat.application.restaurant_request.response.RequestResponse;
+import com.exe.whateat.application.restaurant_request.response.RequestResponses;
 import com.exe.whateat.entity.common.ActiveStatus;
 import com.exe.whateat.entity.food.Food;
 import com.exe.whateat.entity.food.QFood;
@@ -65,7 +66,7 @@ public final class GetRestaurantRequests {
         @ApiResponse(
                 description = "Successful. Returns list of the requests.",
                 responseCode = "200",
-                content = @Content(schema = @Schema(implementation = RequestResponse.class))
+                content = @Content(schema = @Schema(implementation = RequestResponses.class))
         )
         @ApiResponse(
                 description = "Failed getting of the requests.",
@@ -73,7 +74,7 @@ public final class GetRestaurantRequests {
                 content = @Content(schema = @Schema(implementation = WhatEatErrorResponse.class))
         )
         public ResponseEntity<Object> getRequests(@ParameterObject GetRequestsRequest getRequestsRequest) {
-            final RequestResponse response = service.get(getRequestsRequest);
+            final RequestResponses response = service.get(getRequestsRequest);
             return ResponseEntity.ok(response);
         }
     }
@@ -88,7 +89,7 @@ public final class GetRestaurantRequests {
         @PersistenceContext
         private EntityManager entityManager;
 
-        public RequestResponse get(GetRequestsRequest request) {
+        public RequestResponses get(GetRequestsRequest request) {
             final QRestaurantRequest qRestaurantRequest = QRestaurantRequest.restaurantRequest;
             final JPAQuery<RestaurantRequest> restaurantRequestJPAQuery = new JPAQuery<>(entityManager)
                     .select(qRestaurantRequest)
@@ -97,7 +98,7 @@ public final class GetRestaurantRequests {
                     .offset(request.getOffset());
             final List<RestaurantRequest> requests = restaurantRequestJPAQuery.fetch();
             final long total = restaurantRequestRepository.count();
-            final RequestResponse response = new RequestResponse(requests.stream().map(requestMapper::convertToDto).toList(), total);
+            final RequestResponses response = new RequestResponses(requests.stream().map(requestMapper::convertToDto).toList(), total);
             response.setPage(request.getPage());
             response.setLimit(request.getLimit());
             return response;

@@ -43,6 +43,7 @@ public enum WhatEatErrorCode {
     WEB_0022("Gói không tồn tại", HttpStatus.BAD_REQUEST),
     WEB_0023("Vượt quá giới hạn tạo món của gói", HttpStatus.BAD_REQUEST),
     WEB_0024("Ngày tháng không hợp lệ", HttpStatus.BAD_REQUEST),
+    WEB_0025("Tài khoản đã gửi yêu cầu món mới vượt quá giới hạn gói", HttpStatus.BAD_REQUEST),
     WEV_0000("Invalid request", HttpStatus.BAD_REQUEST),
     WEV_0001("Invalid email address", HttpStatus.BAD_REQUEST),
     WEV_0002("Invalid password", HttpStatus.BAD_REQUEST),
