@@ -34,5 +34,9 @@ public interface RestaurantSubscriptionTrackerRepository extends JpaRepository<R
 
     List<RestaurantSubscriptionTracker> findAllByRestaurantId(WhatEatId restaurantId, Pageable pageable);
 
+    boolean existsByPaymentId(String paymentId);
+
+    RestaurantSubscriptionTracker findByPaymentId(String paymentId);
+
     long countByRestaurantId(WhatEatId restaurantId);
 }

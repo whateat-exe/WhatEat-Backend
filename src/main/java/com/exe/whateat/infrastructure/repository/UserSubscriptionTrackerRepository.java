@@ -44,4 +44,8 @@ public interface UserSubscriptionTrackerRepository extends JpaRepository<UserSub
     List<UserSubscriptionTracker> findAllByUserId(WhatEatId userId, Pageable pageable);
 
     long countByUserId(WhatEatId userId);
+
+    boolean existsByPaymentId(String paymentId);
+
+    UserSubscriptionTracker findByPaymentId(String paymentId);
 }
