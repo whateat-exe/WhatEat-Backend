@@ -251,7 +251,7 @@ public class WhatEatSecurityConfiguration {
                         .permitAll())
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.POST, resolvePath(subscriptionPath + "/users"))
                         .hasAuthority(AccountRole.USER.name()))
-                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath(subscriptionPath + "/current"))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath(subscriptionPath))
                         .hasAnyAuthority(AccountRole.USER.name(), AccountRole.RESTAURANT.name()));
     }
 
