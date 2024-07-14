@@ -250,7 +250,9 @@ public class WhatEatSecurityConfiguration {
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath(subscriptionPath + "/payos"))
                         .permitAll())
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.POST, resolvePath(subscriptionPath + "/users"))
-                        .hasAuthority(AccountRole.USER.name()));
+                        .hasAuthority(AccountRole.USER.name()))
+                .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath(subscriptionPath))
+                        .authenticated());
     }
 
     private String resolvePath(String path) {
