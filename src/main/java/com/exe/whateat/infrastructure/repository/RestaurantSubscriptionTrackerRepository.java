@@ -39,4 +39,13 @@ public interface RestaurantSubscriptionTrackerRepository extends JpaRepository<R
     RestaurantSubscriptionTracker findByPaymentId(String paymentId);
 
     long countByRestaurantId(WhatEatId restaurantId);
+
+    @Query(value = """
+             UPDATE restaurant_subscription_tracker 
+             SET payment_status = 'EXPIRED', subscription_status = 'CANCELLED'
+             WHERE payment_status = 'PENDING' and subscription_status = 'PENDING'
+             AND expiration_time < NOW() AT TIME ZONE 'UTC'
+            """, nativeQuery = true)
+    @Modifying
+    void changeAllExpiredPayment();
 }
