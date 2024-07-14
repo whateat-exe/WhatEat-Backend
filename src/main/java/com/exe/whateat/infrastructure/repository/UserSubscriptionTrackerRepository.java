@@ -45,6 +45,10 @@ public interface UserSubscriptionTrackerRepository extends JpaRepository<UserSub
 
     long countByUserId(WhatEatId userId);
 
+    boolean existsByPaymentId(String paymentId);
+
+    UserSubscriptionTracker findByPaymentId(String paymentId);
+
     @Query(value = """
              UPDATE user_subscription_tracker 
              SET payment_status = 'EXPIRED', subscription_status = 'CANCELLED'
