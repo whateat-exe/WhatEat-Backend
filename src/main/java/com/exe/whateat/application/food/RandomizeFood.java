@@ -106,7 +106,7 @@ public final class RandomizeFood {
             if (foods.isEmpty()) {
                 throw WhatEatException.builder()
                         .code(WhatEatErrorCode.WEB_0013)
-                        .reason("food", "Bạn quá khó tính. Giảm filter xuống đê.")
+                        .reason("food", "Không có món phù hợp với filter của bạn")
                         .build();
             }
             final int position = RANDOM.nextInt(foods.size());
