@@ -136,9 +136,9 @@ public final class GetDishByRestaurant {
                         .groupBy(qDish.id);
 
                 if (DishFilter.REVIEW.equals(getDishesByRestaurantRequest.getAsc())) {
-                    query.orderBy(qRating.stars.avg().asc());
+                    query.orderBy(qRating.stars.avg().coalesce(0.0).asc());
                 } else {
-                    query.orderBy(qRating.stars.avg().desc());
+                    query.orderBy(qRating.stars.avg().coalesce(0.0).desc());
                 }
             } else if (DishFilter.PRICE.equals(getDishesByRestaurantRequest.getAsc()) || DishFilter.PRICE.equals(getDishesByRestaurantRequest.getDesc())) {
                 query.select(qDish)
