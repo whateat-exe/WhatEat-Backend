@@ -9,8 +9,10 @@ import com.exe.whateat.application.randomhistory.RandomService;
 import com.exe.whateat.application.randomhistory.response.RandomResponse;
 import com.exe.whateat.entity.account.Account;
 import com.exe.whateat.entity.food.Food;
+import com.exe.whateat.entity.profile.ProfileType;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
 import com.exe.whateat.infrastructure.repository.FoodRepository;
+import com.exe.whateat.infrastructure.repository.PersonalProfileRepository;
 import com.exe.whateat.infrastructure.repository.UserSubscriptionTrackerRepository;
 import com.exe.whateat.infrastructure.security.WhatEatSecurityHelper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -77,6 +79,7 @@ public final class RandomizeFood {
         private final RandomService randomService;
         private final WhatEatSecurityHelper securityHelper;
         private final UserSubscriptionTrackerRepository userSubscriptionTrackerRepository;
+        private final PersonalProfileRepository personalProfileRepository;
 
         public FoodResponse random() {
             final Account account = securityHelper.getCurrentLoggedInAccount()
@@ -91,8 +94,11 @@ public final class RandomizeFood {
                         .reason("cooldown", "Số lượng ngẫu nhiên đã đạt tới giới hạn.")
                         .build();
             }
+
+            boolean hasPersonalProfile = personalProfileRepository.existsByAccountIdAndType(account.getId(), ProfileType.LIKE);
+
             final List<Food> foods;
-            if (userSubscriptionTrackerRepository.userIsUnderActiveSubscription(account.getId())) {
+            if (userSubscriptionTrackerRepository.userIsUnderActiveSubscription(account.getId()) && hasPersonalProfile) {
                 foods = foodRepository.subscribedRandom(account.getId().asTsid().asLong());
             } else {
                 foods = foodRepository.freeRandom();
