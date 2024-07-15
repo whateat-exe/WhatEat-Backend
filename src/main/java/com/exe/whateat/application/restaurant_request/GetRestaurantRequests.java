@@ -52,14 +52,14 @@ public final class GetRestaurantRequests {
     @RestController
     @AllArgsConstructor
     @Tag(
-            name = "request",
+            name = "restaurant_request",
             description = "APIs for request food."
     )
     public static final class GetRestaurantRequestsController extends AbstractController {
 
         private final GetRequestsService service;
 
-        @GetMapping("/requests")
+        @GetMapping("/restaurant-requests")
         @Operation(
                 summary = "Get restaurant request API"
         )

@@ -1,12 +1,12 @@
-package com.exe.whateat.application.restaurant_request;
+package com.exe.whateat.application.restaurant_response;
 
 import com.exe.whateat.application.common.AbstractController;
-import com.exe.whateat.application.restaurant_request.response.RequestResponse;
+import com.exe.whateat.application.restaurant_request.CreateRestaurantRequest;
+import com.exe.whateat.application.restaurant_request.DeleteRestaurantRequest;
 import com.exe.whateat.entity.common.WhatEatId;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
-import com.exe.whateat.infrastructure.repository.PostRepository;
 import com.exe.whateat.infrastructure.repository.RestaurantRepository;
-import com.exe.whateat.infrastructure.repository.RestaurantRequestRepository;
+import com.exe.whateat.infrastructure.repository.RestaurantRequestResponseRepository;
 import io.github.x4ala1c.tsid.Tsid;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -14,7 +14,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -25,21 +24,21 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class DeleteRestaurantRequest {
+public class DeleteRestaurantResponse {
 
     @RestController
     @AllArgsConstructor
     @Tag(
-            name = "restaurant_request",
-            description = "APIs for restaurant request."
+            name = "request",
+            description = "APIs for request food."
     )
     public static final class CreateRestaurantRequestDishController extends AbstractController {
 
-        private DeleteRestaurantRequestService service;
+        private DeleteRestaurantRequestResponseService service;
 
-        @DeleteMapping("/restaurant-requests/{id}")
+        @DeleteMapping("/restaurant-responses/{id}")
         @Operation(
-                summary = "Delete restaurant request API",
+                summary = "Delete restaurant response API",
                 requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                         description = "No content"
                 )
@@ -58,13 +57,13 @@ public class DeleteRestaurantRequest {
     @Service
     @Transactional(rollbackOn = Exception.class)
     @AllArgsConstructor
-    public static class DeleteRestaurantRequestService {
+    public static class DeleteRestaurantRequestResponseService {
 
-        private final RestaurantRequestRepository restaurantRequestRepository;
+        private final RestaurantRequestResponseRepository restaurantRequestResponseRepository;
 
         public void delete(Tsid id) {
             final WhatEatId whatEatId = new WhatEatId(id);
-            restaurantRequestRepository.deleteById(whatEatId);
+            restaurantRequestResponseRepository.deleteById(whatEatId);
         }
     }
 }
