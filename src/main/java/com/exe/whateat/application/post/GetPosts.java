@@ -115,6 +115,7 @@ public final class GetPosts {
                                     .where(qPostComment.post.eq(qPost)
                                     ))
                     .from(qPost)
+                    .orderBy(qPost.lastModified.desc())
                     .leftJoin(qPost.postImages)
                     .leftJoin(qPost.account).fetchJoin()
                     .distinct()
