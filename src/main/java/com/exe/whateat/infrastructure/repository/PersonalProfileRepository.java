@@ -2,6 +2,7 @@ package com.exe.whateat.infrastructure.repository;
 
 import com.exe.whateat.entity.common.WhatEatId;
 import com.exe.whateat.entity.profile.PersonalProfile;
+import com.exe.whateat.entity.profile.ProfileType;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Collection;
@@ -14,4 +15,6 @@ public interface PersonalProfileRepository extends JpaRepository<PersonalProfile
     void deleteAllByAccountIdAndIdIn(WhatEatId accountId, Collection<WhatEatId> ids);
 
     void deleteAllByAccountId(WhatEatId accountId);
+
+    boolean existsByAccountIdAndType(WhatEatId id, ProfileType type);
 }
