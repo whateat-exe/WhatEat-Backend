@@ -116,6 +116,7 @@ public final class GetPostsByCurrentUser {
                             ))
                     .from(qPost)
                     .where(qPost.account.id.eq(user.getId()))
+                    .orderBy(qPost.lastModified.desc())
                     .leftJoin(qPost.postImages)
                     .leftJoin(qPost.account).fetchJoin()
                     .distinct()
