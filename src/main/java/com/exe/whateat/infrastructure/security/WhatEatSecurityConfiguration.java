@@ -65,6 +65,7 @@ public class WhatEatSecurityConfiguration {
         handlePostApi(http);
         handleDishApi(http);
         handleSubscriptionApi(http);
+        handleStatsApi(http);
         if (environment.acceptsProfiles(Profiles.of("dev"))) {
             http.authorizeHttpRequests(c -> c.requestMatchers(resolvePath("/test/**")).permitAll());
         }
@@ -253,6 +254,11 @@ public class WhatEatSecurityConfiguration {
                         .hasAuthority(AccountRole.USER.name()))
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath(subscriptionPath))
                         .hasAnyAuthority(AccountRole.USER.name(), AccountRole.RESTAURANT.name()));
+    }
+
+    private void handleStatsApi(HttpSecurity http) throws Exception {
+        http.authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath("/stats/**"))
+                        .permitAll());
     }
 
     private String resolvePath(String path) {

@@ -7,7 +7,6 @@ import com.exe.whateat.application.common.request.PaginationRequest;
 import com.exe.whateat.application.dish.mapper.DishMapper;
 import com.exe.whateat.application.dish.response.DishesResponse;
 import com.exe.whateat.entity.food.Dish;
-import com.exe.whateat.entity.food.FoodTag;
 import com.exe.whateat.entity.food.QDish;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -88,7 +87,7 @@ public final class GetDishes {
                     .limit(getDishesRequest.getLimit())
                     .offset(getDishesRequest.getOffset())
                     .fetch();
-            final long count = new BlazeJPAQuery<FoodTag>(entityManager, criteriaBuilderFactory)
+            final long count = new BlazeJPAQuery<Dish>(entityManager, criteriaBuilderFactory)
                     .select(qDish)
                     .from(qDish)
                     .fetchCount();
