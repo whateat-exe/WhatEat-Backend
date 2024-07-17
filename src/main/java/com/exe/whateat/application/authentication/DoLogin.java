@@ -102,12 +102,12 @@ public final class DoLogin {
             final Account account = accountRepository.findByEmail(request.getEmail())
                     .orElseThrow(() -> WhatEatException.builder()
                             .code(WhatEatErrorCode.WEA_0005)
-                            .reason("email", "Email không hợp lệ.")
+                            .reason("email", "Email không tồn tại.")
                             .build());
             if (!passwordEncoder.matches(request.getPassword(), account.getPassword())) {
                 throw WhatEatException.builder()
                         .code(WhatEatErrorCode.WEA_0005)
-                        .reason("password", "Mật khẩu không hợp lệ.")
+                        .reason("password", "Mật khẩu không chính xác.")
                         .build();
             }
             if (account.getStatus() == ActiveStatus.PENDING) {
