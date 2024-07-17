@@ -18,7 +18,7 @@ public class PostCommentMapper implements WhatEatMapper<PostComment, PostComment
                 .fullName(postComment.getAccount().getFullName())
                 .createdAt(postComment.getCreatedAt())
                 .imageUrl(postComment.getAccount().getImage())
-                .isModified(postComment.getVersion() > 0 ? true : false)
+                .isModified(postComment.getVersion() > 0)
                 .content(postComment.getContent())
                 .build();
     }
