@@ -6,10 +6,13 @@ import com.exe.whateat.application.tag.mapper.TagMapper;
 import com.exe.whateat.application.tag.response.TagsResponse;
 import com.exe.whateat.entity.food.QTag;
 import com.exe.whateat.entity.food.Tag;
+import com.exe.whateat.entity.food.TagPriority;
 import com.exe.whateat.entity.food.TagType;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
 import com.exe.whateat.infrastructure.repository.TagRepository;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -17,11 +20,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.persistence.EntityManager;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
@@ -93,10 +92,17 @@ public final class GetTags {
             if (request.getType() != null) {
                 predicates = predicates.and(qTag.type.eq(request.getType()));
             }
+
+            NumberExpression<Integer> priorityOrder = new CaseBuilder()
+                    .when(qTag.priority.eq(TagPriority.PRIMARY)).then(1)
+                    .when(qTag.priority.eq(TagPriority.SECONDARY)).then(2)
+                    .otherwise(3);
+
             final JPAQuery<Tag> tagJPAQuery = new JPAQuery<>(entityManager)
                     .select(qTag)
                     .from(qTag)
                     .where(predicates)
+                    .orderBy(priorityOrder.asc())
                     .limit(request.getLimit())
                     .offset(request.getOffset());
             final List<Tag> tags = tagJPAQuery.fetch();
