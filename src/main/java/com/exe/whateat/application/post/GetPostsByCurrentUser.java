@@ -28,7 +28,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -113,9 +117,10 @@ public final class GetPostsByCurrentUser {
                             JPAExpressions.select(qPostComment.count())
                                     .from(qPostComment)
                                     .where(qPostComment.post.eq(qPost)
-                            ))
+                                    ))
                     .from(qPost)
                     .where(qPost.account.id.eq(user.getId()))
+                    .orderBy(qPost.lastModified.desc())
                     .leftJoin(qPost.postImages)
                     .leftJoin(qPost.account).fetchJoin()
                     .distinct()
@@ -127,7 +132,7 @@ public final class GetPostsByCurrentUser {
                     .from(qPost)
                     .where(qPost.account.id.eq(user.getId()))
                     .fetchCount();
-            
+
             List<PostResponse> postResponses = new ArrayList<>();
             Set<Long> seenPostIds = new HashSet<>();
             for (Tuple tuple : results) {
@@ -155,14 +160,15 @@ public final class GetPostsByCurrentUser {
             response.setPage(getPostsRequest.getPage());
             return response;
         }
-        private void setPostResponse (PostResponse postResponse, Post post) {
+
+        private void setPostResponse(PostResponse postResponse, Post post) {
             var user = securityHelper.getCurrentLoggedInAccount()
                     .orElseThrow(() -> WhatEatException.builder()
                             .code(WhatEatErrorCode.WES_0001)
                             .reason("account", "account chưa xác thực")
                             .build());
             var postVoting = postVotingRepository.postVotingAlreadyExists(user.getId(), post.getId());
-            if(postVoting.isPresent()) {
+            if (postVoting.isPresent()) {
                 postResponse.setVoted(true);
                 postResponse.setPostVoting(postVotingMapper.convertToDto(postVoting.get()));
             } else {

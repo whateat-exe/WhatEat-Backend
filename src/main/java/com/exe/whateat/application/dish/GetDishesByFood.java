@@ -138,9 +138,9 @@ public final class GetDishesByFood {
                         .groupBy(qDish.id);
 
                 if (DishFilter.REVIEW.equals(request.getAsc())) {
-                    query.orderBy(qRating.stars.avg().asc());
+                    query.orderBy(qRating.stars.avg().coalesce(0.0).asc());
                 } else {
-                    query.orderBy(qRating.stars.avg().desc());
+                    query.orderBy(qRating.stars.avg().coalesce(0.0).desc());
                 }
             } else if (DishFilter.PRICE.equals(request.getAsc()) || DishFilter.PRICE.equals(request.getDesc())) {
                 query.select(qDish)

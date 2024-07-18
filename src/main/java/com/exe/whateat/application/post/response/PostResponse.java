@@ -24,6 +24,7 @@ public class PostResponse {
     private Integer numberOfUp;
     private Integer numberOfDown;
     private Instant createdAt;
+    private Instant lastModified;
     private boolean isVoted;
     private PostVotingResponse postVoting;
     private Long totalVotes;

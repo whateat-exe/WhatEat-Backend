@@ -34,7 +34,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -115,27 +119,27 @@ public final class GetPaidSubscriptionHistory {
         }
 
         private Object getUserSubscriptionHistory(Account account, GetPaidSubscriptionHistoryRequest request) {
-           final QUserSubscriptionTracker qTracker = QUserSubscriptionTracker.userSubscriptionTracker;
+            final QUserSubscriptionTracker qTracker = QUserSubscriptionTracker.userSubscriptionTracker;
 
             OrderSpecifier<?> orderSpecifier = qTracker.validityStart.desc();
             if (request.paidDate != null && request.paidDate == SubscriptionFilter.ASC) {
                 orderSpecifier = qTracker.validityStart.asc();
             }
-             BooleanExpression predicates = qTracker.isNotNull();
-             predicates = predicates.and(qTracker.user.id.eq(account.getId()));
+            BooleanExpression predicates = qTracker.isNotNull();
+            predicates = predicates.and(qTracker.user.id.eq(account.getId()));
 
-             predicates = predicates.and(qTracker.validityStart.isNotNull());
+            predicates = predicates.and(qTracker.validityStart.isNotNull());
 
-             JPAQuery<UserSubscriptionTracker> query = new JPAQuery<>(entityManager);
-             List<UserSubscriptionTracker> trackers = query.select(qTracker)
-                     .from(qTracker)
-                     .where(predicates)
-                     .limit(request.getLimit())
-                     .offset(request.getOffset())
-                     .orderBy(orderSpecifier)
-                     .fetch();
+            JPAQuery<UserSubscriptionTracker> query = new JPAQuery<>(entityManager);
+            List<UserSubscriptionTracker> trackers = query.select(qTracker)
+                    .from(qTracker)
+                    .where(predicates)
+                    .limit(request.getLimit())
+                    .offset(request.getOffset())
+                    .orderBy(orderSpecifier)
+                    .fetch();
 
-             final long count = new BlazeJPAQuery<UserSubscriptionTracker>(entityManager, criteriaBuilderFactory)
+            final long count = new BlazeJPAQuery<UserSubscriptionTracker>(entityManager, criteriaBuilderFactory)
                     .select(qTracker)
                     .from(qTracker)
                     .where(predicates)
@@ -151,27 +155,27 @@ public final class GetPaidSubscriptionHistory {
         }
 
         private Object getRestaurantSubscriptionHistory(Restaurant restaurant, GetPaidSubscriptionHistoryRequest request) {
-             final QRestaurantSubscriptionTracker qTracker = QRestaurantSubscriptionTracker.restaurantSubscriptionTracker;
+            final QRestaurantSubscriptionTracker qTracker = QRestaurantSubscriptionTracker.restaurantSubscriptionTracker;
 
             OrderSpecifier<?> orderSpecifier = qTracker.validityStart.desc();
             if (request.paidDate != null && request.paidDate == SubscriptionFilter.ASC) {
                 orderSpecifier = qTracker.validityStart.asc();
             }
-             BooleanExpression predicates = qTracker.isNotNull();
-             predicates = predicates.and(qTracker.restaurant.id.eq(restaurant.getId()));
+            BooleanExpression predicates = qTracker.isNotNull();
+            predicates = predicates.and(qTracker.restaurant.id.eq(restaurant.getId()));
 
-              predicates = predicates.and(qTracker.validityStart.isNotNull());
+            predicates = predicates.and(qTracker.validityStart.isNotNull());
 
-             JPAQuery<RestaurantSubscriptionTracker> query = new JPAQuery<>(entityManager);
-             List<RestaurantSubscriptionTracker> trackers = query.select(qTracker)
-                     .from(qTracker)
-                     .where(predicates)
-                     .limit(request.getLimit())
-                     .offset(request.getOffset())
-                     .orderBy(orderSpecifier)
-                     .fetch();
+            JPAQuery<RestaurantSubscriptionTracker> query = new JPAQuery<>(entityManager);
+            List<RestaurantSubscriptionTracker> trackers = query.select(qTracker)
+                    .from(qTracker)
+                    .where(predicates)
+                    .limit(request.getLimit())
+                    .offset(request.getOffset())
+                    .orderBy(orderSpecifier)
+                    .fetch();
 
-             final long count = new BlazeJPAQuery<RestaurantSubscriptionTracker>(entityManager, criteriaBuilderFactory)
+            final long count = new BlazeJPAQuery<RestaurantSubscriptionTracker>(entityManager, criteriaBuilderFactory)
                     .select(qTracker)
                     .from(qTracker)
                     .where(predicates)

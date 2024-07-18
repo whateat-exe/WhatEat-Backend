@@ -27,6 +27,7 @@ public class PostMapper implements WhatEatMapper<Post, PostResponse> {
                 .postImages(post.getPostImages().stream().map(postImageMapper::convertToDto).toList())
                 .numberOfUp(numberOfVotingUp)
                 .numberOfDown(numberOfVotingDown)
+                .lastModified(post.getLastModified())
                 .createdAt(post.getCreatedAt())
                 .build();
     }
@@ -41,6 +42,7 @@ public class PostMapper implements WhatEatMapper<Post, PostResponse> {
                 .accountName(post.getAccount().getFullName())
                 .content(post.getContent())
                 .postImages(post.getPostImages().stream().map(postImageMapper::convertToDto).toList())
+                .lastModified(post.getLastModified())
                 .createdAt(post.getCreatedAt())
                 .build();
     }

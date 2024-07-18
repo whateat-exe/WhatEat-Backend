@@ -8,7 +8,8 @@ import java.util.List;
 public class UserSubscriptionTrackersResponse extends PaginationResponse<UserSubscriptionTrackerResponse> {
 
     @Getter
-    private Long totalSubscription;
+    private final Long totalSubscription;
+
     public UserSubscriptionTrackersResponse(List<UserSubscriptionTrackerResponse> data, Long total, Long totalSubscription) {
         super(data, total);
         this.totalSubscription = totalSubscription;

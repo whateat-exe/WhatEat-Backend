@@ -11,10 +11,13 @@ import com.exe.whateat.entity.common.ActiveStatus;
 import com.exe.whateat.entity.common.Money;
 import com.exe.whateat.entity.common.WhatEatId;
 import com.exe.whateat.entity.food.Dish;
+import com.exe.whateat.entity.subscription.RestaurantSubscriptionTracker;
+import com.exe.whateat.entity.subscription.SubscriptionStatus;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
 import com.exe.whateat.infrastructure.repository.DishRepository;
 import com.exe.whateat.infrastructure.repository.FoodRepository;
 import com.exe.whateat.infrastructure.repository.RestaurantRepository;
+import com.exe.whateat.infrastructure.repository.RestaurantSubscriptionTrackerRepository;
 import io.github.x4ala1c.tsid.Tsid;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -35,6 +38,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Optional;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class CreateDish {
@@ -106,10 +111,35 @@ public final class CreateDish {
         private final RestaurantRepository restaurantRepository;
         private final FirebaseImageService firebaseImageService;
         private final DishMapper dishMapper;
+        private final RestaurantSubscriptionTrackerRepository restaurantSubscriptionTrackerRepository;
 
         public DishResponse createDish(CreateDishRequest request) {
             var foodId = WhatEatId.builder().id(request.getFoodId()).build();
             var restaurantId = WhatEatId.builder().id(request.getRestaurantId()).build();
+
+            Long numOfDishes = dishRepository.countByRestaurantId(restaurantId);
+            Optional<RestaurantSubscriptionTracker> subscriptionTracker = restaurantSubscriptionTrackerRepository.findByRestaurantIdAndSubscriptionStatus(restaurantId, SubscriptionStatus.ACTIVE);
+
+            if (subscriptionTracker.isEmpty()) {
+                throw WhatEatException.builder()
+                        .code(WhatEatErrorCode.WEB_0021)
+                        .reason("subscription", "Vui lòng đăng ký gói để tạo món.")
+                        .build();
+            } else {
+                RestaurantSubscriptionTracker tracker = subscriptionTracker.get();
+                Integer maxDishes = switch (tracker.getSubscription().getType()) {
+                    case SILVER -> 10;
+                    case GOLD -> 30;
+                    case DIAMOND -> 50;
+                };
+                if (numOfDishes >= maxDishes) {
+                    throw WhatEatException.builder()
+                            .code(WhatEatErrorCode.WEB_0023)
+                            .reason("subscription", "Bạn đã đạt giới hạn số món cho phép với gói hiện tại.")
+                            .build();
+                }
+            }
+
             if (dishRepository.existsByNameIgnoreCase(request.getName())) {
                 throw WhatEatException.builder()
                         .code(WhatEatErrorCode.WEB_0014)

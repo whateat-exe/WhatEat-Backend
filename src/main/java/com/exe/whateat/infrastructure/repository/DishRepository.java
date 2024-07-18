@@ -1,5 +1,6 @@
 package com.exe.whateat.infrastructure.repository;
 
+import com.exe.whateat.entity.common.ActiveStatus;
 import com.exe.whateat.entity.common.WhatEatId;
 import com.exe.whateat.entity.food.Dish;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -26,4 +27,8 @@ public interface DishRepository extends JpaRepository<Dish, WhatEatId> {
 
     @Query("SELECT COUNT(r) FROM Rating r WHERE r.dish.id = :dishId AND r.stars = :stars")
     Long countRatingsByDishIdAndStars(@Param("dishId") WhatEatId dishId, @Param("stars") int stars);
+
+    long countByRestaurantId(WhatEatId id);
+
+    long countByStatusAndRestaurantId(ActiveStatus status, WhatEatId id);
 }
