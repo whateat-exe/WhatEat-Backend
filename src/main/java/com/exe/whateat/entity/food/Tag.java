@@ -32,6 +32,10 @@ public class Tag extends AbstractEntity {
     @Column(name = "type", nullable = false)
     private TagType type;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "priority", nullable = false)
+    private TagPriority priority;
+
     @OneToMany(mappedBy = "tag")
     private List<FoodTag> foodTags;
 

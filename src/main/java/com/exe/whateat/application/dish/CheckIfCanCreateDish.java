@@ -1,19 +1,17 @@
 package com.exe.whateat.application.dish;
 
 import com.exe.whateat.application.common.AbstractController;
+import com.exe.whateat.application.dish.response.CheckIfCanCreateDishResponse;
 import com.exe.whateat.application.exception.WhatEatErrorCode;
 import com.exe.whateat.application.exception.WhatEatException;
 import com.exe.whateat.entity.account.Account;
-import com.exe.whateat.entity.common.ActiveStatus;
 import com.exe.whateat.entity.common.WhatEatId;
-import com.exe.whateat.entity.food.Dish;
 import com.exe.whateat.entity.subscription.RestaurantSubscriptionTracker;
 import com.exe.whateat.entity.subscription.SubscriptionStatus;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
 import com.exe.whateat.infrastructure.repository.DishRepository;
 import com.exe.whateat.infrastructure.repository.RestaurantSubscriptionTrackerRepository;
 import com.exe.whateat.infrastructure.security.WhatEatSecurityHelper;
-import io.github.x4ala1c.tsid.Tsid;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -25,80 +23,68 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Optional;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class ActivateDish {
+public final class CheckIfCanCreateDish {
 
     @RestController
     @AllArgsConstructor
     @Tag(
-            name = "dish",
-            description = "APIs for dishes."
+            name = "dish"
     )
-    public static final class ActivateDishController extends AbstractController {
+    public static final class CheckIfCanCreateDishController extends AbstractController {
 
-        private final ActivateDishService service;
+        private final CheckIfCanCreateDishService service;
 
-        @PostMapping("/dishes/{id}/activate")
+        @GetMapping("/dishes/check-create")
         @Operation(
-                summary = "Activate dish API"
+                summary = "Check If Can Create Dish API"
         )
         @ApiResponse(
-                responseCode = "204"
+                description = "Successful.",
+                responseCode = "200",
+                content = @Content(schema = @Schema(implementation = CheckIfCanCreateDishResponse.class))
         )
         @ApiResponse(
-                description = "Failed activating the dish.",
+                description = "Failed.",
                 responseCode = "400s/500s",
                 content = @Content(schema = @Schema(implementation = WhatEatErrorResponse.class))
         )
-        public ResponseEntity<Object> activateDish(@PathVariable Tsid id) {
-            service.activateDish(id);
-            return ResponseEntity.noContent().build();
+        public ResponseEntity<Object> check() {
+            final CheckIfCanCreateDishResponse response = service.check();
+            return ResponseEntity.ok(response);
         }
     }
 
     @Service
     @Transactional(rollbackOn = Exception.class)
     @AllArgsConstructor
-    public static class ActivateDishService {
+    public static class CheckIfCanCreateDishService {
 
         private final DishRepository dishRepository;
         private final RestaurantSubscriptionTrackerRepository restaurantSubscriptionTrackerRepository;
         private final WhatEatSecurityHelper securityHelper;
 
-        public void activateDish(Tsid id) {
+        public CheckIfCanCreateDishResponse check() {
             final Account acc = securityHelper.getCurrentLoggedInAccount()
                     .orElseThrow(() -> WhatEatException.builder()
                             .code(WhatEatErrorCode.WEA_0013)
                             .reason("account", "Không xác định được tài khoản đang thực hiện hành động này.")
                             .build());
 
-            final WhatEatId whatEatId = new WhatEatId(id);
-            final Dish dish = dishRepository.findById(whatEatId)
-                    .orElseThrow(() -> WhatEatException.builder()
-                            .code(WhatEatErrorCode.WEB_0015)
-                            .reason("dish", String.format("Món ăn với ID '%s' không tồn tại.", id))
-                            .build());
-            if (dish.getStatus() == ActiveStatus.ACTIVE) {
-                throw WhatEatException.builder()
-                        .code(WhatEatErrorCode.WEB_0007)
-                        .reason("status", "Món ăn đã được kích hoạt trước đó.")
-                        .build();
-            }
-
             final WhatEatId restaurantId = acc.getRestaurant().getId();
-            Long numOfActivatedDishes = dishRepository.countByStatusAndRestaurantId(ActiveStatus.ACTIVE, restaurantId);
+
+            Long numOfDishes = dishRepository.countByRestaurantId(acc.getRestaurant().getId());
             Optional<RestaurantSubscriptionTracker> subscriptionTracker = restaurantSubscriptionTrackerRepository.findByRestaurantIdAndSubscriptionStatus(restaurantId, SubscriptionStatus.ACTIVE);
 
             if (subscriptionTracker.isEmpty()) {
-                throw WhatEatException.builder()
-                        .code(WhatEatErrorCode.WEB_0021)
-                        .reason("subscription", "Vui lòng đăng ký gói để kích hoạt món.")
+                return CheckIfCanCreateDishResponse.builder()
+                        .canCreateDish(false)
+                        .message("Vui lòng đăng ký gói để tạo món.")
                         .build();
             } else {
                 RestaurantSubscriptionTracker tracker = subscriptionTracker.get();
@@ -107,16 +93,19 @@ public final class ActivateDish {
                     case GOLD -> 30;
                     case DIAMOND -> 50;
                 };
-                if (numOfActivatedDishes >= maxDishes) {
-                    throw WhatEatException.builder()
-                            .code(WhatEatErrorCode.WEB_0023)
-                            .reason("subscription", "Bạn đã đạt giới hạn số món cho phép với gói hiện tại. Vui lòng vô hiệu hoá món khác để kích hoạt món hiện tại")
+                if (numOfDishes >= maxDishes) {
+                    return CheckIfCanCreateDishResponse.builder()
+                            .canCreateDish(false)
+                            .message("Bạn đã đạt giới hạn số món cho phép với gói hiện tại.")
                             .build();
                 }
             }
+            return CheckIfCanCreateDishResponse.builder()
+                    .canCreateDish(true)
+                    .message("Bạn có thể tạo món")
+                    .build();
 
-            dish.setStatus(ActiveStatus.ACTIVE);
-            dishRepository.save(dish);
         }
     }
+
 }

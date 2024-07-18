@@ -1,7 +1,6 @@
 package com.exe.whateat.infrastructure.schedulejob.subscribtion;
 
 import com.exe.whateat.infrastructure.repository.RestaurantSubscriptionTrackerRepository;
-import com.exe.whateat.infrastructure.repository.UserSubscriptionTrackerRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
