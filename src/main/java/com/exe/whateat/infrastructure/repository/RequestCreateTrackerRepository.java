@@ -10,11 +10,10 @@ import java.util.Optional;
 
 public interface RequestCreateTrackerRepository extends JpaRepository<RequestCreateTracker, WhatEatId> {
 
-    @Modifying
     @Query(value = """
-                select * from request_create_tracker
-                where id = ?1
-                and status = 'ACTIVE'
-        """, nativeQuery = true)
+                select rct from RequestCreateTracker rct
+                where rct.restaurant.id = ?1
+                and rct.requestCreateTrackerStatus = 'ACTIVE'
+        """)
     Optional<RequestCreateTracker> findByRestaurantIdAndStatus(WhatEatId whatEatId);
 }

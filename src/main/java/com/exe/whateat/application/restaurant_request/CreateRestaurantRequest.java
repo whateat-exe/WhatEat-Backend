@@ -3,25 +3,15 @@ package com.exe.whateat.application.restaurant_request;
 import com.exe.whateat.application.common.AbstractController;
 import com.exe.whateat.application.exception.WhatEatErrorCode;
 import com.exe.whateat.application.exception.WhatEatException;
-import com.exe.whateat.application.image.FirebaseImageResponse;
-import com.exe.whateat.application.image.FirebaseImageService;
-import com.exe.whateat.application.post.CreatePost;
-import com.exe.whateat.application.post.mapper.PostMapper;
-import com.exe.whateat.application.post.response.PostResponse;
 import com.exe.whateat.application.restaurant_request.mapper.RequestMapper;
 import com.exe.whateat.application.restaurant_request.response.RequestResponse;
 import com.exe.whateat.entity.account.Account;
 import com.exe.whateat.entity.account.AccountRole;
 import com.exe.whateat.entity.common.WhatEatId;
-import com.exe.whateat.entity.post.Post;
-import com.exe.whateat.entity.post.PostImage;
 import com.exe.whateat.entity.request.RequestCreateTracker;
 import com.exe.whateat.entity.request.RequestType;
 import com.exe.whateat.entity.request.RestaurantRequest;
-import com.exe.whateat.entity.restaurant.Restaurant;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
-import com.exe.whateat.infrastructure.repository.PostImageRepository;
-import com.exe.whateat.infrastructure.repository.PostRepository;
 import com.exe.whateat.infrastructure.repository.RequestCreateTrackerRepository;
 import com.exe.whateat.infrastructure.repository.RestaurantRepository;
 import com.exe.whateat.infrastructure.repository.RestaurantRequestRepository;
@@ -140,6 +130,9 @@ public class CreateRestaurantRequest {
                     .restaurant(restaurantRepository.getReferenceById(account.getRestaurant().getId()))
                     .build();
             var response = requestMapper.convertToDto(restaurantRequestRepository.save(restaurantRequest));
+            int numberOfCreated = requestCreateTracker.getNumberOfRequestedDish() + 1;
+            requestCreateTracker.setNumberOfRequestedDish(numberOfCreated);
+            requestCreateTrackerRepository.save(requestCreateTracker);
             return response;
         }
     }

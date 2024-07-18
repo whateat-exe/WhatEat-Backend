@@ -144,8 +144,6 @@ public final class HandleSubscriptionWebhook {
 
         private final RestaurantSubscriptionTrackerRepository restaurantSubscriptionTrackerRepository;
         private final UserSubscriptionTrackerRepository userSubscriptionTrackerRepository;
-        private final RequestCreateTrackerRepository requestCreateTrackerRepository;
-        private final RestaurantRepository restaurantRepository;
 
         @SuppressWarnings("Duplicates")
         public void handle(WebhookRequest request) {
@@ -170,7 +168,6 @@ public final class HandleSubscriptionWebhook {
                 restaurantSubscriptionTrackerRepository.cancelAllCurrentlyActiveSubscriptions(
                         restaurantSubscriptionTrack.getRestaurant().getId(), validityEnd);
                 restaurantSubscriptionTrackerRepository.save(restaurantSubscriptionTrack);
-                handleCreateRequestDishRestaurantTracker(validityStart, validityEnd, restaurantSubscriptionTrack.getRestaurant().getId().asTsid(), restaurantSubscriptionTrack.getSubscription());
                 return;
             }
             final Optional<UserSubscriptionTracker> userSubscriptionTracker =
@@ -197,30 +194,6 @@ public final class HandleSubscriptionWebhook {
             userSubscriptionTrackerRepository.cancelAllCurrentlyActiveSubscriptions(
                     userSubscriptionTrack.getUser().getId(), validityEnd);
             userSubscriptionTrackerRepository.save(userSubscriptionTrack);
-        }
-
-        private void handleCreateRequestDishRestaurantTracker(Instant validityStart, Instant validityEnd,
-                                                              Tsid restaurantId, RestaurantSubscription restaurantSubscription) {
-            WhatEatId whatEatId = new WhatEatId(restaurantId);
-            int maxNumberOfCreatingDish = 0;
-            if (restaurantSubscription.getType().equals(RestaurantSubscriptionType.SILVER))
-                maxNumberOfCreatingDish = 10;
-            else if (restaurantSubscription.getType().equals(RestaurantSubscriptionType.GOLD))
-                maxNumberOfCreatingDish = 30;
-            else if(restaurantSubscription.getType().equals(RestaurantSubscriptionType.DIAMOND))
-                maxNumberOfCreatingDish = 50;
-            RequestCreateTracker requestCreateTracker =
-                    RequestCreateTracker
-                            .builder()
-                            .id(WhatEatId.generate())
-                            .numberOfRequestedDish(0)
-                            .requestCreateTrackerStatus(RequestCreateTrackerStatus.ACTIVE)
-                            .validityStart(validityStart)
-                            .validityEnd(validityEnd)
-                            .maxNumberOfCreateDish(maxNumberOfCreatingDish)
-                            .restaurant(restaurantRepository.getReferenceById(whatEatId))
-                            .build();
-            requestCreateTrackerRepository.save(requestCreateTracker);
         }
     }
 }

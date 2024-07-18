@@ -29,7 +29,7 @@ public class DeleteRestaurantResponse {
     @RestController
     @AllArgsConstructor
     @Tag(
-            name = "request",
+            name = "restaurant_response",
             description = "APIs for request food."
     )
     public static final class CreateRestaurantRequestDishController extends AbstractController {
