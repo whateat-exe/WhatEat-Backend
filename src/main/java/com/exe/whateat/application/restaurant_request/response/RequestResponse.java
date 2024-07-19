@@ -21,8 +21,6 @@ public class RequestResponse {
     private Tsid tsid;
     private String title;
     private String content;
-
-    @Enumerated(EnumType.STRING)
     private RequestType type;
     private Instant createdAt;
     private RestaurantResponse restaurant;

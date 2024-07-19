@@ -18,8 +18,6 @@ public class RestaurantResponseResponse {
     private Tsid tsid;
     private String title;
     private String content;
-
-    @Enumerated(EnumType.STRING)
     private RequestStatus status;
     private Instant createdAt;
     private Tsid restaurantRequestId;

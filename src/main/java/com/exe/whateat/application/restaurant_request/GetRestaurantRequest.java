@@ -76,7 +76,7 @@ public class GetRestaurantRequest {
                     .orElseThrow(() -> {
                          throw WhatEatException.builder()
                                  .code(WhatEatErrorCode.WES_0001)
-                                 .reason("restaurant-request", "Truyền Id bị sai")
+                                 .reason("restaurantRequest", "Truyền Id bị sai")
                                  .build();
                     });
             return requestMapper.convertToDto(restaurantRequest);

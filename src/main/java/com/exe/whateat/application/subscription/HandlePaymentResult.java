@@ -131,7 +131,7 @@ public final class HandlePaymentResult {
                         restaurantSubscriptionTrackerRepository.findByPaymentIdAndOrderCode(response.getId(),
                                 response.getOrderCode());
                 if (restaurantSubscriptionTracker.isPresent()) {
-                    handleCreateRequestDishRestaurantTracker(restaurantSubscriptionTracker.get().getRestaurant().getId().asTsid(), restaurantSubscriptionTracker.get().getSubscription());
+                    handleCreateRequestDishRestaurantTracker(restaurantSubscriptionTracker.get().getRestaurant().getId(), restaurantSubscriptionTracker.get().getSubscription());
                 }
             }
         }
@@ -176,8 +176,7 @@ public final class HandlePaymentResult {
             userSubscriptionTrackerRepository.save(userSubscriptionTrack);
         }
 
-        private void handleCreateRequestDishRestaurantTracker(Tsid restaurantId, RestaurantSubscription restaurantSubscription) {
-            WhatEatId whatEatId = new WhatEatId(restaurantId);
+        private void handleCreateRequestDishRestaurantTracker(WhatEatId restaurantId, RestaurantSubscription restaurantSubscription) {
             int maxNumberOfCreatingDish = 0;
             if (restaurantSubscription.getType().equals(RestaurantSubscriptionType.SILVER))
                 maxNumberOfCreatingDish = 10;
@@ -194,7 +193,7 @@ public final class HandlePaymentResult {
                             .validityStart(Instant.now())
                             .validityEnd(Instant.now().plus(30, ChronoUnit.DAYS))
                             .maxNumberOfCreateDish(maxNumberOfCreatingDish)
-                            .restaurant(restaurantRepository.getReferenceById(whatEatId))
+                            .restaurant(restaurantRepository.getReferenceById(restaurantId))
                             .build();
             requestCreateTrackerRepository.save(requestCreateTracker);
         }
