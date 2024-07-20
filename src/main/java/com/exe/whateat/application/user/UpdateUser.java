@@ -137,6 +137,9 @@ public class UpdateUser {
                 if (StringUtils.isNotBlank(updateUserRequest.getImage())) {
                     firebaseImageResponse = firebaseImageService.uploadBase64Image(updateUserRequest.getImage());
                     account.setImage(firebaseImageResponse.url());
+                } else {
+                    firebaseImageService.deleteImage(account.getImage(), FirebaseImageService.DeleteType.URL);
+                    account.setImage(null);
                 }
             } catch (Exception e) {
                 // Image is created. Time to delete!
