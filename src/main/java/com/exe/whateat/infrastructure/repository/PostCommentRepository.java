@@ -11,7 +11,7 @@ import java.time.Instant;
 public interface PostCommentRepository extends JpaRepository<PostComment, WhatEatId> {
 
     @Query(value = """
-            SELECT COUNT(*) FROM post_voting 
+            SELECT COUNT(*) FROM post_comment 
             WHERE CAST(TO_TIMESTAMP((:epoch + (id >> 22)) / 1000.0) AS TIMESTAMP) BETWEEN :start AND :end
             """,
             nativeQuery = true)
