@@ -12,7 +12,6 @@ import com.exe.whateat.application.exception.WhatEatException;
 import com.exe.whateat.entity.common.ActiveStatus;
 import com.exe.whateat.entity.common.WhatEatId;
 import com.exe.whateat.entity.food.Dish;
-import com.exe.whateat.entity.food.FoodTag;
 import com.exe.whateat.entity.food.QDish;
 import com.exe.whateat.entity.random.QRating;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
@@ -161,7 +160,7 @@ public final class GetDishByRestaurant {
                     .offset(getDishesByRestaurantRequest.getOffset())
                     .fetch();
 
-            final long count = new BlazeJPAQuery<FoodTag>(entityManager, criteriaBuilderFactory)
+            final long count = new BlazeJPAQuery<Dish>(entityManager, criteriaBuilderFactory)
                     .select(qDish)
                     .from(qDish)
                     .where(predicates)
