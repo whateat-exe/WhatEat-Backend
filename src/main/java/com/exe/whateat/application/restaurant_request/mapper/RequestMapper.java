@@ -5,12 +5,10 @@ import com.exe.whateat.application.restaurant.mapper.RestaurantMapper;
 import com.exe.whateat.application.restaurant_request.response.RequestResponse;
 import com.exe.whateat.entity.request.RestaurantRequest;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import org.springframework.stereotype.Component;
 
-@AllArgsConstructor
 @Component
-@Builder
+@AllArgsConstructor
 public class RequestMapper implements WhatEatMapper<RestaurantRequest, RequestResponse> {
 
     private RestaurantMapper restaurantMapper;

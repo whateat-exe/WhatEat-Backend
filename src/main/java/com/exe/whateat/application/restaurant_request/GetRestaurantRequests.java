@@ -1,22 +1,13 @@
 package com.exe.whateat.application.restaurant_request;
 
 import com.exe.whateat.application.common.AbstractController;
-import com.exe.whateat.application.common.WhatEatMapper;
 import com.exe.whateat.application.common.request.PaginationRequest;
-import com.exe.whateat.application.food.response.FoodResponse;
-import com.exe.whateat.application.food.response.FoodsResponse;
 import com.exe.whateat.application.restaurant_request.mapper.RequestMapper;
-import com.exe.whateat.application.restaurant_request.response.RequestResponse;
 import com.exe.whateat.application.restaurant_request.response.RequestResponses;
-import com.exe.whateat.entity.common.ActiveStatus;
-import com.exe.whateat.entity.food.Food;
-import com.exe.whateat.entity.food.QFood;
 import com.exe.whateat.entity.request.QRestaurantRequest;
 import com.exe.whateat.entity.request.RestaurantRequest;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
-import com.exe.whateat.infrastructure.repository.FoodRepository;
 import com.exe.whateat.infrastructure.repository.RestaurantRequestRepository;
-import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -31,9 +22,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.apache.commons.lang3.StringUtils;
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -86,6 +75,7 @@ public final class GetRestaurantRequests {
 
         private RestaurantRequestRepository restaurantRequestRepository;
         private RequestMapper requestMapper;
+
         @PersistenceContext
         private EntityManager entityManager;
 
