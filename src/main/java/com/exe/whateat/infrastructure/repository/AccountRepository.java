@@ -5,7 +5,9 @@ import com.exe.whateat.entity.common.WhatEatId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,4 +33,13 @@ public interface AccountRepository extends JpaRepository<Account, WhatEatId> {
             """, nativeQuery = true)
     @Modifying
     void deleteUnusedAccount(List<Long> ids);
+
+    @Query(value = """
+            SELECT COUNT(*) FROM account 
+            WHERE CAST(TO_TIMESTAMP((:epoch + (id >> 22)) / 1000.0) AS TIMESTAMP) BETWEEN :start AND :end
+            AND status != 'PENDING'
+            """,
+            nativeQuery = true)
+    long countRecordsInRange(@Param("start") Instant start, @Param("end") Instant end, @Param("epoch") long epoch);
+
 }
