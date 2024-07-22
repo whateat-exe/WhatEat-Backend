@@ -7,6 +7,7 @@ import com.exe.whateat.entity.account.Account;
 import com.exe.whateat.entity.common.ActiveStatus;
 import com.exe.whateat.entity.common.WhatEatId;
 import com.exe.whateat.entity.food.Dish;
+import com.exe.whateat.entity.food.DishStatus;
 import com.exe.whateat.entity.subscription.RestaurantSubscriptionTracker;
 import com.exe.whateat.entity.subscription.SubscriptionStatus;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
@@ -84,7 +85,7 @@ public final class ActivateDish {
                             .code(WhatEatErrorCode.WEB_0015)
                             .reason("dish", String.format("Món ăn với ID '%s' không tồn tại.", id))
                             .build());
-            if (dish.getStatus() == ActiveStatus.ACTIVE) {
+            if (dish.getStatus() == DishStatus.ACTIVE) {
                 throw WhatEatException.builder()
                         .code(WhatEatErrorCode.WEB_0007)
                         .reason("status", "Món ăn đã được kích hoạt trước đó.")
@@ -115,7 +116,7 @@ public final class ActivateDish {
                 }
             }
 
-            dish.setStatus(ActiveStatus.ACTIVE);
+            dish.setStatus(DishStatus.ACTIVE);
             dishRepository.save(dish);
         }
     }
