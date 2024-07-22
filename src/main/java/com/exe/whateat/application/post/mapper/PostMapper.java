@@ -24,7 +24,7 @@ public class PostMapper implements WhatEatMapper<Post, PostResponse> {
             return null;
         }
 
-        if (post.getAccount().getRole().equals(AccountRole.RESTAURANT)){
+        if (post.getAccount().getRole().equals(AccountRole.RESTAURANT)) {
             WhatEatId whatEatId = post.getAccount().getId();
             Restaurant restaurant = restaurantRepository.findByAccountId(whatEatId)
                     .orElseThrow(() -> WhatEatException.builder()
@@ -62,7 +62,7 @@ public class PostMapper implements WhatEatMapper<Post, PostResponse> {
             return null;
         }
 
-        if (post.getAccount().getRole().equals(AccountRole.RESTAURANT)){
+        if (post.getAccount().getRole().equals(AccountRole.RESTAURANT)) {
             WhatEatId whatEatId = post.getAccount().getId();
             Restaurant restaurant = restaurantRepository.findByAccountId(whatEatId)
                     .orElseThrow(() -> WhatEatException.builder()

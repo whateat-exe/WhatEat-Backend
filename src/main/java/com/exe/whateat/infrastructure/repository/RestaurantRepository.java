@@ -26,7 +26,7 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, WhatEatI
 
     @Query("""
             select r from Restaurant r
-            where r.account.id = :id
+            where r.account.id = ?1
         """)
     Optional<Restaurant> findByAccountId(WhatEatId id);
 }
