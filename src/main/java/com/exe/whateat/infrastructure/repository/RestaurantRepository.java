@@ -23,4 +23,10 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, WhatEatI
                                         @Param("accountEmail") String accountEmail);
 
     boolean existsByNameIgnoreCase(String name);
+
+    @Query("""
+            select r from Restaurant r
+            where r.account.id = :id
+        """)
+    Optional<Restaurant> findByAccountId(WhatEatId id);
 }
