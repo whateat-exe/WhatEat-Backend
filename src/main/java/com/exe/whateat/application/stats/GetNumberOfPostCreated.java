@@ -7,7 +7,6 @@ import com.exe.whateat.application.exception.WhatEatErrorCode;
 import com.exe.whateat.application.exception.WhatEatException;
 import com.exe.whateat.entity.post.Post;
 import com.exe.whateat.entity.post.QPost;
-import com.exe.whateat.infrastructure.repository.PostRepository;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;

@@ -116,9 +116,9 @@ public class CreateRestaurantRequest {
                     });
             if (requestCreateTracker.getNumberOfRequestedDish() == requestCreateTracker.getMaxNumberOfCreateDish())
                 throw WhatEatException.builder()
-                    .code(WhatEatErrorCode.WEB_0025)
-                    .reason("restaurant_tracker", "Gửi vướt giới hạn của gói")
-                    .build();
+                        .code(WhatEatErrorCode.WEB_0025)
+                        .reason("restaurant_tracker", "Gửi vướt giới hạn của gói")
+                        .build();
 
             // create request
             RestaurantRequest restaurantRequest = RestaurantRequest.builder()

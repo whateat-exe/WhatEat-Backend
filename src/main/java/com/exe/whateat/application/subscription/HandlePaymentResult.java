@@ -17,7 +17,6 @@ import com.exe.whateat.infrastructure.repository.RequestCreateTrackerRepository;
 import com.exe.whateat.infrastructure.repository.RestaurantRepository;
 import com.exe.whateat.infrastructure.repository.RestaurantSubscriptionTrackerRepository;
 import com.exe.whateat.infrastructure.repository.UserSubscriptionTrackerRepository;
-import io.github.x4ala1c.tsid.Tsid;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -182,7 +181,7 @@ public final class HandlePaymentResult {
                 maxNumberOfCreatingDish = 10;
             else if (restaurantSubscription.getType().equals(RestaurantSubscriptionType.GOLD))
                 maxNumberOfCreatingDish = 30;
-            else if(restaurantSubscription.getType().equals(RestaurantSubscriptionType.DIAMOND))
+            else if (restaurantSubscription.getType().equals(RestaurantSubscriptionType.DIAMOND))
                 maxNumberOfCreatingDish = 50;
             RequestCreateTracker requestCreateTracker =
                     RequestCreateTracker

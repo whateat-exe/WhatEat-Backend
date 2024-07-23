@@ -34,31 +34,36 @@ public interface DishRepository extends JpaRepository<Dish, WhatEatId> {
     long countByStatusAndRestaurantId(ActiveStatus status, WhatEatId id);
 
     @Query(value = """
-            UPDATE dish 
-            SET status = 'EXPIRED'
-            WHERE status = 'ACTIVE' AND 
-            restaurant_id IN 
-            (SELECT DISTINCT d.restaurant_id
-            FROM dish d 
-            LEFT JOIN restaurant_subscription_tracker rst
-            ON d.restaurant_id = rst.restaurant_id
-            GROUP BY d.restaurant_id
-            HAVING SUM(CASE WHEN rst.subscription_status = 'ACTIVE' THEN 1 ELSE 0 END) = 0);
-            """, nativeQuery = true)
+                   UPDATE dish 
+                   SET status = 'EXPIRED'
+                   WHERE status = 'ACTIVE' AND 
+                   restaurant_id 
+                   IN (
+                       SELECT DISTINCT d.restaurant_id
+                       FROM dish d 
+                       LEFT JOIN restaurant_subscription_tracker rst
+                       ON d.restaurant_id = rst.restaurant_id
+                       GROUP BY d.restaurant_id
+                       HAVING SUM(CASE WHEN rst.subscription_status = 'ACTIVE' THEN 1 ELSE 0 END) = 0
+                   );
+                   """,
+            nativeQuery = true)
     @Modifying
     void changeAllExpiredDish();
 
     @Modifying
     @Query(value = """
-        UPDATE dish d
-        SET status = 'EXPIRED'
-        WHERE d.restaurant_id = :restaurantId AND d.status = 'ACTIVE' 
-        AND d.id NOT IN (
-            SELECT sub.id FROM dish sub 
-            WHERE sub.restaurant_id = :restaurantId AND sub.status = 'ACTIVE' 
-            ORDER BY sub.id DESC 
-            LIMIT :maxActiveDishes
-        )
-        """, nativeQuery = true)
+                   UPDATE dish d
+                   SET status = 'EXPIRED'
+                   WHERE d.restaurant_id = :restaurantId AND d.status = 'ACTIVE' 
+                   AND d.id
+                   NOT IN (
+                       SELECT sub.id FROM dish sub 
+                       WHERE sub.restaurant_id = :restaurantId AND sub.status = 'ACTIVE' 
+                       ORDER BY sub.id DESC 
+                       LIMIT :maxActiveDishes
+                   );
+                   """,
+            nativeQuery = true)
     void expireExceedingActiveDishes(@Param("maxActiveDishes") int maxActiveDishes, @Param("restaurantId") Long restaurantId);
 }

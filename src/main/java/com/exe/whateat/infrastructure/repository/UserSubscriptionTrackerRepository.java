@@ -59,11 +59,12 @@ public interface UserSubscriptionTrackerRepository extends JpaRepository<UserSub
     void changeAllExpiredPayment();
 
     @Query(value = """
-             UPDATE user_subscription_tracker 
-             SET subscription_status = 'EXPIRED'
-             WHERE subscription_status = 'ACTIVE'
-             AND validity_end < NOW() AT TIME ZONE 'UTC'
-            """, nativeQuery = true)
+                   UPDATE user_subscription_tracker 
+                   SET subscription_status = 'EXPIRED'
+                   WHERE subscription_status = 'ACTIVE'
+                   AND validity_end < NOW() AT TIME ZONE 'UTC'
+                   """,
+            nativeQuery = true)
     @Modifying
     void changeAllExpiredSubscription();
 }
