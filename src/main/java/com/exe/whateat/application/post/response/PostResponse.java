@@ -18,6 +18,7 @@ public class PostResponse {
     private Tsid id;
     private String content;
     private String accountName;
+    private String avatarImage;
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private List<PostImageResponse> postImages;
