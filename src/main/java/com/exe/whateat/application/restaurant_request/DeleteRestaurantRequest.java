@@ -1,11 +1,8 @@
 package com.exe.whateat.application.restaurant_request;
 
 import com.exe.whateat.application.common.AbstractController;
-import com.exe.whateat.application.restaurant_request.response.RequestResponse;
 import com.exe.whateat.entity.common.WhatEatId;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
-import com.exe.whateat.infrastructure.repository.PostRepository;
-import com.exe.whateat.infrastructure.repository.RestaurantRepository;
 import com.exe.whateat.infrastructure.repository.RestaurantRequestRepository;
 import io.github.x4ala1c.tsid.Tsid;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,7 +11,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;

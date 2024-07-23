@@ -1,7 +1,6 @@
 package com.exe.whateat.entity.food;
 
 import com.exe.whateat.entity.common.AbstractEntity;
-import com.exe.whateat.entity.common.ActiveStatus;
 import com.exe.whateat.entity.common.Money;
 import com.exe.whateat.entity.random.RandomHistoryDish;
 import com.exe.whateat.entity.random.Rating;
@@ -46,7 +45,7 @@ public class Dish extends AbstractEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private ActiveStatus status;
+    private DishStatus status;
 
     @ManyToOne
     @JoinColumn(name = "food_id", columnDefinition = AbstractEntity.ID_COLUMN, nullable = false)

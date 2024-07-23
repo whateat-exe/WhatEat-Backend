@@ -69,7 +69,7 @@ public final class GetNumberOfAccount {
         }
     }
 
-     @Service
+    @Service
     @Transactional(rollbackOn = Exception.class)
     public static class GetNumberOfAccountService {
 
@@ -80,13 +80,13 @@ public final class GetNumberOfAccount {
         @Value("${whateat.tsid.epoch}")
         private long epoch;
 
-         public GetNumberOfAccountService(EntityManager entityManager, CriteriaBuilderFactory criteriaBuilderFactory, AccountRepository accountRepository) {
-             this.entityManager = entityManager;
-             this.criteriaBuilderFactory = criteriaBuilderFactory;
-             this.accountRepository = accountRepository;
-         }
+        public GetNumberOfAccountService(EntityManager entityManager, CriteriaBuilderFactory criteriaBuilderFactory, AccountRepository accountRepository) {
+            this.entityManager = entityManager;
+            this.criteriaBuilderFactory = criteriaBuilderFactory;
+            this.accountRepository = accountRepository;
+        }
 
-         public GetNumberOfAccountResponse get(GetNumberOfAccountRequest request) {
+        public GetNumberOfAccountResponse get(GetNumberOfAccountRequest request) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
             validateDateFormat(request.start);
             validateDateFormat(request.end);
@@ -104,7 +104,7 @@ public final class GetNumberOfAccount {
                         .build();
             }
 
-             GetNumberOfAccountResponse response = new GetNumberOfAccountResponse(accountRepository.countRecordsInRange(start, end, epoch));
+            GetNumberOfAccountResponse response = new GetNumberOfAccountResponse(accountRepository.countRecordsInRange(start, end, epoch));
             return response;
         }
 

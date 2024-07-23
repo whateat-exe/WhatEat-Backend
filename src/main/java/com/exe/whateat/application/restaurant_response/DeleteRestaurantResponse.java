@@ -1,11 +1,8 @@
 package com.exe.whateat.application.restaurant_response;
 
 import com.exe.whateat.application.common.AbstractController;
-import com.exe.whateat.application.restaurant_request.CreateRestaurantRequest;
-import com.exe.whateat.application.restaurant_request.DeleteRestaurantRequest;
 import com.exe.whateat.entity.common.WhatEatId;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
-import com.exe.whateat.infrastructure.repository.RestaurantRepository;
 import com.exe.whateat.infrastructure.repository.RestaurantRequestResponseRepository;
 import io.github.x4ala1c.tsid.Tsid;
 import io.swagger.v3.oas.annotations.Operation;

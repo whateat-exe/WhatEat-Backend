@@ -26,8 +26,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class GetRestaurantRequest {
 
@@ -74,10 +72,10 @@ public class GetRestaurantRequest {
             final WhatEatId whatEatId = new WhatEatId(id);
             final RestaurantRequest restaurantRequest = restaurantRequestRepository.findById(whatEatId)
                     .orElseThrow(() -> {
-                         throw WhatEatException.builder()
-                                 .code(WhatEatErrorCode.WES_0001)
-                                 .reason("restaurantRequest", "Truyền Id bị sai")
-                                 .build();
+                        throw WhatEatException.builder()
+                                .code(WhatEatErrorCode.WES_0001)
+                                .reason("restaurantRequest", "Truyền Id bị sai")
+                                .build();
                     });
             return requestMapper.convertToDto(restaurantRequest);
         }
