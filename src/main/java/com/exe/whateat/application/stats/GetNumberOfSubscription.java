@@ -145,7 +145,7 @@ public final class GetNumberOfSubscription {
                     .fetchCount();
 
             final QUserSubscriptionTracker qUserSubscriptionTracker = QUserSubscriptionTracker.userSubscriptionTracker;
-            BooleanExpression predicatesVip = qUserSubscriptionTracker.validityStart.isNotNull().and(qUserSubscriptionTracker.validityStart.between(start,end));
+            BooleanExpression predicatesVip = qUserSubscriptionTracker.validityStart.isNotNull().and(qUserSubscriptionTracker.validityStart.between(start, end));
 
             final long countVip = new BlazeJPAQuery<Post>(entityManager, criteriaBuilderFactory)
                     .select(qUserSubscriptionTracker)

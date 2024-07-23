@@ -7,10 +7,10 @@ import com.exe.whateat.application.exception.WhatEatErrorCode;
 import com.exe.whateat.application.exception.WhatEatException;
 import com.exe.whateat.application.image.FirebaseImageResponse;
 import com.exe.whateat.application.image.FirebaseImageService;
-import com.exe.whateat.entity.common.ActiveStatus;
 import com.exe.whateat.entity.common.Money;
 import com.exe.whateat.entity.common.WhatEatId;
 import com.exe.whateat.entity.food.Dish;
+import com.exe.whateat.entity.food.DishStatus;
 import com.exe.whateat.entity.subscription.RestaurantSubscriptionTracker;
 import com.exe.whateat.entity.subscription.SubscriptionStatus;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
@@ -149,7 +149,7 @@ public final class CreateDish {
             Dish dish = Dish.builder()
                     .id(WhatEatId.generate())
                     .name(request.getName())
-                    .status(ActiveStatus.ACTIVE)
+                    .status(DishStatus.ACTIVE)
                     .description(request.description)
                     .price(request.getPrice())
                     .food(foodRepository.getReferenceById(foodId))

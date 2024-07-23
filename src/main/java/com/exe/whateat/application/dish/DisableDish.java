@@ -3,9 +3,9 @@ package com.exe.whateat.application.dish;
 import com.exe.whateat.application.common.AbstractController;
 import com.exe.whateat.application.exception.WhatEatErrorCode;
 import com.exe.whateat.application.exception.WhatEatException;
-import com.exe.whateat.entity.common.ActiveStatus;
 import com.exe.whateat.entity.common.WhatEatId;
 import com.exe.whateat.entity.food.Dish;
+import com.exe.whateat.entity.food.DishStatus;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
 import com.exe.whateat.infrastructure.repository.DishRepository;
 import io.github.x4ala1c.tsid.Tsid;
@@ -69,13 +69,13 @@ public final class DisableDish {
                             .code(WhatEatErrorCode.WEB_0014)
                             .reason("dish", String.format("Món ăn với ID '%s' không tồn tại.", id))
                             .build());
-            if (dish.getStatus() == ActiveStatus.INACTIVE) {
+            if (dish.getStatus() == DishStatus.INACTIVE) {
                 throw WhatEatException.builder()
                         .code(WhatEatErrorCode.WEB_0007)
                         .reason("status", "Món ăn đã được vô hiệu hóa trước đó.")
                         .build();
             }
-            dish.setStatus(ActiveStatus.INACTIVE);
+            dish.setStatus(DishStatus.INACTIVE);
             dishRepository.save(dish);
         }
     }
