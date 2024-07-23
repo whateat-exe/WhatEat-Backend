@@ -4,10 +4,17 @@ import com.exe.whateat.application.common.AbstractController;
 import com.exe.whateat.application.exception.WhatEatErrorCode;
 import com.exe.whateat.application.exception.WhatEatException;
 import com.exe.whateat.application.subscription.request.PayOSPaymentReturnResponse;
+import com.exe.whateat.entity.common.WhatEatId;
+import com.exe.whateat.entity.request.RequestCreateTracker;
+import com.exe.whateat.entity.request.RequestCreateTrackerStatus;
 import com.exe.whateat.entity.subscription.PaymentStatus;
+import com.exe.whateat.entity.subscription.RestaurantSubscription;
 import com.exe.whateat.entity.subscription.RestaurantSubscriptionTracker;
+import com.exe.whateat.entity.subscription.RestaurantSubscriptionType;
 import com.exe.whateat.entity.subscription.SubscriptionStatus;
 import com.exe.whateat.entity.subscription.UserSubscriptionTracker;
+import com.exe.whateat.infrastructure.repository.RequestCreateTrackerRepository;
+import com.exe.whateat.infrastructure.repository.RestaurantRepository;
 import com.exe.whateat.infrastructure.repository.RestaurantSubscriptionTrackerRepository;
 import com.exe.whateat.infrastructure.repository.UserSubscriptionTrackerRepository;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,6 +40,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -101,6 +110,8 @@ public final class HandlePaymentResult {
 
         private final RestaurantSubscriptionTrackerRepository restaurantSubscriptionTrackerRepository;
         private final UserSubscriptionTrackerRepository userSubscriptionTrackerRepository;
+        private final RequestCreateTrackerRepository requestCreateTrackerRepository;
+        private final RestaurantRepository restaurantRepository;
 
         public void handle(PayOSPaymentReturnResponse response) {
             if (!StringUtils.equals(response.getCode(), SUCCESSFUL_CODE)) {
@@ -111,6 +122,16 @@ public final class HandlePaymentResult {
             }
             if (response.isCancel()) {
                 handleCancelPayment(response);
+                return;
+            }
+
+            if (StringUtils.equals(response.getCode(), SUCCESSFUL_CODE)) {
+                final Optional<RestaurantSubscriptionTracker> restaurantSubscriptionTracker =
+                        restaurantSubscriptionTrackerRepository.findByPaymentIdAndOrderCode(response.getId(),
+                                response.getOrderCode());
+                if (restaurantSubscriptionTracker.isPresent()) {
+                    handleCreateRequestDishRestaurantTracker(restaurantSubscriptionTracker.get().getRestaurant().getId(), restaurantSubscriptionTracker.get().getSubscription());
+                }
             }
         }
 
@@ -152,6 +173,28 @@ public final class HandlePaymentResult {
             userSubscriptionTrack.setPaymentStatus(PaymentStatus.CANCELLED);
             userSubscriptionTrack.setSubscriptionStatus(SubscriptionStatus.CANCELLED);
             userSubscriptionTrackerRepository.save(userSubscriptionTrack);
+        }
+
+        private void handleCreateRequestDishRestaurantTracker(WhatEatId restaurantId, RestaurantSubscription restaurantSubscription) {
+            int maxNumberOfCreatingDish = 0;
+            if (restaurantSubscription.getType().equals(RestaurantSubscriptionType.SILVER))
+                maxNumberOfCreatingDish = 10;
+            else if (restaurantSubscription.getType().equals(RestaurantSubscriptionType.GOLD))
+                maxNumberOfCreatingDish = 30;
+            else if (restaurantSubscription.getType().equals(RestaurantSubscriptionType.DIAMOND))
+                maxNumberOfCreatingDish = 50;
+            RequestCreateTracker requestCreateTracker =
+                    RequestCreateTracker
+                            .builder()
+                            .id(WhatEatId.generate())
+                            .numberOfRequestedDish(0)
+                            .requestCreateTrackerStatus(RequestCreateTrackerStatus.ACTIVE)
+                            .validityStart(Instant.now())
+                            .validityEnd(Instant.now().plus(30, ChronoUnit.DAYS))
+                            .maxNumberOfCreateDish(maxNumberOfCreatingDish)
+                            .restaurant(restaurantRepository.getReferenceById(restaurantId))
+                            .build();
+            requestCreateTrackerRepository.save(requestCreateTracker);
         }
     }
 }

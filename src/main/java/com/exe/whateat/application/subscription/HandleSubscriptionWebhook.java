@@ -8,6 +8,7 @@ import com.exe.whateat.entity.subscription.RestaurantSubscriptionTracker;
 import com.exe.whateat.entity.subscription.SubscriptionStatus;
 import com.exe.whateat.entity.subscription.UserSubscriptionTracker;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
+import com.exe.whateat.infrastructure.repository.DishRepository;
 import com.exe.whateat.infrastructure.repository.RestaurantSubscriptionTrackerRepository;
 import com.exe.whateat.infrastructure.repository.UserSubscriptionTrackerRepository;
 import io.swagger.v3.oas.annotations.Operation;
@@ -136,6 +137,7 @@ public final class HandleSubscriptionWebhook {
 
         private final RestaurantSubscriptionTrackerRepository restaurantSubscriptionTrackerRepository;
         private final UserSubscriptionTrackerRepository userSubscriptionTrackerRepository;
+        private final DishRepository dishRepository;
 
         @SuppressWarnings("Duplicates")
         public void handle(WebhookRequest request) {
@@ -160,6 +162,12 @@ public final class HandleSubscriptionWebhook {
                 restaurantSubscriptionTrackerRepository.cancelAllCurrentlyActiveSubscriptions(
                         restaurantSubscriptionTrack.getRestaurant().getId(), validityEnd);
                 restaurantSubscriptionTrackerRepository.save(restaurantSubscriptionTrack);
+                Integer maxDishes = switch (restaurantSubscriptionTrack.getSubscription().getType()) {
+                    case SILVER -> 10;
+                    case GOLD -> 30;
+                    case DIAMOND -> 50;
+                };
+                dishRepository.expireExceedingActiveDishes(maxDishes, restaurantSubscriptionTrack.getRestaurant().getId().asTsid().asLong());
                 return;
             }
             final Optional<UserSubscriptionTracker> userSubscriptionTracker =

@@ -9,9 +9,9 @@ import com.exe.whateat.application.dish.request.DishFilter;
 import com.exe.whateat.application.dish.response.DishesResponse;
 import com.exe.whateat.application.exception.WhatEatErrorCode;
 import com.exe.whateat.application.exception.WhatEatException;
-import com.exe.whateat.entity.common.ActiveStatus;
 import com.exe.whateat.entity.common.WhatEatId;
 import com.exe.whateat.entity.food.Dish;
+import com.exe.whateat.entity.food.DishStatus;
 import com.exe.whateat.entity.food.QDish;
 import com.exe.whateat.entity.random.QRating;
 import com.exe.whateat.infrastructure.exception.WhatEatErrorResponse;
@@ -52,7 +52,7 @@ public final class GetDishesByFood {
         private String name;
         private DishFilter asc;
         private DishFilter desc;
-        private ActiveStatus status;
+        private DishStatus status;
 
     }
 
