@@ -167,13 +167,13 @@ public class WhatEatSecurityConfiguration {
         final String postVotingPath = "/posts/post-votings/**";
         final String postVotingIdPath = "/posts/post-votings/{id}";
         http.authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.POST, resolvePath(postVotingPath))
-                        .hasAnyAuthority(AccountRole.USER.name()))
+                        .hasAnyAuthority(AccountRole.USER.name(), AccountRole.RESTAURANT.name()))
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.PUT, resolvePath(postVotingIdPath))
-                        .hasAnyAuthority(AccountRole.USER.name()))
+                        .hasAnyAuthority(AccountRole.USER.name(), AccountRole.RESTAURANT.name()))
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.DELETE, resolvePath(postVotingIdPath))
                         .hasAnyAuthority(AccountRole.USER.name(), AccountRole.MANAGER.name(), AccountRole.ADMIN.name()))
                 .authorizeHttpRequests(c -> c.requestMatchers(HttpMethod.GET, resolvePath("/posts/{id}/post-votings"))
-                        .hasAnyAuthority(AccountRole.USER.name()));
+                        .hasAnyAuthority(AccountRole.USER.name(), AccountRole.RESTAURANT.name()));
     }
 
     @SuppressWarnings("java:S1075")
